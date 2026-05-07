@@ -690,7 +690,7 @@ input:focus, textarea:focus, select:focus { outline: none; }
        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="rounded-2xl p-6" style="background:white;"><span><center>
           <img src="trust.jpg" width="90" height="90"
-          style="border-radius: 10px;">
+          style="border-radius: 10px;">s
           </center>
          <center><h4 class="font-bold text-lg mb-3" style="color:#2a505f60; font-family: 18px;"> Trust &amp; Transparency</h4>
         </center></span>
@@ -1082,6 +1082,22 @@ function updateHeaderAvatar() {
   }
 }
 
+// Try to load a persisted user by email; returns true if loaded
+function loadUserIfExists(email) {
+  try {
+    const raw = localStorage.getItem('els_user');
+    if (!raw) return false;
+    const u = JSON.parse(raw);
+    if (u && u.email && String(u.email).toLowerCase() === String(email).toLowerCase()) {
+      currentUser = Object.assign({}, currentUser, u);
+      try { updateHeaderAvatar(); } catch(e) {}
+      try { renderProfile(); } catch(e) {}
+      return true;
+    }
+  } catch (e) { console.warn('loadUserIfExists failed', e); }
+  return false;
+}
+
 // ===== Open Store form validation =====
 function showFieldError(id, msg) {
   const el = document.getElementById(id);
@@ -1159,14 +1175,26 @@ function switchAuthTab(tab) {
 }
 function handleLogin(e) {
   e.preventDefault();
-  currentUser.email = document.getElementById('login-email').value;
-  currentUser.name = currentUser.email.split('@')[0];
+  const email = (document.getElementById('login-email')?.value || '').trim();
+  if (!email) return showToast('Please enter your email');
+  // If a persisted profile for this email exists, load it and do not overwrite
+  const loaded = loadUserIfExists(email);
+  if (!loaded) {
+    currentUser.email = email;
+    currentUser.name = email.split('@')[0];
+  }
   enterApp();
 }
 function handleRegister(e) {
   e.preventDefault();
-  currentUser.name = document.getElementById('reg-name').value;
-  currentUser.email = document.getElementById('reg-email').value; 
+  const name = (document.getElementById('reg-name')?.value || '').trim();
+  const email = (document.getElementById('reg-email')?.value || '').trim();
+  if (!email || !name) return showToast('Please enter name and email to register');
+  const loaded = loadUserIfExists(email);
+  if (!loaded) {
+    currentUser.name = name;
+    currentUser.email = email;
+  }
   enterApp();
 }
 function enterApp() {
