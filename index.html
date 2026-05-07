@@ -439,12 +439,14 @@ input:focus, textarea:focus, select:focus { outline: none; }
            <textarea id="prod-desc" rows="3" required placeholder="Describe your product..."
             class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;"></textarea>
              <p id="err-prod-desc" class="hidden text-sm text-red-500 mt-1"></p>
-         </div><button id="add-product-btn" type="submit" data-publish="true"
-         disabled
-         class="w-full py-3 rounded-xl font-semibold text-white transition hover:opacity-90"
-          style="background:#e94560;"> <span id="add-prod-text">List & Publish</span>
-           <span id="add-prod-loading" class="hidden">Listing...</span> 
-          </button>
+         </div>
+         <div class="flex gap-3 w-full mt-3">
+           <button id="save-draft-btn" type="submit" data-publish="false" disabled class="flex-1 py-3 rounded-xl font-semibold text-gray-700" style="background:#f3f4f6;">Save Draft</button>
+           <button id="add-product-btn" type="submit" data-publish="true" disabled class="flex-1 py-3 rounded-xl font-semibold text-white" style="background:#e94560;">
+             <span id="add-prod-text">List & Publish</span>
+             <span id="add-prod-loading" class="hidden">Listing...</span>
+           </button>
+         </div>
          <p id="store-limit-msg" 
          class="hidden text-center text-red-500 text-sm mt-3 font-medium">Maximum product limit reached (999). Please remove some products first.</p>
         </form>
@@ -1128,11 +1130,11 @@ function validateOpenStoreForm() {
 }
 
 function updateAddProductButtonState() {
-  const btn = document.getElementById('add-product-btn');
-  if (!btn) return;
+  const publishBtn = document.getElementById('add-product-btn');
+  const draftBtn = document.getElementById('save-draft-btn');
   const valid = validateOpenStoreForm();
-  btn.disabled = !valid;
-  btn.style.opacity = valid ? '1' : '0.6';
+  if (publishBtn) { publishBtn.disabled = !valid; publishBtn.style.opacity = valid ? '1' : '0.6'; }
+  if (draftBtn) { draftBtn.disabled = !valid; draftBtn.style.opacity = valid ? '1' : '0.6'; }
 }
 
 // wire inputs
@@ -1144,6 +1146,9 @@ function updateAddProductButtonState() {
     el.addEventListener('input', () => updateAddProductButtonState());
     el.addEventListener('change', () => updateAddProductButtonState());
   });
+
+  // ensure buttons exist and update on start
+  updateAddProductButtonState();
   // initialize state
   setTimeout(updateAddProductButtonState, 200);
 })();
@@ -1768,24 +1773,37 @@ async function handleAddProduct(e) {
     document.getElementById('store-limit-msg').classList.remove('hidden');
     return;
   }
-  const btn = document.getElementById('add-product-btn');
-  btn.disabled = true;
-  document.getElementById('add-prod-text').classList.add('hidden');
-  document.getElementById('add-prod-loading').classList.remove('hidden');
+  // determine which button triggered submit (publish vs draft)
+  const submitter = (e && e.submitter) ? e.submitter : null;
+  const publishBtn = document.getElementById('add-product-btn');
+  const draftBtn = document.getElementById('save-draft-btn');
+  if (publishBtn) publishBtn.disabled = true;
+  if (draftBtn) draftBtn.disabled = true;
+  // show spinner only when Publish was clicked
+  if (submitter && submitter.id === 'add-product-btn') {
+    document.getElementById('add-prod-text').classList.add('hidden');
+    document.getElementById('add-prod-loading').classList.remove('hidden');
+  }
   // ensure form is valid before proceeding
   if (!validateOpenStoreForm()) {
     showToast('Please complete all required fields');
-    btn.disabled = false;
-    document.getElementById('add-prod-text').classList.remove('hidden');
-    document.getElementById('add-prod-loading').classList.add('hidden');
+    if (publishBtn) publishBtn.disabled = false;
+    if (draftBtn) draftBtn.disabled = false;
+    if (submitter && submitter.id === 'add-product-btn') {
+      document.getElementById('add-prod-text').classList.remove('hidden');
+      document.getElementById('add-prod-loading').classList.add('hidden');
+    }
     return;
   }
   // require at least one image for a public listing
   if (!selectedImages.length) {
     showToast('Please add at least one product image');
-    btn.disabled = false;
-    document.getElementById('add-prod-text').classList.remove('hidden');
-    document.getElementById('add-prod-loading').classList.add('hidden');
+    if (publishBtn) publishBtn.disabled = false;
+    if (draftBtn) draftBtn.disabled = false;
+    if (submitter && submitter.id === 'add-product-btn') {
+      document.getElementById('add-prod-text').classList.remove('hidden');
+      document.getElementById('add-prod-loading').classList.add('hidden');
+    }
     return;
   }
   // determine if the submitter requested publish
@@ -1803,6 +1821,18 @@ async function handleAddProduct(e) {
     public: forcePublish ? true : (document.getElementById('prod-public') ? Boolean(document.getElementById('prod-public').checked) : true),
     created_at: new Date().toISOString()
   };
+
+  // If Publish was explicitly requested, add an optimistic local product
+  // so users see it immediately, then navigate to Shop while upload/creation continues.
+  if (forcePublish) {
+    const optUid = 'local-optimistic-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+    const optimisticProd = Object.assign({}, productPayload, { __backendId: optUid, __optimistic: true });
+    allProducts.push(optimisticProd);
+    try { saveProductsToLocal(); } catch(e) {}
+    renderShop(); renderHomeProducts(); renderMyProducts();
+    // immediate redirect so buyers see the new listing while background tasks run
+    try { goTo('shop'); } catch(e){}
+  }
 
   // If a cloud upload URL/handler is configured and we have a local image, upload it first
   if (selectedImages.length && (window.cloudImageUploadUrl || window.CLOUD_IMAGE_UPLOAD_URL || typeof window.cloudImageUploadHandler === 'function' || window.FIREBASE_CONFIG)) {
@@ -1889,19 +1919,29 @@ async function handleAddProduct(e) {
       createdOk = !!(result && result.isOk);
       // If backend returned the created item, add to local list for immediate UX
       if (createdOk && result && result.item) {
-        const toPush = Object.assign({}, result.item);
-        if (!toPush.__backendId && result.id) toPush.__backendId = result.id;
-        allProducts.push(toPush);
-        // ensure UI reflects the new product immediately
+        const returned = Object.assign({}, result.item);
+        if (!returned.__backendId && result.id) returned.__backendId = result.id;
+        // replace optimistic placeholder if present
+        const optIndex = allProducts.findIndex(p => p && p.__backendId && String(p.__backendId).startsWith('local-optimistic-'));
+        if (optIndex !== -1) {
+          allProducts[optIndex] = returned;
+        } else {
+          allProducts.push(returned);
+        }
         renderShop(); renderHomeProducts(); renderMyProducts();
         try { saveProductsToLocal(); } catch(e){}
-        window.lastCreatedProductId = toPush.__backendId || result.id || null;
+        window.lastCreatedProductId = returned.__backendId || result.id || null;
       } else if (createdOk && result && result.id) {
-        const toPush = Object.assign({}, productPayload, { __backendId: result.id });
-        allProducts.push(toPush);
+        const returned = Object.assign({}, productPayload, { __backendId: result.id });
+        const optIndex = allProducts.findIndex(p => p && p.__backendId && String(p.__backendId).startsWith('local-optimistic-'));
+        if (optIndex !== -1) {
+          allProducts[optIndex] = returned;
+        } else {
+          allProducts.push(returned);
+        }
         renderShop(); renderHomeProducts(); renderMyProducts();
         try { saveProductsToLocal(); } catch(e){}
-        window.lastCreatedProductId = toPush.__backendId || result.id || null;
+        window.lastCreatedProductId = returned.__backendId || result.id || null;
       }
     }
   } catch (err) {
@@ -1912,7 +1952,13 @@ async function handleAddProduct(e) {
   // Fallback local-only storage
   if (!createdOk) {
     const localProd = Object.assign({}, productPayload, { __backendId: 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2,8) });
-    allProducts.push(localProd);
+    // replace optimistic placeholder if present
+    const optIndex = allProducts.findIndex(p => p && p.__backendId && String(p.__backendId).startsWith('local-optimistic-'));
+    if (optIndex !== -1) {
+      allProducts[optIndex] = localProd;
+    } else {
+      allProducts.push(localProd);
+    }
     window.lastCreatedProductId = localProd.__backendId;
     renderShop();
     renderHomeProducts();
@@ -1921,9 +1967,12 @@ async function handleAddProduct(e) {
     createdOk = true;
   }
 
-  btn.disabled = false;
-  document.getElementById('add-prod-text').classList.remove('hidden');
-  document.getElementById('add-prod-loading').classList.add('hidden');
+  if (publishBtn) publishBtn.disabled = false;
+  if (draftBtn) draftBtn.disabled = false;
+  if (submitter && submitter.id === 'add-product-btn') {
+    document.getElementById('add-prod-text').classList.remove('hidden');
+    document.getElementById('add-prod-loading').classList.add('hidden');
+  }
 
   if (createdOk) {
     document.getElementById('add-product-form').reset();
