@@ -119,6 +119,17 @@ input:focus, textarea:focus, select:focus { outline: none; }
   }
   </style>
   <style>body { box-sizing: border-box; }</style>
+  <style>
+  /* Joint movement button visuals: consistent radius and hover shadow */
+  .cat-btn, .product-card button, .nav-link, .side-link, .hero-cta, .auth-cta, .product-action, .joint-btn {
+    border-radius: 8px; /* uniform 8px radius */
+    transition: transform 200ms cubic-bezier(.2,.9,.3,1), box-shadow 180ms ease, background-color 140ms ease;
+  }
+  .cat-btn:hover, .product-card button:hover, .nav-link:hover, .side-link:hover, .hero-cta:hover, .auth-cta:hover, .product-action:hover, .joint-btn:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+  }
+  </style>
  </head>
  <body class="h-full">
   <div id="app" class="h-full w-full overflow-auto" style="background:s#6497aca1;">
@@ -211,12 +222,19 @@ input:focus, textarea:focus, select:focus { outline: none; }
       <nav class="hidden md:flex items-center gap-1">
        <button onclick="goTo('home')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="home">Home</button> <button onclick="goTo('shop')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="shop">Shop</button> <button onclick="goTo('open-store')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="open-store">Open Store</button> <button onclick="goTo('messages')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="messages">Messages</button> <button onclick="goTo('about')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="about">About</button> <button onclick="goTo('contact')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="contact">Contact</button>
       </nav>
-      <div class="flex items-center gap-2">
-       <button onclick="goTo('orders')" class="relative text-white p-2 rounded-lg hover:bg-white/10 transition" title="Track Orders"> <i data-lucide="package" class="w-5 h-5"></i> </button><button onclick="goTo('cart')" class="relative text-white p-2 rounded-lg hover:bg-white/10 transition"> <i data-lucide="shopping-cart" class="w-5 h-5"></i> 
-        <span id="cart-badge" class="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white hidden" 
-        style="background:#e94560;">0</span> </button> <button onclick="goTo('home')" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" 
-        style="background:#e94560;" id="user-avatar">J</button>
-      </div>
+       <div class="flex items-center gap-2">
+         <button onclick="goTo('orders')" class="relative text-white p-2 rounded-lg hover:bg-white/10 transition" title="Track Orders">
+           <i data-lucide="package" class="w-5 h-5"></i>
+         </button>
+         <button onclick="goTo('cart')" class="relative text-white p-2 rounded-lg hover:bg-white/10 transition">
+           <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+           <span id="cart-badge" class="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white hidden" style="background:#e94560;">0</span>
+         </button>
+         <button id="user-avatar" class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm overflow-hidden" title="Edit profile" onclick="goTo('profile')" style="background:#e94560;">
+           <img id="user-avatar-img" src="" alt="avatar" class="hidden w-full h-full object-cover" />
+           <span id="user-avatar-initial">J</span>
+         </button>
+       </div>
      </div>
     </header>
     <!-- SIDEBAR OVERLAY -->
@@ -377,7 +395,8 @@ input:focus, textarea:focus, select:focus { outline: none; }
          </div>
          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-           <label for="prod-category" class="block text-sm font-medium mb-1" style="color:#1a1a2e;">Category</label> <select id="prod-category" required class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;"> <option value="">Select category</option> <option value="Electronics">Electronics</option> <option value="Fashion">Fashion</option> <option value="Home">Home</option> <option value="Sports">Sports</option> <option value="Other">Other</option> </select>
+           <label for="prod-category" class="block text-sm font-medium mb-1" style="color:#1a1a2e;">Category</label> <select id="prod-category" required class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;"> <option value="">Select category</option>
+             <option value="Electronics">Electronics</option> <option value="Fashion">Fashion</option> <option value="Home">Home</option> <option value="Sports">Sports</option> <option value="Other">Other</option> </select>
            <p id="err-prod-category" class="hidden text-sm text-red-500 mt-1"></p>
           </div>
          </div>
@@ -703,15 +722,56 @@ input:focus, textarea:focus, select:focus { outline: none; }
        </div>
        <div class="rounded-2xl p-8 text-center"
         style="background:linear-gradient(135deg, #1a1a2e, #0f3460);">
+        
         <h3 class="text-2xl font-bold text-white mb-3" style="font-family:'Playfair Display',serif;">Join the Movement</h3>
         <p class="text-gray-300 mb-6">Whether you're here to discover or to create, ELS.OnlineStore is your launchpad.</p>
         <div class="flex gap-3 justify-center flex-wrap">
-         <button onclick="goTo('shop')" class="px-6 py-3 rounded-xl font-semibold text-white" style="background:#e94560;">Start Shopping</button> <button onclick="goTo('open-store')" class="px-6 py-3 rounded-xl font-semibold text-white" style="border:1px solid rgba(255,255,255,0.3);">Open a Store</button>
+         <button onclick="goTo('shop')" 
+         class="joint-btn px-6 py-3 rounded-xl font-semibold text-white" 
+         style="background:#24558d;">Start Shopping</button> 
+         <button onclick="goTo('open-store')"
+          class="joint-btn px-6 py-3 rounded-xl font-semibold text-white"
+          style="border:1px solid rgba(255,255,255,0.3);">Open a Store</button>
         </div>
        </div>
       </div>
      </section>
      <!-- CONTACT PAGE -->
+    <!-- PROFILE PAGE -->
+    <section id="page-profile" class="page">
+      <div class="max-w-2xl mx-auto px-4 py-12">
+        <div class="rounded-2xl p-8" style="background:white; border:1px solid #e5e5e5;">
+          <h2 class="text-2xl font-bold mb-4" style="color:#1a1a2e;">Edit Profile</h2>
+          <form id="profile-form" onsubmit="saveProfile(event)">
+            <div class="text-center mb-4">
+              <img id="profile-avatar-preview-page" src="" alt="avatar preview" class="mx-auto rounded-full w-24 h-24 object-cover hidden" />
+              <div id="profile-avatar-placeholder-page" class="mx-auto w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600"></div>
+              <input id="profile-avatar-input-page" type="file" accept="image/*" class="hidden" onchange="handleProfileAvatarInput(event)" />
+              <div class="flex gap-2 justify-center mt-3">
+                <button type="button" onclick="document.getElementById('profile-avatar-input-page').click()" class="px-4 py-2 rounded-xl bg-gray-100">Choose Avatar</button>
+                <button type="button" onclick="clearProfileAvatarPreviewPage()" class="px-4 py-2 rounded-xl bg-gray-100">Clear</button>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label for="profile-name" class="block text-sm font-medium mb-1">Display Name</label>
+              <input id="profile-name" type="text" class="w-full px-4 py-3 rounded-xl" />
+            </div>
+            <div class="mb-4">
+              <label for="profile-email" class="block text-sm font-medium mb-1">Email</label>
+              <input id="profile-email" type="email" class="w-full px-4 py-3 rounded-xl" />
+            </div>
+            <div class="mb-4">
+              <label for="profile-bio" class="block text-sm font-medium mb-1">Bio</label>
+              <textarea id="profile-bio" rows="3" class="w-full px-4 py-3 rounded-xl"></textarea>
+            </div>
+            <div class="flex gap-3">
+              <button type="submit" class="px-6 py-3 rounded-xl font-semibold text-white" style="background:#e94560;">Save Profile</button>
+              <button type="button" onclick="goTo('home')" class="px-6 py-3 rounded-xl font-semibold" style="background:#f3f4f6;">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
      <section id="page-contact" class="page">
       <div class="max-w-2xl mx-auto px-4 py-12">
        <div class="text-center mb-10">
@@ -730,11 +790,13 @@ input:focus, textarea:focus, select:focus { outline: none; }
         <div class="mb-6">
          <label
           for="contact-msg" class="block text-sm font-medium mb-1" 
-          style="color:#1a1a2e;">Message</label> <textarea id="contact-msg" rows="5" required class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;"></textarea>
+          style="color:#1a1a2e;">Message</label> 
+          <textarea id="contact-msg" rows="5" required class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;"></textarea>
         </div>
         <button id="contact-submit" type="submit" class="w-full py-3 rounded-xl font-semibold text-white transition hover:opacity-90 flex items-center justify-center" style="background:#204069ad;">
           <span id="contact-submit-text">Send Message</span>
-          <span id="contact-submit-loading" class="hidden ml-3"><span class="spinner" aria-hidden="true"></span><span class="sr-only">Sending</span></span>
+          <span id="contact-submit-loading" class="hidden ml-3"><span class="spinner" aria-hidden="true">   
+          </span><span class="sr-only">Sending</span></span>
         </button>
         <p id="contact-success" class="hidden text-center text-green-600 font-medium mt-4">✓ Message sent! We'll get back to you soon.</p>
        </form>
@@ -770,6 +832,8 @@ input:focus, textarea:focus, select:focus { outline: none; }
       </div>
     </div>
   </div>
+  <!-- Profile inline modal -->
+  <!-- profile modal removed — profile editing now uses the dedicated profile page -->
   </div><!-- end app -->
   <script>
 // ===== STATE =====
@@ -798,7 +862,7 @@ const defaultConfig = {
   font_size: 16
 };
 
-// If running locally, default to the example upload server on port 8001
+// If running locally, default to the examplse upload server on port 8001
 try {
   if (location && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
     window.cloudImageUploadUrl = window.cloudImageUploadUrl || (location.protocol + '//' + location.hostname + ':8001/upload');
@@ -942,7 +1006,7 @@ document.addEventListener('click', (e) => {
 
 // Add interactive feedback when mouse/touch contacts buttons
 function bindButtonTouchResponses() {
-  const selector = '.auth-cta, .hero-cta, .cat-btn, .side-link, .nav-link, .image-upload-area button, .product-card button';
+  const selector = '.auth-cta, .hero-cta, .cat-btn, .side-link, .nav-link, .image-upload-area button, .product-card button, .product-action';
   const nodes = Array.from(document.querySelectorAll(selector));
   nodes.forEach(el => {
     // don't bind repeatedly
@@ -986,6 +1050,37 @@ function loadProductsFromLocal() {
 
 // load persisted products on startup (before dataSdk may populate)
 loadProductsFromLocal();
+
+// load persisted user profile if present
+function loadUserFromLocal() {
+  try {
+    const raw = localStorage.getItem('els_user');
+    if (!raw) return;
+    const u = JSON.parse(raw);
+    if (u && u.name) {
+      currentUser = Object.assign({}, currentUser, u);
+      // update header avatar consistently
+      try { updateHeaderAvatar(); } catch (e) {}
+    }
+  } catch (e) { console.warn('loadUserFromLocal failed', e); }
+}
+loadUserFromLocal();
+
+function updateHeaderAvatar() {
+  const avatarImg = document.getElementById('user-avatar-img');
+  const avatarInitial = document.getElementById('user-avatar-initial');
+  const avatarBtn = document.getElementById('user-avatar');
+  if (!avatarBtn) return;
+  if (avatarImg && currentUser.avatarDataUrl) {
+    avatarImg.src = currentUser.avatarDataUrl;
+    avatarImg.classList.remove('hidden');
+    if (avatarInitial) avatarInitial.classList.add('hidden');
+  } else {
+    if (avatarInitial && currentUser.name) avatarInitial.textContent = currentUser.name.charAt(0).toUpperCase();
+    if (avatarImg) avatarImg.classList.add('hidden');
+    if (avatarInitial) avatarInitial.classList.remove('hidden');
+  }
+}
 
 // ===== Open Store form validation =====
 function showFieldError(id, msg) {
@@ -1077,7 +1172,7 @@ function handleRegister(e) {
 function enterApp() {
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('main-app').classList.remove('hidden');
-  document.getElementById('user-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+  try { updateHeaderAvatar(); } catch (e) {}
   lucide.createIcons();
   showToast('Welcome, ' + currentUser.name + '!');
 }
@@ -1092,7 +1187,7 @@ function handleLogout() {
 }
 
 // ===== NAVIGATION =====
-function goTo(page) {
+function goTo(page, push = true) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + page);
   if (target) target.classList.add('active');
@@ -1104,8 +1199,24 @@ function goTo(page) {
   if (page === 'payment') renderPayment();
   if (page === 'shop') renderShop();
   if (page === 'messages') renderConversations();
+  if (page === 'profile') renderProfile();
   window.scrollTo(0, 0);
+
+  try {
+    if (push && window.history && typeof window.history.pushState === 'function') {
+      window.history.pushState({ page }, '', '#' + page);
+    }
+  } catch (e) {
+    // ignore history errors in older browsers
+  }
 }
+
+// sync navigation with browser back/forward buttons
+window.addEventListener('popstate', (e) => {
+  const page = (e.state && e.state.page) || (location.hash ? location.hash.replace('#', '') : 'home');
+  // navigate without pushing another history entry
+  goTo(page || 'home', false);
+});
 
 // ===== SIDEBAR =====
 function toggleSidebar() {
@@ -1936,6 +2047,96 @@ function selectConversation(id) {
   currentConversation = conversations.find(c => c.id === id);
   renderConversations();
 }
+
+// ===== PROFILE =====
+function renderProfile() {
+  const nameEl = document.getElementById('profile-name');
+  const emailEl = document.getElementById('profile-email');
+  const bioEl = document.getElementById('profile-bio');
+  if (nameEl) nameEl.value = currentUser.name || '';
+  if (emailEl) emailEl.value = currentUser.email || '';
+  if (bioEl) bioEl.value = currentUser.bio || '';
+  // show avatar preview on profile page
+  const preview = document.getElementById('profile-avatar-preview-page');
+  const placeholder = document.getElementById('profile-avatar-placeholder-page');
+  if (preview && placeholder) {
+    if (currentUser.avatarDataUrl) { preview.src = currentUser.avatarDataUrl; preview.classList.remove('hidden'); placeholder.classList.add('hidden'); }
+    else { preview.classList.add('hidden'); placeholder.classList.remove('hidden'); placeholder.textContent = (currentUser.name||'').charAt(0).toUpperCase() || 'U'; }
+  }
+}
+
+async function saveProfile(e) {
+  e.preventDefault();
+  const name = (document.getElementById('profile-name')?.value || '').trim();
+  const email = (document.getElementById('profile-email')?.value || '').trim();
+  const bio = (document.getElementById('profile-bio')?.value || '').trim();
+  if (!name) return showToast('Please enter a display name');
+  currentUser.name = name; currentUser.email = email; currentUser.bio = bio;
+  // check for avatar uploaded on profile page
+  try {
+    const avatarTemp = document.getElementById('profile-form')?.dataset?.avatarTemp;
+    if (avatarTemp) {
+      // If cloud upload is configured, attempt to upload and store a remote URL
+      if (window.cloudImageUploadUrl || window.CLOUD_IMAGE_UPLOAD_URL || typeof window.cloudImageUploadHandler === 'function' || window.FIREBASE_CONFIG) {
+        showToast('Uploading avatar...');
+        try {
+          const remote = await uploadImageToCloud(avatarTemp);
+          if (remote) currentUser.avatarDataUrl = remote; else currentUser.avatarDataUrl = avatarTemp;
+        } catch (err) {
+          console.warn('avatar upload failed', err);
+          currentUser.avatarDataUrl = avatarTemp;
+          showToast('Avatar upload failed — saved locally');
+        }
+      } else {
+        // no cloud configured — save data URL locally
+        currentUser.avatarDataUrl = avatarTemp;
+      }
+      // remove temp dataset after consuming
+      try { delete document.getElementById('profile-form').dataset.avatarTemp; } catch(e){}
+    }
+  } catch(e) { console.warn('avatar check failed', e); }
+
+  try { localStorage.setItem('els_user', JSON.stringify(currentUser)); } catch(e){ /* ignore */ }
+  try { updateHeaderAvatar(); } catch(e) {}
+  try { renderProfile(); } catch(e) {}
+  showToast('Profile saved');
+  goTo('home');
+}
+
+// Modal handlers
+// profile modal removed — UI uses profile page instead
+
+function handleProfileAvatarInput(ev) {
+  const f = ev?.target?.files?.[0];
+  if (!f) return;
+  if (!f.type.startsWith('image/')) return showToast('Please select an image file');
+  const maxSize = 2 * 1024 * 1024; // 2MB
+  if (f.size > maxSize) return showToast('Avatar too large — max 2MB');
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      let dataUrl = e.target.result;
+      // compress avatar to keep localStorage size reasonable
+      try { dataUrl = await compressImageDataUrl(dataUrl, { maxDim: 800, targetBytes: 150 * 1024 }); } catch (err) { /* ignore compression failure - use original */ }
+      const preview = document.getElementById('profile-avatar-preview-page');
+      const placeholder = document.getElementById('profile-avatar-placeholder-page');
+      if (preview && placeholder) { preview.src = dataUrl; preview.classList.remove('hidden'); placeholder.classList.add('hidden'); }
+      const form = document.getElementById('profile-form'); if (form) form.dataset.avatarTemp = dataUrl;
+    } catch (err) {
+      console.error('Avatar processing failed', err);
+      showToast('Failed to process avatar');
+    }
+  };
+  reader.readAsDataURL(f);
+}
+
+function clearProfileAvatarPreviewPage() {
+  const preview = document.getElementById('profile-avatar-preview-page'); if (preview) preview.classList.add('hidden');
+  const placeholder = document.getElementById('profile-avatar-placeholder-page'); if (placeholder) placeholder.classList.remove('hidden');
+  const form = document.getElementById('profile-form'); if (form) delete form.dataset.avatarTemp;
+}
+
+// modal save removed — profile page save handles persistence
 
 async function sendMessage() {
   const input = document.getElementById('message-input');
