@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8001/api';
+window.API_BASE = 'http://localhost:8001/api';
 
 window.dataSdk = {
 
@@ -67,6 +67,39 @@ window.dataSdk = {
         isOk: false
       };
     }
+  },
+
+  async update(product) {
+
+  try {
+
+    const id = product._id || product.__backendId;
+
+    const res = await fetch(`${API_BASE}/products/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(product)
+    });
+
+    const data = await res.json();
+
+    return {
+      isOk: true,
+      item: data
+    };
+
+  } catch (err) {
+
+    console.error('update failed', err);
+
+    return {
+      isOk: false
+    };
+
   }
+
+}
 
 };

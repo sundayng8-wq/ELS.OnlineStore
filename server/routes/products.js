@@ -32,4 +32,49 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+
+  try {
+
+    await Product.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      error: 'Failed to delete product'
+    });
+
+  }
+
+});
+
+router.put('/:id', async (req, res) => {
+
+  try {
+
+    const updated = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    res.json(updated);
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      error: 'Failed to update product'
+    });
+
+  }
+
+});
 module.exports = router;
