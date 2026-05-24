@@ -43,8 +43,6 @@ app.use('/api/', generalLimiter);
 
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
-const mongoSanitize = require('express-mongo-sanitize');
-app.use(mongoSanitize({ replaceWith: '_' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
