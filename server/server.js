@@ -6,6 +6,10 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 const productRoutes = require('./routes/products');
+const storeRoutes = require('./routes/stores');
+const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/orders');
+const checkoutRoutes = require('./routes/checkout');
 const authRoutes = require('./routes/auth');
 
 const connectDB = require('./config/db');
@@ -19,6 +23,10 @@ app.use(express.json({ limit: '20mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/stores', storeRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),

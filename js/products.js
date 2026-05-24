@@ -1,21 +1,41 @@
+let _uploadProcessing = false;
+
 function handleImageUpload(event) {
+  if (_uploadProcessing) return;
+  
   const files = Array.from(event?.target?.files || []);
-  if (selectedImages.length + files.length > 6) {
-  showToast('Maximum 6 images allowed');
-  return;
-}
   if (!files.length) return;
-  files.forEach(f => processProductImageFile(f));
+  
+  if (selectedImages.length + files.length > 6) {
+    showToast('Maximum 6 images allowed');
+    event.target.value = '';
+    return;
+  }
+
+  _uploadProcessing = true;
+  
+  let processed = 0;
+  files.forEach(f => {
+    processProductImageFile(f, () => {
+      processed++;
+      if (processed >= files.length) {
+        _uploadProcessing = false;
+        event.target.value = '';
+      }
+    });
+  });
 }
 
-function processProductImageFile(file) {
+function processProductImageFile(file, onComplete) {
   const maxFileSize = 8 * 1024 * 1024;
   if (!file.type.startsWith('image/')) {
     showToast('Please upload an image file (JPG, PNG, WebP).');
+    if (onComplete) onComplete();
     return;
   }
   if (file.size > maxFileSize) {
     showToast('Image too large. Max size is 8MB.');
+    if (onComplete) onComplete();
     return;
   }
 
@@ -31,18 +51,22 @@ function processProductImageFile(file) {
         finalDataUrl = compressed;
         compressedSize = dataURLtoBlob(compressed).size;
       }
-
       selectedImages.push(finalDataUrl);
       renderImageGallery();
       const infoEl = document.getElementById('image-info');
       const originalBytes = dataURLtoBlob(dataUrl).size;
       const dims = await getImageDimensions(dataUrl);
-      if (infoEl) infoEl.textContent = `${selectedImages.length} image(s) • ${dims.w}×${dims.h} • ${formatBytes(originalBytes)}${compressedSize ? ' → ' + formatBytes(compressedSize) : ''}`;
+      if (infoEl) infoEl.textContent = selectedImages.length + ' image(s) • ' + dims.w + '×' + dims.h + ' • ' + formatBytes(originalBytes) + (compressedSize ? ' → ' + formatBytes(compressedSize) : '');
       showToast('Image added');
     } catch (err) {
       console.error('Image processing failed', err);
       showToast('Failed to process image');
     }
+    if (onComplete) onComplete();
+  };
+  reader.onerror = () => {
+    showToast('Failed to read image file');
+    if (onComplete) onComplete();
   };
   reader.readAsDataURL(file);
 }
@@ -58,7 +82,6 @@ function renderImageGallery() {
     const wrap = document.createElement('div'); wrap.className = 'relative';
     const img = document.createElement('img'); img.src = src; img.className = 'w-full h-28 object-cover rounded-lg';
     wrap.appendChild(img);
-
     const controls = document.createElement('div'); controls.className = 'absolute top-1 right-1 flex gap-1';
     const btnPrimary = document.createElement('button'); btnPrimary.title = 'Set as primary'; btnPrimary.className = 'bg-white/70 p-1 rounded'; btnPrimary.innerHTML = i===primaryImageIndex ? '★' : '☆';
     btnPrimary.onclick = () => { primaryImageIndex = i; renderImageGallery(); };
@@ -76,19 +99,16 @@ function moveImageLeft(i) {
   if (primaryImageIndex===i) primaryImageIndex = i-1; else if (primaryImageIndex===i-1) primaryImageIndex = i;
   renderImageGallery();
 }
-
 function moveImageRight(i) {
   if (i>=selectedImages.length-1) return; [selectedImages[i+1], selectedImages[i]] = [selectedImages[i], selectedImages[i+1]];
   if (primaryImageIndex===i) primaryImageIndex = i+1; else if (primaryImageIndex===i+1) primaryImageIndex = i;
   renderImageGallery();
 }
-
 function removeImageAt(i) {
   selectedImages.splice(i,1);
   if (primaryImageIndex >= selectedImages.length) primaryImageIndex = Math.max(0, selectedImages.length-1);
   renderImageGallery();
 }
-
 function clearAllImages() { selectedImages = []; primaryImageIndex = 0; renderImageGallery(); }
 
 function getImageDimensions(dataUrl) {
@@ -99,7 +119,6 @@ function getImageDimensions(dataUrl) {
     img.src = dataUrl;
   });
 }
-
 function formatBytes(bytes) {
   if (!bytes) return '0 B';
   const units = ['B','KB','MB','GB'];
@@ -107,7 +126,6 @@ function formatBytes(bytes) {
   while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
   return v.toFixed(v < 10 && i > 0 ? 1 : 0) + ' ' + units[i];
 }
-
 function compressImageDataUrl(dataUrl, opts = {}) {
   const maxDim = opts.maxDim || 1200;
   const targetBytes = opts.targetBytes || 700 * 1024;
@@ -118,8 +136,7 @@ function compressImageDataUrl(dataUrl, opts = {}) {
         let w = img.width, h = img.height;
         if (w > maxDim || h > maxDim) {
           const ratio = Math.max(w / maxDim, h / maxDim);
-          w = Math.round(w / ratio);
-          h = Math.round(h / ratio);
+          w = Math.round(w / ratio); h = Math.round(h / ratio);
         }
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
@@ -140,26 +157,38 @@ function compressImageDataUrl(dataUrl, opts = {}) {
     img.src = dataUrl;
   });
 }
-
 function removeImage() { clearAllImages(); }
 
+// INIT: Set up image upload area — NO double-click
 (function initProductImageArea(){
   const area = document.getElementById('image-upload-area');
   const input = document.getElementById('prod-image');
   if (!area || !input) return;
 
-  area.addEventListener('click', () => input.click());
-  area.addEventListener('dragenter', (e) => { e.preventDefault(); area.classList.add('drag-over'); });
-  area.addEventListener('dragover', (e) => { e.preventDefault(); area.classList.add('drag-over'); });
-  area.addEventListener('dragleave', (e) => { e.preventDefault(); area.classList.remove('drag-over'); });
-  area.addEventListener('drop', (e) => {
+  // Remove any existing listeners by cloning
+  const newArea = area.cloneNode(true);
+  area.parentNode.replaceChild(newArea, area);
+  const newInput = document.getElementById('prod-image');
+
+  document.getElementById('image-upload-area').addEventListener('click', function(e) {
+    // Only open if clicking empty space, not buttons or previews
+    if (e.target.tagName === 'BUTTON') return;
+    if (e.target.closest('#image-preview-section')) return;
+    if (e.target.closest('#image-gallery')) return;
+    document.getElementById('prod-image').click();
+  });
+
+  document.getElementById('image-upload-area').addEventListener('dragenter', function(e) { e.preventDefault(); this.classList.add('drag-over'); });
+  document.getElementById('image-upload-area').addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('drag-over'); });
+  document.getElementById('image-upload-area').addEventListener('dragleave', function(e) { e.preventDefault(); this.classList.remove('drag-over'); });
+  document.getElementById('image-upload-area').addEventListener('drop', function(e) {
     e.preventDefault();
-    area.classList.remove('drag-over');
+    this.classList.remove('drag-over');
     const files = Array.from(e.dataTransfer?.files || []);
     files.forEach(f => processProductImageFile(f));
   });
 
-  input.addEventListener('change', handleImageUpload);
+  newInput.addEventListener('change', handleImageUpload);
 })();
 
 function dataURLtoBlob(dataURL) {
@@ -174,9 +203,7 @@ function dataURLtoBlob(dataURL) {
 }
 
 async function uploadImageToCloud(dataUrl, uid) {
-  if (typeof window.cloudImageUploadHandler === 'function') {
-    return await window.cloudImageUploadHandler(dataUrl);
-  }
+  if (typeof window.cloudImageUploadHandler === 'function') return await window.cloudImageUploadHandler(dataUrl);
   const uploadUrl = window.cloudImageUploadUrl || window.CLOUD_IMAGE_UPLOAD_URL;
   if (uploadUrl) {
     return await new Promise((resolve, reject) => {
@@ -216,22 +243,13 @@ async function uploadImageToCloud(dataUrl, uid) {
           reject(new Error('Upload XHR error'));
         };
         xhr.send(form);
-      } catch (err) {
-        reject(err);
-      }
+      } catch (err) { reject(err); }
     });
   }
-
   if (window.FIREBASE_CONFIG) {
-    try {
-      const url = await uploadToFirebaseStorage(dataUrl);
-      return url;
-    } catch (err) {
-      console.error('Firebase upload failed', err);
-      throw err;
-    }
+    try { const url = await uploadToFirebaseStorage(dataUrl); return url; }
+    catch (err) { console.error('Firebase upload failed', err); throw err; }
   }
-
   throw new Error('No cloud upload URL or handler configured');
 }
 
@@ -249,14 +267,11 @@ async function loadFirebaseSdkOnce() {
     s.onload = resolve; s.onerror = reject; document.head.appendChild(s);
   });
 }
-
 async function uploadToFirebaseStorage(dataUrl) {
   if (!window.FIREBASE_CONFIG) throw new Error('FIREBASE_CONFIG not set');
   await loadFirebaseSdkOnce();
   if (!window.firebase) throw new Error('Firebase SDK failed to load');
-  if (!window.__firebaseApp) {
-    window.__firebaseApp = window.firebase.initializeApp(window.FIREBASE_CONFIG);
-  }
+  if (!window.__firebaseApp) window.__firebaseApp = window.firebase.initializeApp(window.FIREBASE_CONFIG);
   const storage = window.firebase.storage();
   const blob = dataURLtoBlob(dataUrl);
   const filename = 'uploads/' + Date.now() + '-' + Math.random().toString(36).slice(2,8) + '.png';
@@ -273,7 +288,6 @@ function triggerReplaceImage(prodId) {
   input.value = '';
   input.click();
 }
-
 let pendingReplaceProductId = null;
 async function handleProductImageReplace(ev) {
   const f = ev?.target?.files?.[0];
@@ -284,50 +298,29 @@ async function handleProductImageReplace(ev) {
     reader.onload = async (e) => {
       let dataUrl = e.target.result;
       const optimize = document.getElementById('optimize-image')?.checked ?? true;
-      if (optimize) {
-        try { dataUrl = await compressImageDataUrl(dataUrl, { maxDim: 1200, targetBytes: 700 * 1024 }); } catch(e) { }
-      }
+      if (optimize) { try { dataUrl = await compressImageDataUrl(dataUrl, { maxDim: 1200, targetBytes: 700 * 1024 }); } catch(e) {} }
       let finalUrl = dataUrl;
       if (window.cloudImageUploadUrl || window.CLOUD_IMAGE_UPLOAD_URL || typeof window.cloudImageUploadHandler === 'function' || window.FIREBASE_CONFIG) {
-        try {
-          const remote = await uploadImageToCloud(dataUrl);
-          if (remote) finalUrl = remote;
-        } catch (err) {
-          console.warn('Upload failed, using local data URL', err);
-        }
+        try { const remote = await uploadImageToCloud(dataUrl); if (remote) finalUrl = remote; }
+        catch (err) { console.warn('Upload failed, using local data URL', err); }
       }
-
       const prod = allProducts.find(p => p.__backendId === pendingReplaceProductId);
       if (!prod) { showToast('Product not found'); pendingReplaceProductId = null; return; }
-
-      prod.image_data = finalUrl;
-      prod.primary_image = finalUrl;
+      prod.image_data = finalUrl; prod.primary_image = finalUrl;
       if (Array.isArray(prod.images) && prod.images.length) prod.images[0] = finalUrl; else prod.images = [finalUrl];
-
-      try {
-        if (window.dataSdk && typeof window.dataSdk.update === 'function') {
-          await window.dataSdk.update(prod);
-        }
-      } catch (e) { console.warn('dataSdk.update failed', e); }
-
+      try { if (window.dataSdk && typeof window.dataSdk.update === 'function') await window.dataSdk.update(prod); } catch (e) {}
       try { saveProductsToLocal(); } catch(e){}
       renderShop(); renderHomeProducts(); renderMyProducts();
       showToast('Product image updated');
       pendingReplaceProductId = null;
     };
     reader.readAsDataURL(f);
-  } catch (err) {
-    console.error(err); showToast('Failed to replace image'); pendingReplaceProductId = null;
-  }
+  } catch (err) { console.error(err); showToast('Failed to replace image'); pendingReplaceProductId = null; }
 }
-
 function replaceProductImageFromUrl(prodId) {
   const url = prompt('Paste an image URL (http/https):');
   if (!url) return;
   if (!/^https?:\/\//i.test(url)) return showToast('Invalid URL');
-  if (!url.match(/\.(jpg|jpeg|png|webp)$/i)) {
-    return showToast('Only JPG, PNG, WEBP images allowed');
-  }
   const prod = allProducts.find(p => p.__backendId === prodId);
   if (!prod) return showToast('Product not found');
   prod.image_data = url; prod.primary_image = url; prod.images = [url];
@@ -342,7 +335,6 @@ function renderShop() {
   let filtered = allProducts.filter(p => p.name && (p.public !== false || p.seller === currentUser.name));
   if (currentCategory !== 'All') filtered = filtered.filter(p => p.category === currentCategory);
   if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search));
-
   const grid = document.getElementById('shop-grid');
   if (!filtered.length) {
     grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-16">No products found. <button onclick="goTo(\'open-store\')" class="underline font-semibold" style="color:#e94560;">List one!</button></p>';
@@ -350,7 +342,7 @@ function renderShop() {
   }
   grid.innerHTML = filtered.map(p => `
     <div class="product-card rounded-2xl overflow-hidden" style="background:white;" data-prod-id="${p.__backendId}">
-          <div class="h-48 bg-gray-200 overflow-hidden relative">${p.image_data ? `<img src="${p.image_data}" class="w-full h-full object-cover" alt="${escHtml(p.name)}" loading="lazy">` : '<div class="w-full h-full flex items-center justify-center text-6xl" style="background:linear-gradient(135deg, #f8f6f3, #eee);">📦</div>'}${p.seller === currentUser.name ? `<button onclick="triggerReplaceImage('${p.__backendId}')" class="absolute top-2 right-2 bg-white/80 text-sm px-2 py-1 rounded shadow">Upload</button>` : ''}</div>
+      <div class="h-48 bg-gray-200 overflow-hidden relative">${p.image_data ? '<img src="'+p.image_data+'" class="w-full h-full object-cover" alt="'+escHtml(p.name)+'" loading="lazy">' : '<div class="w-full h-full flex items-center justify-center text-6xl" style="background:linear-gradient(135deg, #f8f6f3, #eee);">📦</div>'}${p.seller === currentUser.name ? '<button onclick="triggerReplaceImage(\''+p.__backendId+'\')" class="absolute top-2 right-2 bg-white/80 text-sm px-2 py-1 rounded shadow">Upload</button>' : ''}</div>
       <div class="p-5">
         <span class="text-xs font-medium px-2 py-1 rounded-full" style="background:#f0f0f0; color:#666;">${p.category || 'Other'}</span>
         ${p.public === false ? '<span class="text-xs ml-2 px-2 py-1 rounded-full" style="background:#fee2e2;color:#9b1c1c;font-weight:600">Private</span>' : ''}
@@ -359,33 +351,24 @@ function renderShop() {
         <div class="flex items-center justify-between gap-2 mb-3">
           <span class="text-xl font-bold" style="color:#e94560;">$${Number(p.price).toFixed(2)}</span>
           <button onclick="addToCart('${p.__backendId}')" class="px-3 py-2 rounded-xl text-sm font-semibold text-white transition hover:opacity-90" style="background:#e94560;">Add</button>
-          </div>
-
-          ${p.seller === currentUser.name ? `<div class="mt-2 flex gap-2">
-            <button onclick="triggerReplaceImage('${p.__backendId}')" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#0f3460;color:white;">Replace Image</button>
-            <button onclick="replaceProductImageFromUrl('${p.__backendId}')" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#f0f0f0;">Use Image URL</button>
-            ${p.public === false ? `<button onclick="setProductPublic('${p.__backendId}', true)" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#16a34a;color:white;">Publish</button>` : `<button onclick="setProductPublic('${p.__backendId}', false)" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#f97316;color:white;">Unpublish</button>`}
-          </div>` : ''}
+        </div>
+        ${p.seller === currentUser.name ? '<div class="mt-2 flex gap-2"><button onclick="triggerReplaceImage(\''+p.__backendId+'\')" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#0f3460;color:white;">Replace Image</button><button onclick="replaceProductImageFromUrl(\''+p.__backendId+'\')" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#f0f0f0;">Use Image URL</button>'+(p.public === false ? '<button onclick="setProductPublic(\''+p.__backendId+'\', true)" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#16a34a;color:white;">Publish</button>' : '<button onclick="setProductPublic(\''+p.__backendId+'\', false)" class="px-3 py-2 rounded-xl text-sm font-semibold" style="background:#f97316;color:white;">Unpublish</button>')+'</div>' : ''}
         <button onclick="openChat('${p.__backendId}')" class="w-full px-3 py-2 rounded-xl text-sm font-semibold text-white transition hover:opacity-90" style="background:#0f3460;"><i data-lucide="message-circle" class="w-3 h-3 inline mr-1"></i>Chat Seller</button>
         <p class="text-xs text-gray-400 mt-2">by ${escHtml(p.seller || 'Unknown')}</p>
       </div>
     </div>
   `).join('');
   lucide.createIcons();
-  if (window.lastCreatedProductId) {
-    setTimeout(() => { try { highlightAndScrollProduct(window.lastCreatedProductId); window.lastCreatedProductId = null; } catch(e){} }, 120);
-  }
+  if (window.lastCreatedProductId) setTimeout(() => { try { highlightAndScrollProduct(window.lastCreatedProductId); window.lastCreatedProductId = null; } catch(e){} }, 120);
 }
-
 function highlightAndScrollProduct(prodId) {
   if (!prodId) return;
-  const el = document.querySelector(`[data-prod-id="${prodId}"]`);
+  const el = document.querySelector('[data-prod-id="'+prodId+'"]');
   if (!el) return;
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   el.classList.add('new-highlight');
   setTimeout(() => el.classList.remove('new-highlight'), 4200);
 }
-
 function filterShopCategory(cat) {
   currentCategory = cat;
   document.querySelectorAll('.cat-btn').forEach(b => {
@@ -393,10 +376,8 @@ function filterShopCategory(cat) {
     b.style.background = isActive ? '#e94560' : 'white';
     b.style.color = isActive ? 'white' : '#1a1a2e';
   });
-  renderShop();
-  goTo('shop');
+  renderShop(); goTo('shop');
 }
-
 function renderHomeProducts() {
   const container = document.getElementById('home-products');
   const prods = allProducts.filter(p => p.name).slice(-4).reverse();
@@ -406,29 +387,19 @@ function renderHomeProducts() {
   }
   container.innerHTML = prods.map(p => `
     <div class="product-card rounded-2xl overflow-hidden cursor-pointer" onclick="goTo('shop')" style="background:white;">
-      <div class="h-32 bg-gray-200 overflow-hidden flex items-center justify-center relative">${p.image_data ? `<img src="${p.image_data}" class="w-full h-full object-cover" alt="${escHtml(p.name)}" loading="lazy">` : '<span class="text-5xl">📦</span>'}${p.seller === currentUser.name ? `<button onclick="event.stopPropagation(); triggerReplaceImage('${p.__backendId}')" class="absolute top-2 right-2 bg-white/80 text-xs px-2 py-1 rounded">Upload</button>` : ''}</div>
-      <div class="p-4">
-        <h4 class="font-bold text-sm mb-1" style="color:#1a1a2e;">${escHtml(p.name)}</h4>
-        <span class="font-bold" style="color:#e94560;">$${Number(p.price).toFixed(2)}</span>
-      </div>
+      <div class="h-32 bg-gray-200 overflow-hidden flex items-center justify-center relative">${p.image_data ? '<img src="'+p.image_data+'" class="w-full h-full object-cover" alt="'+escHtml(p.name)+'" loading="lazy">' : '<span class="text-5xl">📦</span>'}${p.seller === currentUser.name ? '<button onclick="event.stopPropagation(); triggerReplaceImage(\''+p.__backendId+'\')" class="absolute top-2 right-2 bg-white/80 text-xs px-2 py-1 rounded">Upload</button>' : ''}</div>
+      <div class="p-4"><h4 class="font-bold text-sm mb-1" style="color:#1a1a2e;">${escHtml(p.name)}</h4><span class="font-bold" style="color:#e94560;">$${Number(p.price).toFixed(2)}</span></div>
     </div>
   `).join('');
 }
-
 function renderMyProducts() {
   const container = document.getElementById('my-products');
   const mine = allProducts.filter(p => p.seller === currentUser.name && p.name);
-  if (!mine.length) {
-    container.innerHTML = '<p class="text-gray-400 text-center py-8">You haven\'t listed any products yet.</p>';
-    return;
-  }
+  if (!mine.length) { container.innerHTML = '<p class="text-gray-400 text-center py-8">You haven\'t listed any products yet.</p>'; return; }
   container.innerHTML = mine.map(p => `
     <div class="flex items-center gap-4 rounded-xl p-4" style="background:#f8f6f3;">
-      <div class="w-16 h-16 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden flex items-center justify-center">${p.image_data ? `<img src="${p.image_data}" class="w-full h-full object-cover" alt="${escHtml(p.name)}" loading="lazy">` : '<span class="text-2xl">📦</span>'}</div>
-      <div class="flex-1 min-w-0">
-        <h4 class="font-bold text-sm" style="color:#1a1a2e;">${escHtml(p.name)}</h4>
-        <p class="text-xs text-gray-500">${p.category} · $${Number(p.price).toFixed(2)}</p>
-      </div>
+      <div class="w-16 h-16 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden flex items-center justify-center">${p.image_data ? '<img src="'+p.image_data+'" class="w-full h-full object-cover" alt="'+escHtml(p.name)+'" loading="lazy">' : '<span class="text-2xl">📦</span>'}</div>
+      <div class="flex-1 min-w-0"><h4 class="font-bold text-sm" style="color:#1a1a2e;">${escHtml(p.name)}</h4><p class="text-xs text-gray-500">${p.category} · $${Number(p.price).toFixed(2)}</p></div>
       <div class="flex flex-col gap-2">
         <button onclick="deleteProduct('${p.__backendId}', this)" class="text-red-400 hover:text-red-600 p-2 transition flex-shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         <button onclick="triggerReplaceImage('${p.__backendId}')" class="text-gray-600 hover:text-gray-800 p-2 transition flex-shrink-0" title="Replace image"><i data-lucide="image" class="w-4 h-4"></i></button>
@@ -440,26 +411,19 @@ function renderMyProducts() {
 
 async function handleAddProduct(e) {
   e.preventDefault();
-  if (allProducts.length >= 999) {
-    document.getElementById('store-limit-msg').classList.remove('hidden');
-    return;
-  }
+  if (allProducts.length >= 999) { document.getElementById('store-limit-msg').classList.remove('hidden'); return; }
   const btn = document.getElementById('add-product-btn');
   btn.disabled = true;
   document.getElementById('add-prod-text').classList.add('hidden');
   document.getElementById('add-prod-loading').classList.remove('hidden');
   if (!validateOpenStoreForm()) {
     showToast('Please complete all required fields');
-    btn.disabled = false;
-    document.getElementById('add-prod-text').classList.remove('hidden');
-    document.getElementById('add-prod-loading').classList.add('hidden');
+    btn.disabled = false; document.getElementById('add-prod-text').classList.remove('hidden'); document.getElementById('add-prod-loading').classList.add('hidden');
     return;
   }
   if (!selectedImages.length) {
     showToast('Please add at least one product image');
-    btn.disabled = false;
-    document.getElementById('add-prod-text').classList.remove('hidden');
-    document.getElementById('add-prod-loading').classList.add('hidden');
+    btn.disabled = false; document.getElementById('add-prod-text').classList.remove('hidden'); document.getElementById('add-prod-loading').classList.add('hidden');
     return;
   }
   const forcePublish = (e && e.submitter && e.submitter.dataset && e.submitter.dataset.publish === 'true');
@@ -475,7 +439,6 @@ async function handleAddProduct(e) {
     public: forcePublish ? true : (document.getElementById('prod-public') ? Boolean(document.getElementById('prod-public').checked) : true),
     created_at: new Date().toISOString()
   };
-
   if (selectedImages.length && (window.cloudImageUploadUrl || window.CLOUD_IMAGE_UPLOAD_URL || typeof window.cloudImageUploadHandler === 'function' || window.FIREBASE_CONFIG)) {
     try {
       const uploaded = [];
@@ -485,189 +448,78 @@ async function handleAddProduct(e) {
         const row = document.getElementById('upload-row-' + uid);
         if (!row && info.status === 'started') {
           const r = document.createElement('div'); r.id = 'upload-row-' + uid; r.className = 'flex items-center gap-3';
-          r.innerHTML = `<div class="w-12 h-12 bg-gray-100 rounded overflow-hidden"><img src="" class="w-full h-full object-cover"/></div><div class="flex-1"><div class="text-sm upload-name">Uploading...</div><div class="w-full bg-gray-100 rounded h-2 mt-1"><div class="upload-bar bg-e94560 h-2 rounded" style="width:0%"></div></div></div><div class="upload-status text-xs text-gray-500">Starting</div>`;
-          document.getElementById('upload-list').appendChild(r);
-          progressMap[uid] = r;
+          r.innerHTML = '<div class="w-12 h-12 bg-gray-100 rounded overflow-hidden"><img src="" class="w-full h-full object-cover"/></div><div class="flex-1"><div class="text-sm upload-name">Uploading...</div><div class="w-full bg-gray-100 rounded h-2 mt-1"><div class="upload-bar bg-e94560 h-2 rounded" style="width:0%"></div></div></div><div class="upload-status text-xs text-gray-500">Starting</div>';
+          document.getElementById('upload-list').appendChild(r); progressMap[uid] = r;
         }
         const el = progressMap[uid] || document.getElementById('upload-row-' + uid);
         if (!el) return;
-        if (info.status === 'started') {
-          el.querySelector('.upload-name').textContent = 'Uploading...';
-          el.querySelector('img').src = '';
-          el.querySelector('.upload-bar').style.width = '4%';
-          el.querySelector('.upload-status').textContent = 'Uploading';
-        } else if (info.status === 'progress') {
-          const pct = info.total ? Math.round((info.loaded / info.total) * 100) : 0;
-          el.querySelector('.upload-bar').style.width = pct + '%';
-          el.querySelector('.upload-status').textContent = pct + '%';
-        } else if (info.status === 'done') {
-          el.querySelector('.upload-bar').style.width = '100%';
-          el.querySelector('.upload-status').textContent = 'Done';
-          if (info.url) el.querySelector('img').src = info.url;
-        } else if (info.status === 'failed') {
-          el.querySelector('.upload-status').textContent = 'Failed';
-          el.querySelector('.upload-bar').style.background = '#ef4444';
-        }
+        if (info.status === 'started') { el.querySelector('.upload-name').textContent = 'Uploading...'; el.querySelector('img').src = ''; el.querySelector('.upload-bar').style.width = '4%'; el.querySelector('.upload-status').textContent = 'Uploading'; }
+        else if (info.status === 'progress') { const pct = info.total ? Math.round((info.loaded / info.total) * 100) : 0; el.querySelector('.upload-bar').style.width = pct + '%'; el.querySelector('.upload-status').textContent = pct + '%'; }
+        else if (info.status === 'done') { el.querySelector('.upload-bar').style.width = '100%'; el.querySelector('.upload-status').textContent = 'Done'; if (info.url) el.querySelector('img').src = info.url; }
+        else if (info.status === 'failed') { el.querySelector('.upload-status').textContent = 'Failed'; el.querySelector('.upload-bar').style.background = '#ef4444'; }
       };
-
       for (let i = 0; i < selectedImages.length; i++) {
         try {
           const uid = String(Math.random().toString(36).slice(2,9));
           window.__uploadProgressHandler(uid, {status:'started', loaded:0, total: dataURLtoBlob(selectedImages[i]).size});
           const remoteUrl = await uploadImageToCloud(selectedImages[i], uid);
-          if (!remoteUrl) {
-            window.__uploadProgressHandler(uid, {status:'failed'});
-            uploaded.push(selectedImages[i]);
-          } else {
-            window.__uploadProgressHandler(uid, {status:'done', url: remoteUrl});
-            uploaded.push(remoteUrl || selectedImages[i]);
-          }
-        } catch (err) {
-          console.warn('image upload failed for index', i, err);
-          window.__uploadProgressHandler && window.__uploadProgressHandler('', {status:'failed'});
-          showToast('Image upload failed');
-          hideUploadModal();
-          btn.disabled = false;
-
-          document.getElementById('add-prod-text').classList.remove('hidden');
-          document.getElementById('add-prod-loading').classList.add('hidden');
-
-          return;
-        }
+          if (!remoteUrl) { window.__uploadProgressHandler(uid, {status:'failed'}); uploaded.push(selectedImages[i]); }
+          else { window.__uploadProgressHandler(uid, {status:'done', url: remoteUrl}); uploaded.push(remoteUrl || selectedImages[i]); }
+        } catch (err) { console.warn('image upload failed for index', i, err); showToast('Image upload failed'); hideUploadModal(); btn.disabled = false; document.getElementById('add-prod-text').classList.remove('hidden'); document.getElementById('add-prod-loading').classList.add('hidden'); return; }
       }
       hideUploadModal();
-      if (uploaded.length) {
-        productPayload.images = uploaded;
-        productPayload.primary_image = uploaded[primaryImageIndex] || uploaded[0];
-        productPayload.image_data = productPayload.primary_image;
-      }
-    } catch (err) {
-      console.error('Cloud upload failed', err);
-      showToast('Image upload failed — listing will use local images.');
-      hideUploadModal();
-    }
+      if (uploaded.length) { productPayload.images = uploaded; productPayload.primary_image = uploaded[primaryImageIndex] || uploaded[0]; productPayload.image_data = productPayload.primary_image; }
+    } catch (err) { console.error('Cloud upload failed', err); showToast('Image upload failed — listing will use local images.'); hideUploadModal(); }
   }
-
-  let createdOk = false;
-  let sdkResult = null;
+  let createdOk = false; let sdkResult = null;
   try {
     if (window.dataSdk && typeof window.dataSdk.create === 'function') {
       const result = await window.dataSdk.create(productPayload);
-      sdkResult = result;
-      createdOk = !!(result && result.isOk);
+      sdkResult = result; createdOk = !!(result && result.isOk);
       if (createdOk && result && result.item) {
         const toPush = Object.assign({}, result.item);
         if (!toPush.__backendId && result.id) toPush.__backendId = result.id;
-        allProducts.push(toPush);
-        renderShop(); renderHomeProducts(); renderMyProducts();
-        try { saveProductsToLocal(); } catch(e){}
-        window.lastCreatedProductId = toPush.__backendId || result.id || null;
+        allProducts.push(toPush); renderShop(); renderHomeProducts(); renderMyProducts();
+        try { saveProductsToLocal(); } catch(e){} window.lastCreatedProductId = toPush.__backendId || result.id || null;
       } else if (createdOk && result && result.id) {
         const toPush = Object.assign({}, productPayload, { __backendId: result.id });
-        allProducts.push(toPush);
-        renderShop(); renderHomeProducts(); renderMyProducts();
-        try { saveProductsToLocal(); } catch(e){}
-        window.lastCreatedProductId = toPush.__backendId || result.id || null;
+        allProducts.push(toPush); renderShop(); renderHomeProducts(); renderMyProducts();
+        try { saveProductsToLocal(); } catch(e){} window.lastCreatedProductId = toPush.__backendId || result.id || null;
       }
     }
-  } catch (err) {
-    console.error('dataSdk.create error', err);
-    createdOk = false;
-  }
-
+  } catch (err) { console.error('dataSdk.create error', err); createdOk = false; }
   if (!createdOk) {
     const localProd = Object.assign({}, productPayload, { __backendId: 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2,8) });
-    allProducts.push(localProd);
-    window.lastCreatedProductId = localProd.__backendId;
-    renderShop(); renderHomeProducts(); renderMyProducts();
-    try { saveProductsToLocal(); } catch (e) {}
-    createdOk = true;
+    allProducts.push(localProd); window.lastCreatedProductId = localProd.__backendId;
+    renderShop(); renderHomeProducts(); renderMyProducts(); try { saveProductsToLocal(); } catch (e) {} createdOk = true;
   }
-
-  btn.disabled = false;
-  document.getElementById('add-prod-text').classList.remove('hidden');
-  document.getElementById('add-prod-loading').classList.add('hidden');
-
-  if (createdOk) {
-    document.getElementById('add-product-form').reset();
-    removeImage();
-    document.getElementById('prod-image').value = '';
-    showToast('🎉 Product listed successfully!');
-    try { saveProductsToLocal(); } catch (e) {}
-  } else {
-    showToast('Failed to list product. Try again.');
-  }
-
-  if (createdOk) {
-    try {
-      const cat = (sdkResult && sdkResult.item && sdkResult.item.category) || productPayload.category;
-      if (cat) filterShopCategory(cat);
-      else goTo('shop');
-    } catch (e) { goTo('shop'); }
-  }
+  btn.disabled = false; document.getElementById('add-prod-text').classList.remove('hidden'); document.getElementById('add-prod-loading').classList.add('hidden');
+  if (createdOk) { document.getElementById('add-product-form').reset(); removeImage(); document.getElementById('prod-image').value = ''; showToast('🎉 Product listed successfully!'); try { saveProductsToLocal(); } catch (e) {} }
+  else { showToast('Failed to list product. Try again.'); }
+  if (createdOk) { try { const cat = (sdkResult && sdkResult.item && sdkResult.item.category) || productPayload.category; if (cat) filterShopCategory(cat); else goTo('shop'); } catch (e) { goTo('shop'); } }
 }
 
 async function deleteProduct(id, btnEl) {
   const prod = allProducts.find(p => p.__backendId === id);
   if (!prod) return;
-  if (prod.__backendId && String(prod.__backendId).startsWith('local-')) {
-    allProducts = allProducts.filter(p => p.__backendId !== id);
-    renderShop(); renderHomeProducts(); renderMyProducts();
-    try { saveProductsToLocal(); } catch (e) {}
-    showToast('✓ Product removed');
-    return;
-  }
+  if (prod.__backendId && String(prod.__backendId).startsWith('local-')) { allProducts = allProducts.filter(p => p.__backendId !== id); renderShop(); renderHomeProducts(); renderMyProducts(); try { saveProductsToLocal(); } catch (e) {} showToast('✓ Product removed'); return; }
   if (btnEl) btnEl.disabled = true;
   try {
     const result = await window.dataSdk.delete(prod);
-    if (result.isOk) {
-      showToast('✓ Product removed');
-      try { saveProductsToLocal(); } catch (e) {}
-    } else {
-      showToast('Failed to remove product');
-      if (btnEl) btnEl.disabled = false;
-    }
-  } catch (err) {
-    console.error('deleteProduct error', err);
-    showToast('Failed to remove product');
-    if (btnEl) btnEl.disabled = false;
-  }
+    if (result.isOk) { showToast('✓ Product removed'); try { saveProductsToLocal(); } catch (e) {} }
+    else { showToast('Failed to remove product'); if (btnEl) btnEl.disabled = false; }
+  } catch (err) { console.error('deleteProduct error', err); showToast('Failed to remove product'); if (btnEl) btnEl.disabled = false; }
 }
 
 async function loadProductsFromBackend() {
   try {
-    if (!window.dataSdk || typeof window.dataSdk.getAll !== 'function') {
-  console.warn('dataSdk.getAll unavailable');
-  return;
-}
-
-const products = await window.dataSdk.getAll();
-
-    allProducts = products.map(p => ({
-      ...p,
-      __backendId: p._id
-    }));
-
-    renderShop();
-    renderHomeProducts();
-    renderMyProducts();
-
+    if (!window.dataSdk || typeof window.dataSdk.getAll !== 'function') { console.warn('dataSdk.getAll unavailable'); return; }
+    const products = await window.dataSdk.getAll();
+    allProducts = products.map(p => ({ ...p, __backendId: p._id }));
+    renderShop(); renderHomeProducts(); renderMyProducts();
     console.log('Products loaded:', allProducts.length);
-
-  } catch (err) {
-    console.error('Failed to load products', err);
-  }
+  } catch (err) { console.error('Failed to load products', err); }
 }
 
-if (window.dataSdk && typeof window.dataSdk.getAll === 'function') {
-  loadProductsFromBackend();
-} else {
-  console.warn('dataSdk not available, using local products only');
-
-  // Load from localStorage instead
-  try {
-    loadProductsFromLocal();
-  } catch (e) {
-    console.error('Local product loading failed', e);
-  }
-}
+if (window.dataSdk && typeof window.dataSdk.getAll === 'function') { loadProductsFromBackend(); }
+else { console.warn('dataSdk not available, using local products only'); try { loadProductsFromLocal(); } catch (e) { console.error('Local product loading failed', e); } }
