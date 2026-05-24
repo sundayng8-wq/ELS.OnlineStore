@@ -3,10 +3,35 @@ const router = express.Router();
 const Product = require('../models/Product');
 const auth = require('../middleware/auth');
 
-// GET all products (public)
+// Whitelist of allowed fields
+const ALLOWED_FIELDS = ['name', 'price', 'category', 'description', 'images', 'primary_image', 'image_data', 'public'];
+
+function filterBody(body) {
+  const filtered = {};
+  ALLOWED_FIELDS.forEach(field => {
+    if (body[field] !== undefined) {
+      filtered[field] = body[field];
+    }
+  });
+  return filtered;
+}
+
+// GET all public products
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find({ public: true }).sort({ created_at: -1 });
+    const filter = { public: true };
+    
+    // Optional: filter by store
+    if (req.query.store_id) {
+      filter.store_id = req.query.store_id;
+    }
+    
+    // Optional: filter by seller
+    if (req.query.seller_id) {
+      filter.seller_id = req.query.seller_id;
+    }
+    
+    const products = await Product.find(filter).sort({ created_at: -1 });
     res.json(products);
   } catch (err) {
     console.error('Get products error:', err);
@@ -14,7 +39,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET single product (public)
+// GET single product
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -28,27 +53,27 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// CREATE product (protected)
+// CREATE product (protected, whitelisted fields only)
 router.post('/', auth, async (req, res) => {
   try {
-    const { name, price, category, description, images, primary_image, image_data } = req.body;
+    const productData = filterBody(req.body);
 
-    if (!name || !price) {
+    if (!productData.name || !productData.price) {
       return res.status(400).json({ error: 'Name and price are required' });
     }
 
-    const product = new Product({
-      name,
-      price,
-      category: category || 'Other',
-      description: description || '',
-      seller: req.user.email,
-      images: images || [],
-      primary_image: primary_image || '',
-      image_data: image_data || ''
-    });
+    // Price must be positive number
+    if (typeof productData.price !== 'number' || productData.price <= 0) {
+      return res.status(400).json({ error: 'Price must be a positive number' });
+    }
 
+    productData.seller = req.user.email;
+    productData.category = productData.category || 'Other';
+    productData.description = productData.description || '';
+
+    const product = new Product(productData);
     await product.save();
+
     res.status(201).json(product);
   } catch (err) {
     console.error('Create product error:', err);
@@ -56,11 +81,10 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// UPDATE product (protected — only seller)
+// UPDATE product (protected, seller only, whitelisted fields)
 router.put('/:id', auth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -69,10 +93,12 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(403).json({ error: 'You can only edit your own products' });
     }
 
-    const updates = req.body;
-    delete updates._id;
-    delete updates.seller;
-    delete updates.created_at;
+    const updates = filterBody(req.body);
+    
+    // Validate price if being updated
+    if (updates.price !== undefined && (typeof updates.price !== 'number' || updates.price <= 0)) {
+      return res.status(400).json({ error: 'Price must be a positive number' });
+    }
 
     const updated = await Product.findByIdAndUpdate(
       req.params.id,
@@ -87,11 +113,10 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-// DELETE product (protected — only seller)
+// DELETE product (protected, seller only)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -108,7 +133,7 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// GET my products (protected)
+// GET seller's own products
 router.get('/seller/mine', auth, async (req, res) => {
   try {
     const products = await Product.find({ seller: req.user.email }).sort({ created_at: -1 });
