@@ -12,6 +12,7 @@ const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/orders');
 const checkoutRoutes = require('./routes/checkout');
 const authRoutes = require('./routes/auth');
+const earningsRoutes = require('./routes/earnings');
 const connectDB = require('./config/db');
 
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
@@ -50,6 +51,7 @@ app.use('/api/stores', storeRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/earnings', earningsRoutes);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
