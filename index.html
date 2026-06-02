@@ -696,9 +696,30 @@
        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;">
          <div>
            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;">
-             <div><label>Filter by Region</label><select id="partnerRegionFilter"><option value="">All Regions</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Central</option></select></div>
-             <div><label>Sort By</label><select id="partnerSortFilter"><option value="distance">Closest Distance</option><option value="eta">Fastest ETA</option><option value="rating">Highest Rating</option></select></div>
-             <div><label>Vehicle Type</label><select id="partnerVehicleFilter"><option value="">All Vehicles</option><option value="🚚">Van</option><option value="📦">Truck</option><option value="🛵">Bike</option><option value="🚗">Car</option></select></div>
+             <div><label>Filter by Region</label>
+              <select id="partnerRegionFilter">
+              <option value="initial">
+                All Regions</option>
+              <option>North</option>
+              <option>South</option>
+              <option>East</option>
+              <option>West</option>
+              <option>Central</option>
+            </select></div>
+             <div><label>Sort By</label>
+              <select id="partnerSortFilter">
+              <option value="distance">Closest Distance</option>
+              <option value="eta">Fastest ETA</option>
+              <option value="rating">Highest Rating</option>
+            </select></div>
+             <div><label>Vehicle Type</label>
+              <select id="partnerVehicleFilter">
+                <option value="">All Vehicles</option>
+                <option value="🚚">Van</option>
+                <option value="📦">Truck</option>
+                <option value="🛵">Bike</option>
+                <option value="🚗">Car</option>
+              </select></div>
            </div>
            <div id="logisticsPartnersList" style="display:grid;gap:12px;"></div>
          </div>
@@ -968,7 +989,6 @@
        </div>
       </div>
      </section>
-     <!-- CONTACT PAGE -->
     <!-- PROFILE PAGE -->
     <section id="page-profile" class="page">
       <div class="max-w-2xl mx-auto px-4 py-12">
@@ -1017,7 +1037,8 @@
          <label for="contact-name" class="block text-sm font-medium mb-1" style="color:#1a1a2e;">Name</label> <input id="contact-name" type="text" required class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;">
         </div>
         <div class="mb-4">
-         <label for="contact-email" class="block text-sm font-medium mb-1" style="color:#1a1a2e;">Email</label> <input id="contact-email" type="email" required class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;">
+         <label for="contact-email" class="block text-sm font-medium mb-1" style="color:#1a1a2e;">Email</label> 
+         <input id="contact-email" type="email" required class="w-full px-4 py-3 rounded-xl" style="border:1px solid #e5e5e5;">
         </div>
         <div class="mb-6">
          <label
@@ -1027,7 +1048,8 @@
         </div>
         <button id="contact-submit" type="submit" class="w-full py-3 rounded-xl font-semibold text-white transition hover:opacity-90 flex items-center justify-center" style="background:#204069ad;">
           <span id="contact-submit-text">Send Message</span>
-          <span id="contact-submit-loading" class="hidden ml-3"><span class="spinner" aria-hidden="true">   
+          <span id="contact-submit-loading" class="hidden ml-3">
+            <span class="spinner" aria-hidden="true">   
           </span><span class="sr-only">Sending</span></span>
         </button>
         <p id="contact-success" class="hidden text-center text-green-600 font-medium mt-4">✓ Message sent! We'll get back to you soon.</p>
@@ -1218,15 +1240,22 @@
         <div class="logistics-status-panel">
           <h3>Delivery Milestones</h3>
           <div class="timeline-wrapper">
-            <div class="timeline-step" id="step-Pending"><div class="bullet"></div><div class="lbl">Order Logged</div></div>
-            <div class="timeline-step" id="step-Paid"><div class="bullet"></div><div class="lbl">Payment Cleared</div></div>
-            <div class="timeline-step" id="step-Processing"><div class="bullet"></div><div class="lbl">In Sorting Facility</div></div>
-            <div class="timeline-step" id="step-Shipped"><div class="bullet"></div><div class="lbl">Dispatched / Out for Delivery</div></div>
-            <div class="timeline-step" id="step-Delivered"><div class="bullet"></div><div class="lbl">Handed to Customer</div></div>
+            <div class="timeline-step" id="step-Pending">
+              <div class="bullet"></div><div class="lbl">Order Logged</div></div>
+            <div class="timeline-step" id="step-Paid">
+              <div class="bullet"></div><div class="lbl">Payment Cleared</div></div>
+            <div class="timeline-step" id="step-Processing">
+              <div class="bullet"></div><div class="lbl">In Sorting Facility</div></div>
+            <div class="timeline-step" id="step-Shipped">
+              <div class="bullet"></div>
+              <div class="lbl">Dispatched / Out for Delivery</div></div>
+            <div class="timeline-step" id="step-Delivered">
+              <div class="bullet"></div><div class="lbl">Handed to Customer</div></div>
           </div>
                 
           <div class="live-stream-box">
-            <div class="live-indicator"><span class="dot-blink"></span> LIVE DISPATCH FEED</div>
+            <div class="live-indicator">
+              <span class="dot-blink"></span> LIVE DISPATCH FEED</div>
             <video id="logistics-livestream" autoplay muted playsinline controls></video>
             <div class="live-fallback-overlay" id="stream-fallback">Courier has not initiated real-time stream broadcast feed.</div>
           </div>
@@ -1254,7 +1283,8 @@
     </div>
   </div>
  
-  </div><!-- end app -->
+  </div>
+  <!-- end app -->
   <!-- QR Payment Modal (from index2.html) -->
   <div class="qr-modal-overlay" id="qrModal">
     <div class="qr-modal">
