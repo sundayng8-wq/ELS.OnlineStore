@@ -282,26 +282,39 @@
      <!-- HOME PAGE -->
      <section id="page-home" class="page active bg-slate-50 min-h-screen">
   <div class="relative overflow-hidden bg-slate-950 py-24 px-6 text-center">
-    <div id="home-bg-carousel" class="absolute inset-0 pointer-events-none"></div>
+    
+    <div id="home-bg-carousel" class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="carousel-track absolute inset-0 flex w-[400%] h-full opacity-20 transform-gpu">
+            <div class="carousel-panel w-full h-full bg-cover bg-center transition-all duration-1000 scale-105" style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80')"></div>
+            <div class="carousel-panel w-full h-full bg-cover bg-center transition-all duration-1000 scale-105" style="background-image: url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1600&q=80')"></div>
+            <div class="carousel-panel w-full h-full bg-cover bg-center transition-all duration-1000 scale-105" style="background-image: url('https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&q=80')"></div>
+            <div class="carousel-panel w-full h-full bg-cover bg-center transition-all duration-1000 scale-105" style="background-image: url('https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=1600&q=80')"></div>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/85 to-slate-950 z-[1]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#020617_90%)] z-[2]"></div>
+    </div>
+
     <div class="max-w-3xl mx-auto relative z-10">
-      <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold text-indigo-300 mb-6 bg-indigo-500/10 border border-indigo-500/20 tracking-wide slide-up">
+      <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold text-indigo-300 mb-6 bg-indigo-500/10 border border-indigo-500/20 tracking-wide animate-slide-up">
         Welcome to ELS.OnlineStore
       </span>
-      <h2 id="hero-heading" class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-none font-serif">
+      <h2 id="hero-heading" class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-none font-serif text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-indigo-200">
         Discover What You Love
       </h2>
-      <p class="text-slate-300 text-base sm:text-lg mb-10 max-w-xl mx-auto leading-relaxed slide-up-d2">
+      <p class="text-slate-300 text-base sm:text-lg mb-10 max-w-xl mx-auto leading-relaxed animate-slide-up-delayed">
         Buy unique products from independent sellers or open your own store and start selling today.
       </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center slide-up-d3">
-        <button onclick="goTo('shop')" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 transition-all duration-200 transform active:scale-95">
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up-deep">
+        <button onclick="goTo('shop')" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/40 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95">
           Browse Shop
         </button>
-        <button onclick="goTo('open-store')" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-slate-200 bg-white/10 hover:bg-white/10 hover:text-white border border-slate-700 hover:border-slate-500 backdrop-blur-sm transition-all duration-200 transform active:scale-95">
+        <button onclick="goTo('open-store')" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-slate-200 bg-white/5 hover:bg-white/10 hover:text-white border border-slate-800 hover:border-slate-600 backdrop-blur-sm transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95">
           Open a Store
         </button>  
       </div>
     </div>
+</div>
+<script src="js/home.js"></script>
     <div class="absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true">
       <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600 rounded-full blur-[120px]"></div>
       <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600 rounded-full blur-[120px]"></div>
@@ -938,6 +951,7 @@
 <!-- CART PAGE SECTION -->
 <section id="page-cart" class="page bg-slate-50/50 min-h-screen py-12 px-4">
   <div class="max-w-5xl mx-auto">
+    
     <!-- Title Section -->
     <div class="flex items-center gap-3 mb-8">
       <div class="p-2.5 bg-rose-50 text-rose-600 rounded-xl">
@@ -945,49 +959,106 @@
       </div>
       <div>
         <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Your Shopping Cart</h2>
-        <p class="text-xs text-slate-500">Review selected inventory items before checking out.</p>
+        <p class="text-xs text-slate-500">Review, adjust quantities, and manage your selected inventory items.</p>
       </div>
     </div>
-    <!-- Split-Grid Workspace Layout for Checkout Efficiency -->
+
+    <!-- Split-Grid Workspace Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <!-- List Items Card Stack Column (2/3 width) -->
+      
+      <!-- List Items Column Stack (2/3 width) -->
       <div class="lg:col-span-2 space-y-4">
-        <div id="cart-items" class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-          <!-- Fallback Interactive Empty Cart View State -->
-          <div class="text-center py-12">
+        <div id="cart-items" class="space-y-4">
+        
+          <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:border-slate-300/80 transition-all duration-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            
+            <!-- Product Identity Wrapper -->
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+              <div class="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200/50">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" alt="Product Thumbnail" class="w-full h-full object-cover" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 font-medium text-[10px] rounded-md mb-1.5 uppercase tracking-wider">Electronics</span>
+                <h4 class="text-sm font-semibold text-slate-900 truncate pr-4">Premium Wireless Athletics Sneaker</h4>
+                <p class="text-xs text-slate-400 mt-0.5">In Stock • Ships immediately</p>
+                <!-- Mobile Only Controls (Hidden on large viewports for crisp presentation) -->
+                <div class="flex items-center gap-4 mt-2 sm:hidden">
+                  <span class="text-sm font-extrabold text-rose-500">$120.00</span>
+                  <button class="text-xs font-medium text-slate-400 hover:text-rose-500 flex items-center gap-1 transition">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Jumia Mode Functional Actions Panel (Desktop Structure) -->
+            <div class="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-3 sm:pt-0 border-t border-slate-100 sm:border-0">
+              
+              <!-- Clean Pro Stepper Controller Module -->
+              <div class="flex items-center border border-slate-200 bg-slate-50/50 rounded-xl p-1 shadow-sm max-w-[120px]">
+                <!-- Decrease Quantity (Disabled gracefully at 1 to match native UX rules) -->
+                <button type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-white hover:text-rose-500 hover:shadow-sm active:scale-95 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-all">
+                  <i data-lucide="minus" class="w-4 h-4"></i>
+                </button>
+                
+                <!-- Display / Manual Type Input Target Field -->
+                <input type="number" min="1" max="99" value="1" class="w-8 text-center bg-transparent border-0 font-bold text-sm text-slate-800 focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                
+                <!-- Increase Quantity -->
+                <button type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-white hover:text-emerald-600 hover:shadow-sm active:scale-95 transition-all">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <!-- Desktop Pricing Metric Display Panel -->
+              <div class="hidden sm:block text-right min-w-[90px]">
+                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Subtotal</p>
+                <span class="text-base font-black text-slate-900">$120.00</span>
+              </div>
+
+              <!-- Desktop Remove Button Interaction Anchor -->
+              <button title="Remove item" class="hidden sm:flex w-9 h-9 items-center justify-center border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-100 hover:bg-rose-50/30 rounded-xl transition-all duration-150 active:scale-95">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+           </div>
+          </div>
+ <!-- Fallback Empty State (Displays if cart data lookup returns empty arrays) -->
+          <div class="hidden bg-white border border-slate-200/80 rounded-2xl p-12 text-center shadow-sm">
             <div class="w-12 h-12 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <i data-lucide="shopping-cart" class="w-6 h-6"></i>
             </div>
             <p class="text-sm font-semibold text-slate-800">Your cart is currently empty</p>
-            <p class="text-xs text-slate-400 mt-1 mb-4">Looks like you haven't discovered your items yet.</p>
-            <button onclick="goTo('shop')" class="inline-flex items-center justify-center text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-xl shadow-sm transition">
+            <p class="text-xs text-slate-400 mt-1 mb-6">Looks like you haven't discovered your items yet.</p>
+            <button onclick="goTo('shop')" class="inline-flex items-center justify-center text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 px-5 py-2.5 rounded-xl shadow-sm transition active:scale-[0.98]">
               Start Shopping
             </button>
           </div>
         </div>
       </div>
-      <!-- Checkout Summary Column Panel (1/3 width, Stickied layout) -->
-      <div id="cart-summary" class="hidden lg:sticky lg:top-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4 pb-2 border-b border-slate-100">Order Summary</h3>
-       <!-- Summary Pricing Calculations Row Fields -->
+ <!-- Checkout Summary Column Panel (1/3 width, Sticky design) -->
+      <div id="cart-summary" class="lg:sticky lg:top-6 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 pb-2 border-b border-slate-100">Order Summary</h3>
+         <!-- Summary Pricing Calculations Row Fields -->
         <div class="space-y-3 mb-6">
           <div class="flex items-center justify-between text-xs text-slate-500">
             <span>Subtotal</span>
-            <span class="font-medium text-slate-800">$0.00</span>
+            <span class="font-semibold text-slate-800">$120.00</span>
           </div>
           <div class="flex items-center justify-between text-xs text-slate-500">
             <span>Shipping Fees</span>
-            <span class="font-medium text-emerald-600">Calculated later</span>
+            <span class="font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md text-[10px]">Calculated later</span>
           </div>
           <div class="border-t border-slate-100 pt-3 flex justify-between items-center">
-            <span class="text-sm font-bold text-slate-800">Total Balance</span> 
-            <span id="cart-total" class="text-xl font-black text-rose-500">$0.00</span>
+            <div>
+              <span class="text-xs font-bold text-slate-800 block">Total Balance</span> 
+              <span class="text-[10px] text-slate-400 font-normal">Excluding customs/VAT</span>
+            </div>
+            <span id="cart-total" class="text-xl font-black text-rose-500">$120.00</span>
           </div>
         </div>
- <!-- Final Action Click Trigger Call -->
-        <button onclick="goTo('payment')" 
-          class="w-full py-3 rounded-xl font-bold text-sm text-white bg-rose-500 hover:bg-rose-600 shadow-md shadow-rose-100 transition active:scale-[0.99]">
-          Proceed to Payment
+<!-- Final Action Click Trigger Call -->
+        <button onclick="goTo('payment')" class="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-500/10 transition duration-150 active:scale-[0.99] flex items-center justify-center gap-2">
+          Proceed to Payment <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </div>
      </div>
@@ -1367,7 +1438,7 @@
     </div>
   </div>
 </section>
-<script src="js/msge.js"></script>
+<script src="js/home.js"></script>
  <script src="js/els2app.js"></script>
   <script src="js/cloudupload.js"></script>
  <script src="js/ui.js"></script>
