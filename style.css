@@ -261,49 +261,6 @@ animation: fadeIn 0.3s ease;
     max-width: 1200px;
     margin: 0 auto;
 }
-/* --- CINEMATIC TRANSITION INFRASTRUCTURE --- */
-.carousel-track {
-    will-change: transform;
-}
-
-/* Subtle, high-end image pulse animation similar to Google's ambient presentation formats */
-@keyframes ambientKenBurns {
-    0% { transform: scale(1.03) translate3d(0, 0, 0); }
-    50% { transform: scale(1.08) translate3d(-0.5%, -0.5%, 0); }
-    100% { transform: scale(1.03) translate3d(0, 0, 0); }
-}
-
-.carousel-panel-active {
-    animation: ambientKenBurns 12s ease-in-out infinite;
-}
-
-/* --- TEXT FOREGROUND ORCHESTRATION ANIMATIONS --- */
-@keyframes modernSlideUp {
-    from {
-        opacity: 0;
-        transform: translate3d(0, 24px, 0);
-    }
-    to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0);
-    }
-}
-
-.animate-slide-up {
-    animation: modernSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-slide-up-delayed {
-    opacity: 0;
-    animation: modernSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-}
-
-.animate-slide-up-deep {
-    opacity: 0;
-    animation: modernSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
-}
-
-
 
 /* Product Styling */
 .product-grid {
