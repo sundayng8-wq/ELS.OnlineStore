@@ -370,636 +370,178 @@
 <!-- SHOP PAGE -->
     <!-- ========================================== -->
 <!-- ELS ACTIVE SHOP SECTION                    -->
-<!-- ========================================== -->
-<section id="page-shop" class="page relative min-h-screen bg-slate-50/60 overflow-hidden">
-  <!-- High-End Ambient Graphic Backgrounds -->
-  <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-70 pointer-events-none"></div>
-  <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-  <div class="absolute top-1/3 -right-40 w-96 h-96 bg-rose-500/5 rounded-full blur-[120px] pointer-events-none"></div>
-  <div class="relative z-10 max-w-6xl mx-auto px-4 py-12 animate-fadeIn">
-    <!-- Header Controls Grid: Title & Navigation Pill Matrix -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 pb-6 border-b border-slate-200/60">
-      <div>
-        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-serif">
-          ELS Active Shop
-        </h2>
-        <p class="text-slate-500 text-xs sm:text-sm mt-1 font-medium">
-          Discover handpicked collections from verified independent storefronts
-        </p>
+<!-- PAGE 1: USER REGISTRATION / AUTH LAYER -->
+<section id="page-auth-register" class="page bg-slate-50 min-h-screen dynamic-route-node">
+  <div class="max-w-md mx-auto px-4 py-16">
+    <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-100">
+      <div class="text-center mb-6">
+        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight font-serif">Get Started</h2>
+        <p class="text-xs text-slate-400 mt-1">Create your master network node access account credentials</p>
       </div>
-     <!-- Modern Categories Filter Scroller -->
-      <div class="flex gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none snap-x mask-gradient">
-        <!-- Active Pill State Example -->
-        <button onclick="filterShopCategory('All')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 shadow-sm bg-slate-900 text-white ring-2 ring-offset-2 ring-slate-900/10">
-          All Products
-        </button> 
-         <!-- Standard Unselected Pill States -->
-        <button onclick="filterShopCategory('Electronics')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Electronics
-        </button> 
-        <button onclick="filterShopCategory('Fashion')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Fashion
-        </button>
-        <button onclick="filterShopCategory('Home')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Home
-        </button> 
-        <button onclick="filterShopCategory('Sports')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Sports
-        </button>
-        <button onclick="filterShopCategory('Other')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Other
-        </button>
-      </div>
-     </div>
-     <!-- Main Dynamic Showcase Grid Layout -->
-    <div id="shop-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Premium Empty State Component Card (Rendered if grid is blank) -->
-      <div class="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white/80 backdrop-blur-md p-12 text-center max-w-lg mx-auto shadow-xl shadow-slate-100/50 mt-4">
-        <div class="inline-flex p-4 rounded-2xl bg-rose-50 text-rose-500 border border-rose-100 shadow-inner mb-5 animate-pulse">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72M6.75 18h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75z" />
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-slate-900 tracking-tight">The Marketplace is Empty</h3>
-        <p class="text-slate-500 text-sm mt-2 mb-8 leading-relaxed">
-          Be the absolute first pioneer to dominate this category segment! Build your custom brand presence and launch inventory assets live in minutes.
-        </p>
-        <button onclick="goTo('open-store')" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 transition-all shadow-md shadow-rose-500/20 text-xs tracking-wider uppercase transform active:scale-95">
-          Open Your Storefront
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </button>
-      </div>
-     </div>
-    </div>
-    </section>
-   <!-- OPEN STORE PAGE -->
- <section id="page-open-store" class="page bg-slate-50 min-h-screen">
-  <div class="max-w-5xl mx-auto px-4 py-12">
-    <div class="text-center mb-12">
-      <div class="inline-flex justify-center items-center mb-4 p-3 bg-white rounded-2xl shadow-sm">
-        <img src="images/timesetup.png" alt="Setup Time" width="80" height="80" class="object-contain" />
-      </div>
-      <h2 class="text-4xl font-extrabold mb-3 tracking-tight text-slate-900 font-serif">
-        Open Your Store
-      </h2>
-      <p class="text-base text-slate-500 max-w-md mx-auto">
-        Start selling in minutes. List your products and reach customers worldwide seamlessly.
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <div class="bg-white rounded-2xl p-6 text-center border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <div class="inline-block p-2 bg-slate-50 rounded-xl mb-4">
-          <img src="images/setupimg.png" alt="Quick Setup" width="64" height="64" class="mx-auto" />
-        </div>
-        <h4 class="font-bold text-lg text-slate-900 mb-1">Quick Setup</h4>
-        <p class="text-slate-500 text-sm">List a product in under a minute</p>
-      </div>
-      <div class="bg-white rounded-2xl p-6 text-center border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <div class="inline-block p-2 bg-slate-50 rounded-xl mb-4">
-          <img src="images/globe.png" alt="Global Reach" width="64" height="64" class="mx-auto" />
-        </div>
-        <h4 class="font-bold text-lg text-slate-900 mb-1">Global Reach</h4>
-        <p class="text-slate-500 text-sm">Your products visible to everyone</p>
-      </div>
-      <div class="bg-white rounded-2xl p-6 text-center border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <div class="inline-block p-2 bg-slate-50 rounded-xl mb-4">
-          <img src="images/feeimg.png" alt="Zero Fees" width="64" height="64" class="mx-auto" />
-        </div>
-        <h4 class="font-bold text-lg text-slate-900 mb-1">Zero Fees</h4>
-        <p class="text-slate-500 text-sm">No listing or commission fees</p>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_0.6fr] gap-8 mb-12">
       
-      <section class="rounded-3xl p-8 bg-slate-900 text-white relative overflow-hidden shadow-xl border border-slate-800">
-        <span class="absolute right-6 top-6 text-7xl opacity-5 select-none" aria-hidden="true">🏬</span>
-        <h3 class="text-2xl font-bold mb-2 tracking-tight">Create your store instantly</h3>
-        <p class="text-slate-400 text-sm mb-8 max-w-xl">
-          Upload your store details from this page, then list products and route them to the right category automatically.
-        </p>
+      <form id="els-core-register-form" class="space-y-4" onsubmit="handleUserRegistration(event)">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Full Name</label>
+          <input id="reg-user-name" type="text" required placeholder="John Doe" class="w-full text-xs rounded-xl px-4 py-3 border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email Address</label>
+          <input id="reg-user-email" type="email" required placeholder="john@example.com" class="w-full text-xs rounded-xl px-4 py-3 border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Password</label>
+          <input id="reg-user-password" type="password" required placeholder="••••••••" class="w-full text-xs rounded-xl px-4 py-3 border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono" />
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md transition-colors text-sm">
+          Register & Continue Setup
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
 
-        <form id="open-store-create-form" class="space-y-6" onsubmit="handleStorePaymentPipeline(event)">
+<!-- PAGE 2: MANDATORY STORE SET-UP SYSTEM -->
+<section id="page-open-store" class="page bg-slate-50 min-h-screen hidden dynamic-route-node">
+  <div class="max-w-5xl mx-auto px-4 py-12">
+    <div class="text-center mb-10">
+      <div class="inline-flex justify-center items-center mb-4 p-3 bg-white rounded-2xl shadow-sm">
+        <img src="images/timesetup.png" alt="Setup" width="60" height="60" class="object-contain" />
+      </div>
+      <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 font-serif">Open Your Store Terminal</h2>
+      <p class="text-sm text-slate-500 max-w-sm mx-auto mt-1">Provide your verified settlement routing bank account configurations before unlocking inventory listing tools.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_0.6fr] gap-8">
+      <!-- FORM COLUMN -->
+      <div class="rounded-3xl p-8 bg-slate-900 text-white relative overflow-hidden shadow-xl border border-slate-800">
+        <form id="open-store-create-form" class="space-y-5" onsubmit="handleCreateStore(event)">
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Store Name</label>
-            <input id="open-store-name" type="text" oninput="syncLiveCheckoutData()" placeholder="e.g. ELS Gadget Shop" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required />
+            <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-300">Store Name</label>
+            <input id="open-store-name" type="text" oninput="syncLiveCheckoutData()" placeholder="e.g. ELS Gadget Shop" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required />
           </div>
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Store Description</label>
-            <textarea id="open-store-description" rows="3" placeholder="Tell buyers what makes your store special" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"></textarea>
+            <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-300">Store Description</label>
+            <textarea id="open-store-description" rows="2" placeholder="Tell buyers what makes your store special" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"></textarea>
           </div>
+
+          <hr class="border-slate-800 my-4" />
+          <h4 class="text-xs font-bold text-indigo-400 tracking-wide uppercase">Settlement Node Configurations</h4>
+          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Store Logo</label>
-              <input id="open-store-logo" type="file" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 file:cursor-pointer transition-all" />
+              <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-300">Bank Account Name</label>
+              <input id="open-store-bank-account-name" type="text" placeholder="John Doe" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Store Banner</label>
-              <input id="open-store-banner" type="file" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 file:cursor-pointer transition-all" />
+              <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-300">Bank Account Number</label>
+              <input id="open-store-bank-account-number" type="text" oninput="syncLiveCheckoutData()" placeholder="0123456789" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-300">Settlement Bank</label>
+            <select id="open-store-bank-name" onchange="syncLiveCheckoutData()" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required>
+              <option value="" class="bg-slate-900">Select bank</option>
+              <option class="bg-slate-900" value="Access Bank">Access Bank</option>
+              <option class="bg-slate-900" value="GTBank">GTBank</option>
+              <option class="bg-slate-900" value="Zenith Bank">Zenith Bank</option>
+            </select>
+          </div>
+
+          <!-- INTEGRATED GATEWAY SUB-FORM -->
+          <div class="bg-slate-800/50 border border-slate-700 rounded-2xl p-4 mt-4">
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-700">
+              <span class="text-xs font-bold text-white">💳 Gateway Verification Verification Clearance</span>
+              <span id="active-checkout-merchant-badge" class="bg-slate-900 text-indigo-400 text-[9px] font-mono px-2 py-0.5 rounded border border-slate-700">Awaiting Input...</span>
+            </div>
+            <div class="space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input id="payment-card-name" type="text" placeholder="Cardholder Name" required class="w-full text-[11px] rounded-lg p-2.5 border border-slate-700 bg-slate-800/80 text-white" />
+                <input id="payment-card-number" type="text" maxlength="19" placeholder="4000 1234 5678 9010" required class="w-full text-[11px] rounded-lg p-2.5 border border-slate-700 bg-slate-800/80 text-white font-mono" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <input id="payment-card-expiry" type="text" maxlength="5" placeholder="MM/YY" required class="w-full text-[11px] rounded-lg p-2.5 border border-slate-700 bg-slate-800/80 text-white font-mono text-center" />
+                <input id="payment-card-cvv" type="password" maxlength="3" placeholder="CVV" required class="w-full text-[11px] rounded-lg p-2.5 border border-slate-700 bg-slate-800/80 text-white font-mono text-center" />
+              </div>
             </div>
           </div>
 
-          <hr class="border-slate-800 my-6" />
-
-          <h4 class="text-sm font-bold text-indigo-400 tracking-wide uppercase mb-1">Billing & Settlement Details</h4>
-          <p class="text-xs text-slate-400 mb-4">Your details will be remembered locally for quick processing and passed safely to our payment partner setup wizard.</p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Bank Account Name</label>
-              <input id="open-store-bank-account-name" type="text" placeholder="John Doe" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Bank Account Number</label>
-              <input id="open-store-bank-account-number" type="text" oninput="syncLiveCheckoutData()" placeholder="0123456789" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required />
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Settlement Bank</label>
-              <select id="open-store-bank-name" onchange="syncLiveCheckoutData()" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required>
-                <option value="" class="bg-slate-900">Select bank</option>
-                <option class="bg-slate-900" value="Access Bank">Access Bank</option>
-                <option class="bg-slate-900" value="GTBank">GTBank</option>
-                <option class="bg-slate-900" value="Zenith Bank">Zenith Bank</option>
-                <option class="bg-slate-900" value="First Bank">First Bank</option>
-                <option class="bg-slate-900" value="UBA">UBA</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Setup Verification Fee (USD)</label>
-              <input id="open-store-setup-amount" type="text" value="10.00" readonly class="w-full rounded-xl px-4 py-3 border border-slate-800 bg-slate-800/30 text-slate-400 font-mono focus:outline-none cursor-not-allowed" />
-            </div>
-          </div>
-
-          <div class="text-right pt-4">
-            <button id="open-store-submit-btn" type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 font-semibold shadow-lg transition-all duration-150">
-              <span>Verify & Complete Registration</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-            </button>
-          </div>
+          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white py-3.5 font-semibold text-sm transition-all shadow-lg">
+            <span>Deploy Verified Merchant Terminal</span>
+          </button>
         </form>
-      </section>
+      </div>
 
+      <!-- SIDEBAR STATUS -->
       <aside class="rounded-3xl p-6 bg-white shadow-md border border-slate-100 flex flex-col justify-between">
         <div>
-          <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 bg-amber-500 rounded-full inline-block animate-pulse"></span> Store Status
-          </h3>
-          <div id="open-store-status" class="space-y-4 text-sm text-slate-600">
-            <p class="leading-relaxed">No store created yet. Create your store configuration to start selling directly.</p>
-            <div class="rounded-2xl bg-slate-50 p-4 border border-slate-200/60">
-              <p class="text-xs text-slate-500 leading-relaxed">
-                Store setup is required before listing items. Once your store is live, your products will automatically group into organized dynamic category structures.
-              </p>
-            </div>
-          </div>
+          <h3 class="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">⚠️ Activation Lock</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">Inventory publish matrices are completely offline. You must complete verification clearance route protocols to initiate merchant dashboard control parameters.</p>
         </div>
       </aside>
     </div>
+  </div>
+</section>
 
-    <div id="live-store-payment-gateway-wrapper" class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-md mb-12 dynamic-pipeline-area">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="font-bold text-slate-900 text-base">Secure Gateway Clearance</h3>
-            <p class="text-xs text-slate-400">Merchant authorization network interface pipelines</p>
-          </div>
-        </div>
-        <span id="active-checkout-merchant-badge" class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-xl border border-indigo-100 tracking-wide">
-          Awaiting Store Input...
-        </span>
+<!-- PAGE 3: MERCHANT DASHBOARD & PRODUCT CREATION SUITE -->
+<section id="page-store-dashboard" class="page bg-slate-50 min-h-screen hidden dynamic-route-node">
+  <div class="max-w-5xl mx-auto px-4 py-12">
+    
+    <!-- CONTEXT DASHBOARD HEADER -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+      <div>
+        <h2 id="merchant-dashboard-title" class="text-2xl font-black text-slate-900 tracking-tight">Store Terminal Control</h2>
+        <p id="merchant-dashboard-subtitle" class="text-xs text-slate-400 mt-0.5">Active Operator</p>
       </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-1 bg-slate-50 border border-slate-200/60 rounded-2xl p-5 flex flex-col justify-between">
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Due Processing</span>
-            <div id="checkout-amount-display" class="text-3xl font-black text-slate-900 font-mono">$10.00</div>
-          </div>
-          <div class="pt-4 border-t border-slate-200 mt-6">
-            <span class="text-[10px] font-semibold text-slate-400 block mb-1">Target Account Destination</span>
-            <div id="checkout-bank-route-display" class="text-xs font-bold text-slate-700 truncate">No target active...</div>
-          </div>
-        </div>
-
-        <div class="lg:col-span-2 space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Cardholder Name</label>
-              <input id="payment-card-name" type="text" placeholder="John Doe" class="w-full text-xs rounded-xl px-3.5 py-3 border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" />
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Card Number</label>
-              <div class="relative">
-                <input id="payment-card-number" type="text" maxlength="19" placeholder="4000 1234 5678 9010" class="w-full text-xs rounded-xl pl-3.5 pr-10 py-3 border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono tracking-widest" />
-                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"><i data-lucide="credit-card" class="w-4 h-4"></i></div>
-              </div>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Expiration Date</label>
-              <input id="payment-card-expiry" type="text" maxlength="5" placeholder="MM/YY" class="w-full text-xs rounded-xl px-3.5 py-3 border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono text-center" />
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Security Code (CVV)</label>
-              <input id="payment-card-cvv" type="password" maxlength="3" placeholder="•••" class="w-full text-xs rounded-xl px-3.5 py-3 border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono text-center tracking-widest" />
-            </div>
-          </div>
-        </div>
-      </div>
+      <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100 rounded-xl">Node Interlink Clear</span>
     </div>
 
-    <div class="rounded-3xl p-8 bg-white border border-slate-100 shadow-md mb-12">
-      <h3 class="text-xl font-bold mb-6 text-slate-900">List a New Product</h3>
-      <form id="add-product-form" onsubmit="handleAddProduct(event)">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+    <!-- PRODUCT CREATION TERMINAL CARD -->
+    <div class="rounded-3xl p-8 bg-white border border-slate-100 shadow-md mb-8">
+      <h3 class="text-lg font-bold text-slate-900 mb-6">List a New Product Asset</h3>
+      
+      <form id="add-product-form" onsubmit="handlePublishProduct(event)">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <div>
-            <label for="prod-name" class="block text-sm font-medium text-slate-700 mb-2">Product Name</label>
-            <input id="prod-name" type="text" required placeholder="e.g. Wireless Headphones" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-            <p id="err-prod-name" class="hidden text-xs text-rose-500 mt-1.5"></p>
+            <label for="prod-name" class="block text-xs font-medium text-slate-700 mb-1.5">Product Name</label>
+            <input id="prod-name" type="text" required placeholder="Wireless Terminal" class="w-full text-xs px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
           </div>
           <div>
-            <label for="prod-price" class="block text-sm font-medium text-slate-700 mb-2">Price (USD)</label> 
-            <input id="prod-price" type="number" step="0.01" min="0.01" required placeholder="29.99" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
-            <p id="err-prod-price" class="hidden text-xs text-rose-500 mt-1.5"></p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
-          <div>
-            <label for="prod-category" class="block text-sm font-medium text-slate-700 mb-2">Category</label> 
-            <select id="prod-category" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"> 
-              <option value="">Select category</option>
-              <option value="Electronics">Electronics</option> 
-              <option value="Fashion">Fashion</option> 
-              <option value="Home">Home</option> 
-              <option value="Sports">Sports</option> 
-              <option value="Other">Other</option> 
-            </select>
-            <p id="err-prod-category" class="hidden text-xs text-rose-500 mt-1.5"></p>
-            <p id="prod-category-suggestion" class="hidden mt-2.5 text-xs text-indigo-600 bg-indigo-50 p-2.5 rounded-lg inline-block">
-              Suggested category: <button type="button" onclick="acceptSuggestedCategory()" class="font-semibold underline hover:text-indigo-800">Use this category</button>
-            </p>
+            <label for="prod-price" class="block text-xs font-medium text-slate-700 mb-1.5">Price (USD)</label>
+            <input id="prod-price" type="number" step="0.01" min="0.01" required placeholder="49.99" class="w-full text-xs px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
           </div>
         </div>
 
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-slate-700 mb-2">Product Image</label>
-          <div id="image-upload-area" class="border-2 border-dashed border-slate-300 hover:border-indigo-400 bg-slate-50/50 hover:bg-slate-50 rounded-2xl p-6 text-center cursor-pointer transition-all duration-150" aria-label="Product image upload area">
-            <input id="prod-image" type="file" accept="image/*" class="hidden" multiple onchange="handleImageUpload(event)">
-            <input id="product-image-replace-input" type="file" accept="image/*" class="hidden" onchange="handleProductImageReplace(event)">
-            
-            <div class="flex flex-col items-center justify-center gap-3">
-              <div class="p-3 bg-white rounded-full shadow-sm text-slate-400">
-                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
-              </div>
-              <div class="upload-instructions">
-                <button type="button" onclick="document.getElementById('prod-image').click()" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 bg-transparent border-0 p-0 cursor-pointer">
-                  Click to upload images
-                </button>
-                <span class="text-sm text-slate-500"> or drag and drop</span>
-                <p class="text-xs text-slate-400 mt-1">JPG, PNG, or WebP up to 5MB (Recommended: 250x250px)</p>
-              </div>
-            </div> 
-
-            <div id="image-preview-section" class="hidden mt-6 pt-6 border-t border-slate-200 w-full text-left">
-              <div id="image-gallery" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
-              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 bg-white p-3 rounded-xl border border-slate-100">
-                <div id="image-info" class="text-xs font-medium text-slate-600"></div>
-                <div class="flex items-center gap-4">
-                  <label class="inline-flex items-center text-xs font-medium text-slate-700 cursor-pointer">
-                    <input id="optimize-image" type="checkbox" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 mr-1.5" /> Optimize
-                  </label>
-                  <label class="inline-flex items-center text-xs font-medium text-slate-700 cursor-pointer">
-                    <input id="prod-public" type="checkbox" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 mr-1.5" /> Public Visibility
-                  </label>
-                </div>
-              </div>
-              <div id="upload-list" class="mt-3"></div>
-              <div class="flex justify-end mt-4">
-                <button type="button" onclick="clearAllImages()" class="text-xs text-rose-600 hover:text-rose-700 font-semibold bg-rose-50 hover:bg-rose-100/60 px-3 py-1.5 rounded-lg transition-colors">Clear All Images</button>
-              </div>
-            </div>
-          </div>
+        <div class="mb-4">
+          <label for="prod-category" class="block text-xs font-medium text-slate-700 mb-1.5">Category</label>
+          <select id="prod-category" required class="w-full text-xs px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none transition-all">
+            <option value="">Select category</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Home">Home</option>
+          </select>
         </div>
 
         <div class="mb-6">
-          <label for="prod-desc" class="block text-sm font-medium text-slate-700 mb-2">Description</label> 
-          <textarea id="prod-desc" rows="4" required placeholder="Provide a detailed overview of your item..." class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"></textarea>
-          <p id="err-prod-desc" class="hidden text-xs text-rose-500 mt-1.5"></p>
+          <label for="prod-desc" class="block text-xs font-medium text-slate-700 mb-1.5">Asset Description Description</label>
+          <textarea id="prod-desc" rows="3" required placeholder="Provide physical spec item metrics details..." class="w-full text-xs px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"></textarea>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 w-full mt-4">
-          <button id="save-draft-btn" type="button" disabled class="flex-1 py-3.5 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150">
-            Save Draft
-          </button>
-          <button id="add-product-btn" type="button" disabled class="flex-1 py-3.5 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-600/10 transition-colors duration-150">
-            <span id="add-prod-text">Publish Product</span>
+        <div class="flex gap-3">
+          <button id="add-product-btn" type="submit" class="flex-1 py-3.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-md text-sm">
+            Publish Live Asset to Network
           </button>
         </div>
       </form>
     </div>
 
-    <div class="mt-12">
-      <h3 class="text-xl font-bold mb-4 text-slate-900">My Listed Products</h3>
-      <div id="my-products" class="bg-white border border-slate-100 rounded-2xl shadow-sm min-h-[140px] flex items-center justify-center p-6">
-        <p class="text-slate-400 text-sm text-center">You haven't listed any products yet.</p>
-      </div>
-    </div>
-  </div>
-</section>
-     <!-- ORDERS PAGE -->
-  <section id="page-orders" class="page bg-slate-50 min-h-screen">
-  <div class="max-w-6xl mx-auto px-4 py-12 animate-fadeIn">
-    <div class="flex items-center gap-3 mb-10">
-      <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l10.5 6M9 10.125l6 3.5m-6 2.125l6 3.5" />
-        </svg>
-      </div>
-      <div>
-        <h2 class="text-3xl font-black text-slate-900 tracking-tight font-serif">Order Tracking</h2>
-        <p class="text-xs text-slate-500 mt-0.5 font-medium">Monitor real-time status and deployment workflows of your shipments</p>
-      </div>
-    </div>
-     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-      <div class="rounded-2xl p-6 bg-white border border-slate-200/60 shadow-sm border-l-4 border-l-rose-500 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Orders</p>
-          <p class="text-4xl font-black text-slate-900 tracking-tight" id="total-orders">0</p>
-        </div>
-        <div class="p-3 bg-rose-50 text-rose-500 rounded-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0112 3m0 0c-1.135 0-2.098.845-2.192 1.976a48.414 48.414 0 00-.166 1.913m8.706-2.133a48.555 48.555 0 00-1.804-.227A8.915 8.915 0 0015 4.5a8.914 8.914 0 00-1.547-.144m-3.116-.328a48.567 48.567 0 01-1.804.227m4.92 12.462c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75V11.25a.75.75 0 00-.75-.75h-4.5a.75.75 0 00-.75.75v5.025z" />
-          </svg>
-        </div>
-      </div>
-      <div class="rounded-2xl p-6 bg-white border border-slate-200/60 shadow-sm border-l-4 border-l-indigo-600 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">In Transit</p>
-          <p class="text-4xl font-black text-slate-900 tracking-tight" id="in-transit-count">0</p>
-        </div>
-        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM19.5 18.75a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM4.744 14.25H21.16c.381 0 .675-.353.6-.729-1.21-6.046-1.748-8.021-1.748-8.021A1.5 1.5 0 0018.551 4.5H11.25m-6.506 9.75l-.466-2.333a1.5 1.5 0 011.47-1.792h14.537m-16.007 4.125l-.47-2.348m4.5 4.5h9" />
-          </svg>
-        </div>
-      </div>
-       <div class="rounded-2xl p-6 bg-white border border-slate-200/60 shadow-sm border-l-4 border-l-emerald-500 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Delivered</p>
-          <p class="text-4xl font-black text-slate-900 tracking-tight" id="delivered-count">0</p>
-        </div>
-        <div class="p-3 bg-emerald-50 text-emerald-500 rounded-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-     <div class="rounded-3xl bg-white border border-slate-200/80 shadow-xl shadow-slate-100/40 overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-        <h3 class="text-lg font-bold text-slate-900">Your Orders</h3>
-        <span class="text-xs font-semibold text-slate-500 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200/40">Live Logs</span>
-      </div>
-       <div id="orders-list" class="p-6">
-        <div class="text-center py-16 max-w-sm mx-auto">
-          <div class="inline-flex p-4 rounded-full bg-slate-50 border border-slate-100 text-slate-400 mb-4 shadow-inner">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1,0-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
-          </div>
-          <p class="text-slate-800 font-bold text-lg tracking-tight">No active orders found</p>
-          <p class="text-slate-400 text-sm mt-1 mb-6 leading-relaxed">You haven't requested any items yet. Discover premium independent products in the shop right now.</p>
-          <button onclick="goTo('shop')" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-md shadow-indigo-600/10 text-xs transform active:scale-[0.98]">
-            Start Shopping
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M15 12l-6.75 6.75" />
-            </svg>
-          </button>
-        </div>
-
+    <!-- INVENTORY MONITOR LAYER -->
+    <div>
+      <h3 class="text-lg font-bold mb-4 text-slate-900">Live Catalog Matrix</h3>
+      <div id="my-products" class="bg-white border border-slate-100 rounded-2xl shadow-sm min-h-[120px] flex items-center justify-center p-6">
+        <p class="text-slate-400 text-xs font-medium">No live active products running inside your node segment.</p>
       </div>
     </div>
 
-  </div>
-</section>
-     <!-- LOGISTICS PAGE -->
-    <section id="page-logistics" class="page bg-slate-50/60 min-h-screen py-8">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shadow-inner">
-          <i data-lucide="truck" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h2 class="text-2xl font-black text-slate-900 tracking-tight">Logistics Hub Terminal</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Manage tracking pipelines and direct driver distribution networks.</p>
-        </div>
-      </div>
-       <div id="logisticsIndicator" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-        </span>
-        <div id="logisticsStatus" class="text-xs font-bold text-slate-700 tracking-wide">Syncing Nodes...</div>
-      </div>
-    </div>
-     <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 mb-8 relative overflow-hidden">
-      <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 opacity-[0.03] text-white pointer-events-none select-none">
-        <i data-lucide="globe" class="w-64 h-64"></i>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10 text-center md:text-left divide-y md:divide-y-0 md:divide-x divide-white/10">
-        <div class="pt-4 md:pt-0">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-center md:justify-start gap-1.5"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-indigo-400"></i> Fulfillment Base</p>
-          <h4 class="text-base font-black text-white mt-1">ELS Online Hub</h4>
-          <p class="text-[11px] text-slate-400 font-medium">Central Warehouse Pool</p>
-        </div>
-        <div class="pt-4 md:pt-0 md:pl-6">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-center md:justify-start gap-1.5"><i data-lucide="users" class="w-3.5 h-3.5 text-emerald-400"></i> Active Couriers</p>
-          <h4 id="availablePartnersCount" class="text-xl font-black text-emerald-400 mt-1">00</h4>
-          <p class="text-[11px] text-slate-400 font-medium">Online Routing Channels</p>
-        </div>
-        <div class="pt-4 md:pt-0 md:pl-6">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-center md:justify-start gap-1.5"><i data-lucide="package" class="w-3.5 h-3.5 text-amber-400"></i> Ready to Pickup</p>
-          <h4 id="readyPickupCount" class="text-xl font-black text-amber-400 mt-1">00</h4>
-          <p class="text-[11px] text-slate-400 font-medium">Awaiting Dispatch Hooks</p>
-        </div>
-        <div class="pt-4 md:pt-0 md:pl-6">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-center md:justify-start gap-1.5"><i data-lucide="zap" class="w-3.5 h-3.5 text-sky-400"></i> Dispatch Vel.</p>
-          <h4 class="text-base font-black text-sky-400 mt-1">~14.2 Mins</h4>
-          <p class="text-[11px] text-slate-400 font-medium">Avg Pickup Acknowledgment</p>
-        </div>
-      </div>
-    </div>
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-8">
-    <div class="lg:col-span-2 space-y-6">
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Routing Control Nodes</span>
-              <h3 class="text-base font-bold text-slate-900 mt-0.5">Order Receiver &amp; Delivery Partner</h3>
-            </div>
-            <span id="logisticsChannelBadge" class="inline-flex items-center text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Receiver View</span>
-          </div>
-          <p class="text-xs text-slate-500 leading-relaxed mb-6">Select your portal orientation. Customers can monitor live order locations, while verified dispatch couriers can sign in to claim local fulfillment jobs.</p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl flex flex-col justify-between">
-              <div>
-                <h4 class="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5"><i data-lucide="search" class="w-4 h-4 text-slate-500"></i> Order Receiver</h4>
-                <p class="text-[11px] text-slate-400 font-medium mt-1 mb-4">Input your secure order reference hash key to pull telemetry records directly.</p>
-              </div>
-              <div>
-                <input id="logisticsTrackOrderId" type="text" placeholder="e.g., ELS-7284-NG" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 mb-3 transition">
-                <button class="w-full rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold py-2.5 transition active:scale-[0.99]" onclick="trackOrderInLogistics()">Track Order Profile</button>
-              </div>
-            </div>
-             <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl flex flex-col justify-between">
-              <div>
-                <h4 class="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i> Network Partner</h4>
-                <p class="text-[11px] text-slate-400 font-medium mt-1 mb-4">Access active routes, update dispatch states, and toggle GPS live streaming tools.</p>
-              </div>
-              <div class="space-y-2">
-                <button class="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 transition active:scale-[0.99]" onclick="openDeliveryPartnerLogin()">Courier Sign In</button>
-                <button class="w-full rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold py-2.5 transition active:scale-[0.99]" onclick="openDeliveryPartnerRegister()">Register as Partner</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-slate-400"></i> Dispatch Network Filters</h4>
-           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div>
-              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Channel Filter</label>
-              <select id="logisticsChannelFilter" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-medium outline-none focus:border-slate-400 transition cursor-pointer">
-                <option value="all">All Channels</option>
-                <option value="receiver">Order Receiver</option>
-                <option value="partner">Delivery Partner</option>
-              </select>
-            </div>
-             <div>
-              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Region Pool</label>
-              <select id="partnerRegionFilter" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-medium outline-none focus:border-slate-400 transition cursor-pointer">
-                <option value="initial">All Regions</option>
-                <option value="North">North Hub</option>
-                <option value="South">South Hub</option>
-                <option value="East">East Hub</option>
-                <option value="West">West Hub</option>
-                <option value="Central">Central Hub</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Sorting Priority</label>
-              <select id="partnerSortFilter" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-medium outline-none focus:border-slate-400 transition cursor-pointer">
-                <option value="distance">Closest Distance</option>
-                <option value="eta">Fastest ETA</option>
-                <option value="rating">Highest Rating</option>
-              </select>
-            </div>
-               <div>
-                </div>
-              </div>
-         <div id="logisticsPartnersList" class="grid grid-cols-1 gap-3">
-          </div>
-      </div>
-      <div class="lg:col-span-1 space-y-6">
-        <div class="bg-slate-900 text-white rounded-2xl p-5 border border-slate-800 shadow-sm space-y-5">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Live Satellite Vector</span>
-              <h3 class="text-sm font-bold text-white mt-0.5">GPS Route Tracking</h3>
-            </div>
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wide">Sync State</span>
-          </div>
-          <div id="gpsGuidePanel" class="bg-slate-950 border border-slate-850 rounded-xl p-4 text-xs font-mono space-y-2.5">
-            <div class="flex justify-between items-center text-slate-400">
-              <span>Next Checkpoint:</span>
-              <span id="gpsNextStop" class="text-white font-bold">Awaiting Input...</span>
-            </div>
-            <div class="flex justify-between items-center text-slate-400">
-              <span>Remaining Scope:</span>
-              <span id="gpsDistance" class="text-indigo-400 font-bold">— km</span>
-            </div>
-            <div class="flex justify-between items-center text-slate-400">
-              <span>System Clock ETA:</span>
-              <span id="gpsEta" class="text-amber-400 font-bold">— min</span>
-            </div>
-          </div>
-          <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden h-40 flex flex-col relative group">
-            <div id="mapPlaceholder" class="flex-1 text-slate-500 flex items-center justify-center font-bold text-[10px] uppercase tracking-widest relative z-10 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:12px_12px]">
-              Map Rendering Interface
-            </div>
-           <div class="absolute bottom-2 left-2 right-2 px-3 py-1.5 bg-slate-900/90 border border-white/5 backdrop-blur rounded-lg flex justify-between text-[10px] font-mono tracking-wider text-slate-400 z-20">
-              <div>SPD: <strong id="tel-speed" class="text-white font-bold">—</strong></div>
-              <div>ETA: <strong id="tel-eta" class="text-white font-bold">—</strong></div>
-            </div>
-          </div>
-          <button class="w-full py-3 rounded-xl text-xs font-bold bg-emerald-400 hover:bg-emerald-500 text-slate-950 active:scale-[0.99] transition shadow-md shadow-emerald-400/5 flex items-center justify-center gap-1.5" onclick="startDeliveryGuide()">
-            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Launch GPS Route Monitor
-          </button>
-        </div>
-      </div>
-     </div>
-  </div>
-</section>
-<section id="page-messages" class="page bg-slate-50/60 min-h-screen py-8 px-4 sm:px-6">
-  <div class="max-w-6xl mx-auto flex flex-col h-[680px]">
-    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-100">
-          <i data-lucide="message-square" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-black text-slate-900 tracking-tight">Direct Support Channels</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Coordinate delivery details directly with buyers and local dispatchers.</p>
-        </div>
-      </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex-1 min-h-0">
-      <div class="md:col-span-1 border-r border-slate-200 bg-slate-50/40 flex flex-col h-full min-h-0">
-        <div class="p-4 border-b border-slate-200 bg-white flex items-center justify-between">
-          <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><i data-lucide="folder-heart" class="w-3.5 h-3.5"></i> Open Dialog Threads</h3>
-          <span class="h-2 w-2 rounded-full bg-indigo-600"></span>
-        </div>
-         <div id="conversations-list" class="flex-1 overflow-y-auto p-3 space-y-1">
-          <div class="text-center py-20 px-4">
-            <div class="w-10 h-10 bg-slate-100 text-slate-400 rounded-xl flex items-center justify-center mx-auto mb-3 border border-slate-200">
-              <i data-lucide="message-circle" class="w-4 h-4"></i>
-            </div>
-            <p class="text-xs font-bold text-slate-700">No active sessions logs</p>
-            <p class="text-[10px] text-slate-400 mt-1 max-w-[180px] mx-auto leading-relaxed">Select a verification partner row card item to spin up communication vectors.</p>
-          </div>
-        </div>
-      </div>
-      <div class="md:col-span-2 flex flex-col h-full min-h-0 bg-white">
-      <div id="chat-header" class="px-5 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/50 z-10 min-h-[53px]">
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center w-full flex items-center justify-center gap-1.5"><i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5 text-indigo-500"></i> Select an operational conversation row to review history</p>
-        </div>
-        <div id="messages-container" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/20"></div>
-        <div id="chat-input-area" class="hidden p-4 border-t border-slate-200 bg-white">
-          <form class="flex items-center gap-2.5" onsubmit="event.preventDefault();">
-            <div class="relative flex-1">
-              <input id="message-input" type="text" placeholder="Type your secure message..." 
-                class="w-full pl-4 pr-10 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition">
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-300">
-                <i data-lucide="shield" class="w-4 h-4"></i>
-              </div>
-            </div> 
-            <button id="send-btn" type="submit" onclick="sendMessage()" disabled
-              class="inline-flex items-center justify-center p-3 rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:pointer-events-none transition shadow-md shadow-indigo-100">
-              <i data-lucide="send" class="w-3.5 h-3.5"></i>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 <!-- CART PAGE SECTION -->
@@ -1318,7 +860,7 @@
               <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
                 <i data-lucide="at-sign" class="w-4 h-4"></i>
               </span>
-              <input id="contact-email" type="email" required placeholder="peter.olamideji@company.com"
+              <input id="contact-email" type="email" required placeholder="peter.olamideji@company.comc "
                 class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 placeholder-slate-400 transition">
             </div>
           </div>
