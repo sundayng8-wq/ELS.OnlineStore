@@ -375,6 +375,11 @@ function enterApp() {
   lucide.createIcons();
   loadProductsFromBackend();
   showToast('Welcome, ' + (currentUser.name || currentUser.email) + '!');
+  
+  // Check if user is a seller and needs to create a store
+  setTimeout(() => {
+    checkAndNavigateStoreFlow();
+  }, 500);
 }
 
 function handleLogout() {

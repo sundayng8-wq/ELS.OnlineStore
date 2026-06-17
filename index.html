@@ -187,7 +187,7 @@
        <h1 id="nav-site-name" class="text-lg font-bold text-white cursor-pointer" onclick="goTo('home')" style="font-family:'Playfair Display',serif;">ELS.OnlineStore</h1>
       </div>
       <nav class="hidden md:flex items-center gap-1">
-       <button onclick="goTo('home')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="home">Home</button> <button onclick="goTo('shop')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="shop">Shop</button> <button onclick="goTo('open-store')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="open-store">Open Store</button> <button onclick="goTo('messages')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="messages">Messages</button> <button onclick="goTo('about')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="about">About</button> <button onclick="goTo('contact')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="contact">Contact</button>
+       <button onclick="goTo('home')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="home">Home</button> <button onclick="goTo('shop')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="shop">Shop</button> <button onclick="goTo('create-store')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="create-store">Create Store</button> <button onclick="goTo('my-store')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="my-store">My Store</button> <button onclick="goTo('messages')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="messages">Messages</button> <button onclick="goTo('about')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="about">About</button> <button onclick="goTo('contact')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="contact">Contact</button>
       </nav>
        <div class="flex items-center gap-2">
          <button onclick="goTo('orders')" class="relative text-white p-2 rounded-lg hover:bg-white/10 transition" title="Track Orders">
@@ -215,7 +215,7 @@
      </div>
      <div class="flex-1 py-4 px-3 flex flex-col gap-1 overflow-auto">
       <button onclick="goTo('home');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="home"><i data-lucide="home" class="w-4 h-4"></i>Home</button> <button onclick="goTo('shop');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="shop"><i data-lucide="shopping-bag" class="w-4 h-4"></i>Shop</button>
-       <button onclick="goTo('open-store');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="open-store"><i data-lucide="store" class="w-4 h-4"></i>Open Store</button> <button onclick="goTo('cart');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="cart"><i data-lucide="shopping-cart" class="w-4 h-4"></i>Cart</button> <button onclick="goTo('orders');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="orders"><i data-lucide="package" class="w-4 h-4"></i>Orders</button> <button onclick="goTo('logistics');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="logistics"><i data-lucide="truck" class="w-4 h-4"></i>Logistics</button> <button onclick="goTo('messages');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="messages"><i data-lucide="message-circle" class="w-4 h-4"></i>Messages</button> <button onclick="goTo('payment');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="payment"><i data-lucide="credit-card" class="w-4 h-4"></i>Payment</button> <button onclick="goTo('about');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="about"><i data-lucide="info" class="w-4 h-4"></i>About</button> <button onclick="goTo('contact');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="contact"><i data-lucide="mail" class="w-4 h-4"></i>Contact</button>
+       <button onclick="goTo('create-store');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="create-store"><i data-lucide="plus-circle" class="w-4 h-4"></i>Create Store</button> <button onclick="goTo('my-store');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="my-store"><i data-lucide="store" class="w-4 h-4"></i>My Store</button> <button onclick="goTo('open-store');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="open-store"><i data-lucide="plus" class="w-4 h-4"></i>Add Products</button> <button onclick="goTo('cart');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="cart"><i data-lucide="shopping-cart" class="w-4 h-4"></i>Cart</button> <button onclick="goTo('orders');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="orders"><i data-lucide="package" class="w-4 h-4"></i>Orders</button> <button onclick="goTo('payment-system');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="payment-system"><i data-lucide="credit-card" class="w-4 h-4"></i>Payments</button> <button onclick="goTo('logistics');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="logistics"><i data-lucide="truck" class="w-4 h-4"></i>Logistics</button> <button onclick="goTo('messages');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="messages"><i data-lucide="message-circle" class="w-4 h-4"></i>Messages</button> <button onclick="goTo('about');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="about"><i data-lucide="info" class="w-4 h-4"></i>About</button> <button onclick="goTo('contact');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="contact"><i data-lucide="mail" class="w-4 h-4"></i>Contact</button>
      </div>
      <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.08);">
       <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition text-sm font-medium"><i data-lucide="log-out" class="w-4 h-4"></i>Sign Out</button>
@@ -809,6 +809,19 @@
        </div>
       </div>
      </section>
+
+     <!-- CREATE STORE PAGE -->
+     <section id="page-create-store" class="page">
+     </section>
+
+     <!-- MY STORE DASHBOARD PAGE -->
+     <section id="page-my-store" class="page">
+     </section>
+
+     <!-- PAYMENT SYSTEM PAGE -->
+     <section id="page-payment-system" class="page">
+     </section>
+
     </main>
    </div><!-- end main-app --> <!-- TOAST -->
    <div id="toast" class="toast-msg hidden" style="background:#1a1a2e; color:white;"></div>
@@ -836,6 +849,9 @@
  <script src="./js/chat.js"></script>
  <script src="./js/profile.js"></script>
  <script src="./js/dataSdk.js"></script>
-<script src="./js/register.js"></script>
+ <script src="./js/register.js"></script>
+ <script src="./js/store-setup.js"></script>
+ <script src="./js/my-store.js"></script>
+ <script src="./js/payment-system.js"></script>
 </body>
 </html>
