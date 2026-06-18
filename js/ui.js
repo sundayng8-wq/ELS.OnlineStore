@@ -104,18 +104,18 @@ function setupHomeCarousel(keywords) {
     const track = document.createElement('div');
     track.className = 'bg-track';
 
-    const kws = Array.isArray(keywords) && keywords.length ? keywords : ['ecommerce','shopping','storefront','marketplace','products','retail'];
+    const kws = Array.isArray(keywords) && keywords.length ? keywords : ['ecommerce','shopping','storefront','marketplace','products','fashion','electronics','online store'];
     const images = kws.map(k => `https://source.unsplash.com/1600x900/?${encodeURIComponent(k)}`);
     const items = images.concat(images);
     items.forEach(url => {
       const d = document.createElement('div');
       d.className = 'bg-carousel-item';
-      d.style.backgroundImage = `url(${url})`;
+      d.style.backgroundImage = `linear-gradient(rgba(15,23,42,0.45), rgba(15,23,42,0.45)), url(${url})`;
       track.appendChild(d);
     });
     container.appendChild(track);
 
-    const duration = Math.max(20, images.length * 6);
+    const duration = Math.max(30, images.length * 8);
     track.style.animationDuration = duration + 's';
   } catch (e) {
     console.warn('Carousel init failed', e);
