@@ -15,10 +15,10 @@ document.getElementById('seller-register-form')?.addEventListener('submit', asyn
     });
     const json = await res.json();
     if (res.ok && json && json.success) {
-      // store token and redirect to product upload
+      // store token and redirect to payment details
       if (json.token) localStorage.setItem('els_token', json.token);
       try { localStorage.setItem('els_user', JSON.stringify({ name: json.user?.name || name, email: json.user?.email || email })); } catch(e){}
-      window.location.href = 'product-upload.html';
+      window.location.href = 'payment-details.html';
       return;
     }
     resultEl.textContent = (json && json.message) ? json.message : 'Registration failed';
