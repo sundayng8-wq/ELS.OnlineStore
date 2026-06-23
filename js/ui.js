@@ -224,6 +224,47 @@ function validateOpenStoreForm() {
   return ok;
 }
 
+function getSuggestedCategoryText() {
+  const name = (document.getElementById('prod-name')||{}).value.toLowerCase();
+  const desc = (document.getElementById('prod-desc')||{}).value.toLowerCase();
+  const text = `${name} ${desc}`;
+  const suggestions = [
+    { cat: 'Electronics', keywords: ['phone','headphone','speaker','camera','charger','laptop','smartwatch','wireless','usb','tablet'] },
+    { cat: 'Fashion', keywords: ['shirt','dress','shoes','jacket','fashion','accessory','bag','sneaker','jewelry','style'] },
+    { cat: 'Home', keywords: ['mug','sofa','pillow','kitchen','home','decor','furniture','lamp','bedding','plate'] },
+    { cat: 'Sports', keywords: ['bike','ball','fitness','yoga','exercise','sports','trainer','running','gym','outdoor'] }
+  ];
+  for (const suggestion of suggestions) {
+    if (suggestion.keywords.some(keyword => text.includes(keyword))) return suggestion.cat;
+  }
+  return '';
+}
+
+function updateCategorySuggestion() {
+  const suggestionEl = document.getElementById('prod-category-suggestion');
+  const categoryEl = document.getElementById('prod-category');
+  if (!suggestionEl || !categoryEl) return;
+  const currentCategory = categoryEl.value.trim();
+  const suggestion = getSuggestedCategoryText();
+  if (suggestion && !currentCategory) {
+    suggestionEl.classList.remove('hidden');
+    suggestionEl.innerHTML = `Suggested category: <button type="button" onclick="acceptSuggestedCategory()" class="font-semibold underline">${suggestion}</button>`;
+  } else {
+    suggestionEl.classList.add('hidden');
+    suggestionEl.innerHTML = 'Suggested category: <button type="button" onclick="acceptSuggestedCategory()" class="font-semibold underline">Use this category</button>';
+  }
+}
+
+function acceptSuggestedCategory() {
+  const suggestion = getSuggestedCategoryText();
+  const categoryEl = document.getElementById('prod-category');
+  if (categoryEl && suggestion) {
+    categoryEl.value = suggestion;
+    updateAddProductButtonState();
+    updateCategorySuggestion();
+  }
+}
+
 function updateAddProductButtonState() {
   const btn = document.getElementById('add-product-btn');
   if (!btn) return;
@@ -232,15 +273,45 @@ function updateAddProductButtonState() {
   btn.style.opacity = valid ? '1' : '0.6';
 }
 
+// Toggle button loading state: adds small spinner and disables button
+function setButtonLoading(btn, loading, label) {
+  if(!btn) return;
+  if(loading) {
+    btn.disabled = true;
+    btn._origText = btn._origText || btn.innerHTML;
+    const spinner = '<span class="btn-spinner" style="display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid rgba(0,0,0,0.12);border-top-color:rgba(0,0,0,0.6);border-radius:50%;animation:spin 0.8s linear infinite"></span>';
+    btn.innerHTML = (label ? label : '') + spinner + (btn._origText || '');
+  } else {
+    btn.disabled = false;
+    if(btn._origText) btn.innerHTML = btn._origText;
+  }
+}
+
+// small keyframes for spinner if not already present
+try{
+  if(!document.getElementById('els-spinner-style')){
+    const s = document.createElement('style'); s.id='els-spinner-style'; s.innerHTML='@keyframes spin{to{transform:rotate(360deg)}} .btn-spinner{vertical-align:middle}'; document.head.appendChild(s);
+  }
+}catch(e){}
+
 (function wireOpenStoreValidation(){
   const ids = ['prod-name','prod-price','prod-category','prod-desc'];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('input', () => updateAddProductButtonState());
-    el.addEventListener('change', () => updateAddProductButtonState());
+    el.addEventListener('input', () => {
+      updateAddProductButtonState();
+      updateCategorySuggestion();
+    });
+    el.addEventListener('change', () => {
+      updateAddProductButtonState();
+      updateCategorySuggestion();
+    });
   });
-  setTimeout(updateAddProductButtonState, 200);
+  setTimeout(() => {
+    updateAddProductButtonState();
+    updateCategorySuggestion();
+  }, 200);
 })();
 
 function switchAuthTab(tab) {

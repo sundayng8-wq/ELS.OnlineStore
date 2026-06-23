@@ -138,6 +138,94 @@ function clearProfileAvatarPreviewPage() {
   const form = document.getElementById('profile-form'); if (form) delete form.dataset.avatarTemp;
 }
 
+// ===== Create Store Handler =====
+async function uploadFileToServer(file){
+  if(!file) return null;
+  try{
+    const fd = new FormData(); fd.append('file', file);
+    const res = await fetch((window.API_BASE||'http://localhost:8001/api').replace('/api','') + '/upload', { method: 'POST', body: fd });
+    if(!res.ok) return null; const data = await res.json(); return data.url || null;
+  }catch(e){ console.error('upload failed',e); return null; }
+}
+
+function collectStoreFormPayload(prefix = ''){
+  const name = (document.getElementById(prefix+'store-name')||{}).value || '';
+  const desc = (document.getElementById(prefix+'store-description')||{}).value || '';
+  const bankName = (document.getElementById(prefix+'bank-name')||document.getElementById(prefix+'open-store-bank-name')||{}).value || '';
+  const bankAccountName = (document.getElementById(prefix+'bank-account-name')||document.getElementById(prefix+'open-store-bank-account-name')||{}).value || '';
+  const bankAccountNumber = (document.getElementById(prefix+'bank-account-number')||document.getElementById(prefix+'open-store-bank-account-number')||{}).value || '';
+  const logoFile = (document.getElementById(prefix+'store-logo')||document.getElementById(prefix+'open-store-logo')||{}).files?.[0] || null;
+  const bannerFile = (document.getElementById(prefix+'store-banner')||document.getElementById(prefix+'open-store-banner')||{}).files?.[0] || null;
+  return { name, desc, bankName, bankAccountName, bankAccountNumber, logoFile, bannerFile };
+}
+
+async function createStoreRecord(payload, btn){
+  if(!payload.name || !payload.bankName || !payload.bankAccountName || !payload.bankAccountNumber){ showToast('Please fill required fields'); return false; }
+  let logoUrl = null, bannerUrl = null;
+  try{ if(payload.logoFile) logoUrl = await uploadFileToServer(payload.logoFile); if(payload.bannerFile) bannerUrl = await uploadFileToServer(payload.bannerFile); }catch(e){ console.warn('image upload failed',e); }
+  const storePayload = { store_name: payload.name, description: payload.desc, bank_account_name: payload.bankAccountName, bank_account_number: payload.bankAccountNumber, bank_name: payload.bankName, logo_url: logoUrl, banner_url: bannerUrl };
+  try{
+    if(btn){ btn.disabled = true; btn._origHtml = btn._origHtml || btn.innerHTML; btn.innerHTML = 'Saving...'; }
+    if(window.localSdk && window.localSdk.stores){
+      const currentUser = window.currentUser || JSON.parse(localStorage.getItem('els_user')||'null') || {};
+      const store = Object.assign({}, storePayload, { _id: 's-'+Date.now().toString(36), created_at: new Date().toISOString(), owner_email: currentUser?.email || currentUser?.name || 'seller' });
+      const stores = JSON.parse(localStorage.getItem('local_stores_v1') || '[]'); stores.push(store); localStorage.setItem('local_stores_v1', JSON.stringify(stores));
+      if(btn){ btn.disabled = false; btn.innerHTML = btn._origHtml; }
+      showToast('Store created successfully (local)');
+      try{ localStorage.setItem('els_user', JSON.stringify(Object.assign({}, currentUser, { store_id: store._id, store_name: store.store_name })) ); }catch(e){}
+      renderOpenStoreStatus();
+      try{ goTo('my-store'); if(window.MyStore && typeof window.MyStore.init === 'function') window.MyStore.init(); }catch(e){}
+      return true;
+    }
+    const token = localStorage.getItem('els_token') || '';
+    const res = await fetch(`${window.API_BASE || 'http://localhost:8001/api'}/stores`, {
+      method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': token?`Bearer ${token}`:'' }, body: JSON.stringify(storePayload)
+    });
+    const data = await res.json();
+    if(!res.ok){ if(btn){ btn.disabled = false; btn.innerHTML = btn._origHtml; } showToast(data.message || 'Failed to create store'); console.error('store create failed', data); return false; }
+    if(btn){ btn.disabled = false; btn.innerHTML = btn._origHtml; }
+    showToast('Store created successfully');
+    renderOpenStoreStatus();
+    try{ goTo('my-store'); if(window.MyStore && typeof window.MyStore.init === 'function') window.MyStore.init(); }catch(e){}
+    return true;
+  }catch(e){ console.error('create store error', e); showToast('Connection error while creating store'); if(btn){ btn.disabled = false; btn.innerHTML = btn._origHtml; } return false; }
+}
+
+async function submitCreateStore(e){
+  e && e.preventDefault();
+  const payload = collectStoreFormPayload();
+  const btn = document.getElementById('btn-submit-store');
+  await createStoreRecord(payload, btn);
+}
+
+async function submitOpenStoreCreate(e){
+  e && e.preventDefault();
+  const payload = collectStoreFormPayload('open-store-');
+  const btn = document.getElementById('open-store-submit-btn');
+  await createStoreRecord(payload, btn);
+}
+
+function renderOpenStoreStatus(){
+  const status = document.getElementById('open-store-status');
+  if(!status) return;
+  const raw = localStorage.getItem('local_stores_v1');
+  const stores = raw ? JSON.parse(raw) : [];
+  const me = JSON.parse(localStorage.getItem('els_user')||'null');
+  const mine = stores.filter(s => String(s.owner_email||'').toLowerCase() === String((me?.email||me?.name||'').toLowerCase()));
+  if(mine.length){
+    const store = mine[mine.length-1];
+    status.innerHTML = `<div class="rounded-2xl bg-slate-50 p-4 text-slate-700"><p class="font-semibold text-slate-900">${store.store_name}</p><p class="text-sm mt-1">${store.description || 'Your newly created store is ready.'}</p><p class="text-xs text-slate-500 mt-3">Bank: ${store.bank_name} • ${store.bank_account_name}</p></div><div class="rounded-2xl bg-slate-50 p-4 text-slate-700"><p class="text-sm font-semibold">Next steps</p><ul class="mt-2 text-slate-600 list-disc list-inside"><li>List your first product</li><li>Choose the right product category</li><li>Send orders for delivery</li></ul></div>`;
+  } else {
+    status.innerHTML = `<p>No store created yet. Create your store to start selling directly from this page.</p><div class="rounded-2xl bg-slate-50 p-4"><p class="text-slate-500">Store setup is required before listing products. Once your store is live, your products will be grouped into category pages automatically.</p></div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const form = document.getElementById('create-store-form'); if(form) form.addEventListener('submit', submitCreateStore);
+  const openForm = document.getElementById('open-store-create-form'); if(openForm) openForm.addEventListener('submit', submitOpenStoreCreate);
+  renderOpenStoreStatus();
+});
+
 // modal save removed — profile page save handles persistence
 
 async function sendMessage() {

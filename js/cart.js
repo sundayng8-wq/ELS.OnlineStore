@@ -61,6 +61,6 @@ function handlePayment(e) {
   const method = document.getElementById('delivery-method').value;
   cart = [];
   updateCartBadge();
-  showToast(`🎉 Order placed! Delivery: ${method}`);
+  showToast(` Order placed! Delivery: ${method}`);
   goTo('home');
 }

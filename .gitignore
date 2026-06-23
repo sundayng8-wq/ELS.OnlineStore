@@ -1,4 +1,8 @@
-node_modules
+node_modules/
 .env
-uploads
-.vscode
+server/uploads/
+*.log
+.DS_Store
+serve.ps1
+server/routes/*.backup
+.env
