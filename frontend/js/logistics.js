@@ -149,8 +149,8 @@
                 availableContainer.innerHTML = `<p class="text-slate-400 text-center text-xs py-6">All logistics dispatch lanes currently clear.</p>`;
             } else {
                 availableContainer.innerHTML = genericAvailableOrders.map(order => `
-                    <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 flex flex-col justify-between gap-2">
-                        <div class="flex justify-between items-start">
+                    <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 flex flex-col justify-between gap-3">
+                        <div class="flex justify-between items-start gap-2">
                             <div>
                                 <p class="font-bold text-xs text-slate-800">${order.order_id}</p>
                                 <p class="text-[10px] text-slate-500">${order.buyer_name || 'Client'} → ${order.delivery_method || 'Hub Delivery'}</p>
@@ -160,6 +160,10 @@
                             </button>
                         </div>
                         <p class="text-[10px] font-bold text-emerald-600">Logistics Earning: $${(order.logistics_fee || 0).toFixed(2)}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="openOrderChat('${order.order_id}')" class="text-[10px] px-2.5 py-1 rounded bg-slate-900 text-white hover:bg-slate-800 transition">Message Buyer</button>
+                            <button type="button" onclick="callBuyer('${String(order.phone || order.shipping_phone || order.billing_phone || order.buyer_phone || '')}')" class="text-[10px] px-2.5 py-1 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Call Buyer</button>
+                        </div>
                     </div>`).join('');
             }
         }
@@ -389,46 +393,284 @@
         advancePipelineStep();
     }
 
-    /**
-     * Enhanced Verification Authentication Submission Gate Handler
-     */
-    function handleLoginEnhanced(event) {
-        if (event) event.preventDefault();
+    function resolveOrderDestination(order) {
+        if (!order || typeof order !== 'object') return null;
 
-        const emailElement = document.getElementById('login-email');
-        const passwordElement = document.getElementById('login-pass');
-        const regionElement = document.getElementById('login-region');
+        const addressPieces = [];
+        const shippingObject = order.shipping_address || order.delivery_address || order.destination || order.address;
 
-        const email = emailElement ? emailElement.value.trim() : '';
-        const password = passwordElement ? passwordElement.value : '';
-        const region = regionElement ? regionElement.value : 'global';
+        if (shippingObject && typeof shippingObject === 'object') {
+            ['street','line1','city','state','region','postal_code','country'].forEach(key => {
+                if (shippingObject[key]) addressPieces.push(String(shippingObject[key]).trim());
+            });
+        } else if (typeof shippingObject === 'string' && shippingObject.trim()) {
+            addressPieces.push(shippingObject.trim());
+        }
 
-        if (!email || !password) {
-            alert('Security access parameter rejection: Credentials cannot be null.');
+        ['shipping_street','shipping_city','shipping_state','shipping_country','shipping_address','billing_address','delivery_address','destination','address'].forEach(key => {
+            if (order[key] && typeof order[key] === 'string') {
+                addressPieces.push(order[key].trim());
+            }
+        });
+
+        ['city','state','region','country'].forEach(key => {
+            if (order[key] && typeof order[key] === 'string') {
+                addressPieces.push(order[key].trim());
+            }
+        });
+
+        return Array.from(new Set(addressPieces.filter(Boolean))).join(', ') || null;
+    }
+
+    function findCurrentLogisticsOrder() {
+        const orders = window.allOrders || [];
+        const activeUser = window.currentUser || {};
+        const activeName = String(activeUser.name || '').trim().toLowerCase();
+
+        let order = orders.find(o => String((o.logistics_provider || '')).trim().toLowerCase() === activeName && String(o.order_status || '').trim().toLowerCase() === 'in transit');
+        if (order) return order;
+
+        order = orders.find(o => ['pending logistics','awaiting pickup','in transit'].includes(String(o.order_status || '').trim().toLowerCase()));
+        return order || null;
+    }
+
+    function startDeliveryGuide() {
+        const order = findCurrentLogisticsOrder();
+        if (!order) {
+            if (typeof showToast === 'function') {
+                return showToast('No active delivery order available for GPS routing.');
+            }
             return;
         }
 
-        // Initialize session parameters cleanly
-        window.__ELS_USER = {
-            email: email,
-            region: region,
-            role: (region && region.toLowerCase().includes('driver')) ? 'delivery' : 'buyer'
-        };
-
-        // UI view swap
-        const authScreen = document.getElementById('auth-screen');
-        const mainAppScreen = document.getElementById('main-app');
-        if (authScreen) authScreen.classList.add('hidden');
-        if (mainAppScreen) mainAppScreen.classList.remove('hidden');
-
-        // Dynamic Avatar Component Initial Generation
-        const avatarBox = document.getElementById('user-avatar-initial');
-        if (avatarBox) avatarBox.textContent = email.charAt(0).toUpperCase();
-
-        // Check if user is a courier driver to route them accordingly
-        if (window.__ELS_USER.role === 'delivery' && typeof window.goTo === 'function') {
-            window.goTo('logistics');
+        const destination = resolveOrderDestination(order);
+        if (!destination) {
+            if (typeof showToast === 'function') {
+                return showToast('Unable to resolve destination address for this order.');
+            }
+            return;
         }
+
+        const nextStop = document.getElementById('gpsNextStop');
+        const distance = document.getElementById('gpsDistance');
+        const eta = document.getElementById('gpsEta');
+        const speed = document.getElementById('tel-speed');
+        const telEta = document.getElementById('tel-eta');
+        const mapPlaceholder = document.getElementById('mapPlaceholder');
+
+        if (nextStop) nextStop.textContent = destination;
+        if (distance) distance.textContent = `${Math.floor(Math.random() * 12) + 3} km`;
+        if (eta) eta.textContent = `${Math.floor(Math.random() * 20) + 5} mins`;
+        if (speed) speed.textContent = `${Math.floor(Math.random() * 25) + 35} km/h`;
+        if (telEta) telEta.textContent = `${Math.floor(Math.random() * 12) + 4} mins`;
+        if (mapPlaceholder) {
+            mapPlaceholder.textContent = 'Opening Google Maps for real-time directions...';
+        }
+
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${encodeURIComponent(destination)}&dir_action=navigate`;
+        window.open(mapsUrl, '_blank');
+
+        if (typeof showToast === 'function') {
+            showToast(`GPS route launched for ${order.order_id || 'current delivery'}`);
+        }
+    }
+
+    function getStoredLogisticsPartners() {
+        try {
+            const raw = localStorage.getItem('els_logistics_partners');
+            const arr = raw ? JSON.parse(raw) : [];
+            return Array.isArray(arr) ? arr : [];
+        } catch (err) {
+            console.warn('Failed to load logistics partners', err);
+            return [];
+        }
+    }
+
+    function saveLogisticsPartners(partners) {
+        try {
+            localStorage.setItem('els_logistics_partners', JSON.stringify(Array.isArray(partners) ? partners : []));
+        } catch (err) {
+            console.warn('Failed to save logistics partners', err);
+        }
+    }
+
+    function renderLogisticsPartners() {
+        const list = document.getElementById('logisticsPartnersList');
+        if (!list) return;
+        const partners = getStoredLogisticsPartners();
+        if (!partners.length) {
+            list.innerHTML = `<div class="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-slate-500 text-xs">No network partners have registered yet. Use the Courier Sign In or Register buttons to onboard a delivery partner.</div>`;
+            return;
+        }
+
+        list.innerHTML = partners.map(partner => `
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-bold text-slate-900">${partner.name}</p>
+                        <p class="text-[10px] text-slate-500">${partner.region || 'Delivery Hub'}</p>
+                    </div>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">${partner.logistics_id}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
+                    <span>Email: ${partner.email}</span>
+                    <span>Phone: ${partner.phone || 'N/A'}</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="logisticsLoadPartner('${partner.email}')" class="text-[10px] px-2.5 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition">Use this Partner</button>
+                    <button type="button" onclick="callBuyer('${partner.phone || ''}')" class="text-[10px] px-2.5 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Call Partner</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function updateLogisticsUserInfo() {
+        const info = document.getElementById('logisticsUserInfo');
+        if (!info) return;
+        const user = window.currentUser || JSON.parse(localStorage.getItem('els_user') || '{}') || {};
+        if (user.name && user.logistics_id) {
+            info.textContent = `${user.name} • ${user.logistics_id}`;
+        } else if (user.name) {
+            info.textContent = `${user.name} • Hub Guest`;
+        } else {
+            info.textContent = 'Guest Hub';
+        }
+    }
+
+    function openDeliveryPartnerLogin() {
+        const modal = document.getElementById('deliveryPartnerModal');
+        const loginForm = document.getElementById('delivery-partner-login-form');
+        const registerForm = document.getElementById('delivery-partner-register-form');
+        if (!modal || !loginForm || !registerForm) return;
+        modal.classList.remove('hidden');
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+    }
+
+    function openDeliveryPartnerRegister() {
+        const modal = document.getElementById('deliveryPartnerModal');
+        const loginForm = document.getElementById('delivery-partner-login-form');
+        const registerForm = document.getElementById('delivery-partner-register-form');
+        if (!modal || !loginForm || !registerForm) return;
+        modal.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+    }
+
+    function closeDeliveryPartnerModal() {
+        const modal = document.getElementById('deliveryPartnerModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    function logisticsToggleAuthForm(type) {
+        const loginForm = document.getElementById('delivery-partner-login-form');
+        const registerForm = document.getElementById('delivery-partner-register-form');
+        if (!loginForm || !registerForm) return;
+        if (type === 'register') {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        } else {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        }
+    }
+
+    function logisticsCreateUserSession(user) {
+        window.currentUser = window.currentUser || {};
+        window.currentUser.name = user.name;
+        window.currentUser.email = user.email;
+        window.currentUser.phone = user.phone || window.currentUser.phone || '';
+        window.currentUser.region = user.region || window.currentUser.region || '';
+        window.currentUser.logistics_id = user.logistics_id;
+        window.currentUser.role = 'delivery';
+        try { localStorage.setItem('els_user', JSON.stringify(window.currentUser)); } catch (e) {}
+        updateLogisticsUserInfo();
+        if (typeof renderProfile === 'function') renderProfile();
+    }
+
+    function logisticsHandleLogin(event) {
+        if (event) event.preventDefault();
+        const email = document.getElementById('logistics-login-email')?.value.trim();
+        const password = document.getElementById('logistics-login-pass')?.value;
+        if (!email || !password) {
+            return showToast('Enter email and password to continue');
+        }
+        const partners = getStoredLogisticsPartners();
+        const partner = partners.find(p => String(p.email).toLowerCase() === email.toLowerCase());
+        if (!partner) {
+            return showToast('This partner is not registered yet. Please register first.');
+        }
+        logisticsCreateUserSession(partner);
+        closeDeliveryPartnerModal();
+        renderLogisticsPartners();
+        if (typeof goTo === 'function') goTo('logistics');
+        showToast('Courier signed in. Your Logistics ID is ' + partner.logistics_id);
+    }
+
+    function logisticsHandleRegister(event) {
+        if (event) event.preventDefault();
+        const name = document.getElementById('logistics-register-name')?.value.trim();
+        const email = document.getElementById('logistics-register-email')?.value.trim();
+        const password = document.getElementById('logistics-register-pass')?.value;
+        const phone = document.getElementById('logistics-register-phone')?.value.trim();
+        const region = document.getElementById('logistics-register-region')?.value || 'delivery-hub';
+        if (!name || !email || !password) {
+            return showToast('Please complete all required registration fields');
+        }
+        const logisticsId = `ELS-LG-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        const newPartner = {
+            name,
+            email,
+            phone: phone || '',
+            region,
+            logistics_id: logisticsId,
+            role: 'delivery'
+        };
+        const partners = getStoredLogisticsPartners();
+        const exists = partners.some(p => String(p.email).toLowerCase() === email.toLowerCase());
+        if (exists) {
+            return showToast('Partner with this email already exists');
+        }
+        partners.push(newPartner);
+        saveLogisticsPartners(partners);
+        logisticsCreateUserSession(newPartner);
+        renderLogisticsPartners();
+        closeDeliveryPartnerModal();
+        if (typeof goTo === 'function') goTo('logistics');
+        showToast('Courier partner registered. Your Logistics ID is ' + logisticsId);
+    }
+
+    function callBuyer(phone) {
+        if (!phone) {
+            return showToast('Phone number is not available');
+        }
+        window.location.href = `tel:${phone}`;
+    }
+
+    function logisticsLoadPartner(email) {
+        const partners = getStoredLogisticsPartners();
+        const partner = partners.find(p => String(p.email).toLowerCase() === String(email).toLowerCase());
+        if (!partner) {
+            return showToast('Partner not found');
+        }
+        logisticsCreateUserSession(partner);
+        renderLogisticsPartners();
+        showToast(`Loaded partner ${partner.name}`);
+    }
+
+    function trackOrderInLogistics() {
+        const orderId = document.getElementById('logisticsTrackOrderId')?.value.trim();
+        if (!orderId) {
+            return showToast('Enter an order reference to track');
+        }
+        const order = (window.allOrders || []).find(o => String(o.order_id).toLowerCase() === orderId.toLowerCase());
+        if (!order) {
+            return showToast('Order not found');
+        }
+        if (typeof openOrderChat === 'function') {
+            openOrderChat(order.order_id);
+        }
+        if (typeof goTo === 'function') goTo('messages');
+        showToast(`Tracking order ${order.order_id}`);
     }
 
     // Module Setup Initialization
@@ -438,6 +680,7 @@
             loginForm.addEventListener('submit', handleLoginEnhanced);
         }
 
+        updateLogisticsUserInfo();        renderLogisticsPartners();
         // Dynamic Injection of Region/Operational Role Configuration Node Options
         if (!document.getElementById('login-region')) {
             const selectElement = document.createElement('select');
@@ -464,7 +707,21 @@
         togglePasswordVisibility,
         calculateTotals,
         openPaymentChooser,
-        simulateLogistics
+        simulateLogistics,
+        startDeliveryGuide
     };
+
+    window.openDeliveryPartnerLogin = openDeliveryPartnerLogin;
+    window.openDeliveryPartnerRegister = openDeliveryPartnerRegister;
+    window.closeDeliveryPartnerModal = closeDeliveryPartnerModal;
+    window.logisticsToggleAuthForm = logisticsToggleAuthForm;
+    window.logisticsHandleLogin = logisticsHandleLogin;
+    window.logisticsHandleRegister = logisticsHandleRegister;
+    window.logisticsLoadPartner = logisticsLoadPartner;
+    window.renderLogisticsPartners = renderLogisticsPartners;
+    window.getStoredLogisticsPartners = getStoredLogisticsPartners;
+    window.saveLogisticsPartners = saveLogisticsPartners;
+    window.callBuyer = callBuyer;
+    window.trackOrderInLogistics = trackOrderInLogistics;
 
 })();

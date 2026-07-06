@@ -82,10 +82,12 @@ function renderProfile() {
   const nameEl = document.getElementById('profile-name');
   const emailEl = document.getElementById('profile-email');
   const bioEl = document.getElementById('profile-bio');
+  const logisticsEl = document.getElementById('profile-logistics-id');
 
   if (nameEl) nameEl.value = currentUser.name || '';
   if (emailEl) emailEl.value = currentUser.email || '';
   if (bioEl) bioEl.value = currentUser.bio || '';
+  if (logisticsEl) logisticsEl.value = currentUser.logistics_id || '';
   
   // Show avatar preview on profile page
   const preview = document.getElementById('profile-avatar-preview-page');
