@@ -464,7 +464,8 @@
         if (speed) speed.textContent = `${Math.floor(Math.random() * 25) + 35} km/h`;
         if (telEta) telEta.textContent = `${Math.floor(Math.random() * 12) + 4} mins`;
         if (mapPlaceholder) {
-            mapPlaceholder.textContent = 'Opening Google Maps for real-time directions...';
+            const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(destination)}&output=embed&z=15`;
+            mapPlaceholder.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full rounded-xl border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
         }
 
         const mapsUrl = `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${encodeURIComponent(destination)}&dir_action=navigate`;
