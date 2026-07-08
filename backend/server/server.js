@@ -14,6 +14,7 @@ const checkoutRoutes = require('./routes/checkout');
 const authRoutes = require('./routes/auth');
 const earningsRoutes = require('./routes/earnings');
 const paymentRoutes = require('./routes/payment');
+const deliveryRoutes = require('./routes/deliveryPartners');
 const connectDB = require('./config/db');
 const { startReconciliationCron } = require('./services/reconciliation');
 
@@ -55,6 +56,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/earnings', earningsRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/delivery', deliveryRoutes);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),

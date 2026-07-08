@@ -30,6 +30,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="css/els2.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
  
  </head>
 
@@ -992,7 +994,7 @@
           </div>
           <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden h-40 flex flex-col relative group">
             <div id="mapPlaceholder" class="flex-1 text-slate-500 flex items-center justify-center font-bold text-[10px] uppercase tracking-widest relative z-10 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:12px_12px]">
-              Map Rendering Interface
+              <div id="map" style="width:100%;height:100%;"></div>
             </div>
            <div class="absolute bottom-2 left-2 right-2 px-3 py-1.5 bg-slate-900/90 border border-white/5 backdrop-blur rounded-lg flex justify-between text-[10px] font-mono tracking-wider text-slate-400 z-20">
               <div>SPD: <strong id="tel-speed" class="text-white font-bold">—</strong></div>

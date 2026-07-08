@@ -18,6 +18,9 @@
         taxMultiplier: 0.08
     };
 
+    // Default map center (Lagos)
+    const DEFAULT_MAP_CENTER = { lat: 6.5244, lng: 3.3792 };
+
     // Private Module State
     let isLogisticsProviderMode = false;
 
@@ -436,20 +439,8 @@
 
     function startDeliveryGuide() {
         const order = findCurrentLogisticsOrder();
-        if (!order) {
-            if (typeof showToast === 'function') {
-                return showToast('No active delivery order available for GPS routing.');
-            }
-            return;
-        }
-
-        const destination = resolveOrderDestination(order);
-        if (!destination) {
-            if (typeof showToast === 'function') {
-                return showToast('Unable to resolve destination address for this order.');
-            }
-            return;
-        }
+        const useDefaultCenter = !order;
+        const destination = useDefaultCenter ? null : resolveOrderDestination(order);
 
         const nextStop = document.getElementById('gpsNextStop');
         const distance = document.getElementById('gpsDistance');
@@ -463,13 +454,41 @@
         if (eta) eta.textContent = `${Math.floor(Math.random() * 20) + 5} mins`;
         if (speed) speed.textContent = `${Math.floor(Math.random() * 25) + 35} km/h`;
         if (telEta) telEta.textContent = `${Math.floor(Math.random() * 12) + 4} mins`;
+        // Prefer interactive Leaflet map in-page when available
         if (mapPlaceholder) {
-            const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(destination)}&output=embed&z=15`;
-            mapPlaceholder.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full rounded-xl border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+            try {
+                // If destination is a string address, fall back to embed to avoid geocoding
+                if (destination && typeof destination === 'string') {
+                    const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(destination)}&output=embed&z=15`;
+                    mapPlaceholder.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full rounded-xl border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                } else {
+                    // Use Leaflet interactive map centered on order loc or default Lagos
+                    const center = (order && order.loc && order.loc.lat && order.loc.lng) ? [order.loc.lat, order.loc.lng] : [DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng];
+                    // Ensure map container exists
+                    const mapNode = document.getElementById('map');
+                    if (mapNode) {
+                        // initialize or update existing map
+                        if (!window._logisticsMap) {
+                            window._logisticsMap = L.map('map', { attributionControl: false }).setView(center, 12);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(window._logisticsMap);
+                            window._logisticsMarker = L.marker(center).addTo(window._logisticsMap).bindPopup('Courier');
+                        } else {
+                            window._logisticsMap.setView(center, 12);
+                            if (window._logisticsMarker) window._logisticsMarker.setLatLng(center);
+                            else window._logisticsMarker = L.marker(center).addTo(window._logisticsMap).bindPopup('Courier');
+                        }
+                    } else {
+                        // fallback to embed if no map node
+                        const embedUrl = `https://maps.google.com/maps?q=${DEFAULT_MAP_CENTER.lat},${DEFAULT_MAP_CENTER.lng}&output=embed&z=13`;
+                        mapPlaceholder.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full rounded-xl border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                    }
+                }
+            } catch (err) {
+                console.warn('Map init failed, falling back to embed', err);
+                const embedUrl = `https://maps.google.com/maps?q=${DEFAULT_MAP_CENTER.lat},${DEFAULT_MAP_CENTER.lng}&output=embed&z=13`;
+                mapPlaceholder.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full rounded-xl border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+            }
         }
-
-        const mapsUrl = `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${encodeURIComponent(destination)}&dir_action=navigate`;
-        window.open(mapsUrl, '_blank');
 
         if (typeof showToast === 'function') {
             showToast(`GPS route launched for ${order.order_id || 'current delivery'}`);
