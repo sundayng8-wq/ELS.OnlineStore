@@ -608,27 +608,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 function handleContact(e) {
   e.preventDefault();
   const form = document.getElementById('contact-form');
-  const nameInput = form.querySelector('input[name="name"]');
-  const emailInput = form.querySelector('input[name="email"]');
-  const subjectInput = form.querySelector('input[name="subject"]');
-  const messageInput = form.querySelector('textarea[name="message"]');
+  const success = document.getElementById('contact-success');
+  const nameInput = document.getElementById('contact-name');
+  const emailInput = document.getElementById('contact-email');
+  const messageInput = document.getElementById('contact-msg');
 
-  if (!nameInput.value || !emailInput.value || !subjectInput.value || !messageInput.value) {
+  if (!form || !nameInput || !emailInput || !messageInput) return;
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const message = messageInput.value.trim();
+
+  if (!name || !email || !message) {
     showToast('Please fill all fields');
     return;
   }
 
-  // Show success page
-  document.getElementById('contact-form').style.display = 'none';
-  document.getElementById('contact-success').classList.remove('hidden');
-  
-  // Log contact attempt (no backend yet)
-  console.log('Contact submitted:', {
-    name: nameInput.value,
-    email: emailInput.value,
-    subject: subjectInput.value,
-    message: messageInput.value
-  });
+  const alertPayload = {
+    id: `contact-${Date.now()}`,
+    name,
+    email,
+    subject: 'Carrier logistics notification',
+    message,
+    createdAt: new Date().toISOString(),
+    source: 'contact'
+  };
+
+  try {
+    const existingAlerts = JSON.parse(localStorage.getItem('els_logistics_alerts') || '[]');
+    existingAlerts.unshift(alertPayload);
+    localStorage.setItem('els_logistics_alerts', JSON.stringify(existingAlerts.slice(0, 20)));
+    localStorage.setItem('els_latest_logistics_alert', JSON.stringify(alertPayload));
+
+    if (typeof window.dispatchContactToLogistics === 'function') {
+      window.dispatchContactToLogistics(alertPayload);
+    } else if (typeof window.startLogisticsLiveStream === 'function') {
+      window.startLogisticsLiveStream(alertPayload);
+    }
+
+    form.style.display = 'none';
+    if (success) success.classList.remove('hidden');
+    form.reset();
+    showToast('Carrier alert sent to logistics');
+
+    if (typeof goTo === 'function') {
+      setTimeout(() => goTo('logistics'), 250);
+    }
+  } catch (err) {
+    console.error('Failed to dispatch logistics alert', err);
+    showToast('Could not send alert right now');
+  }
 }
 
 // Logistics Role Toggle

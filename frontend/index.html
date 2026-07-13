@@ -1001,6 +1001,13 @@
               <div>ETA: <strong id="tel-eta" class="text-white font-bold">—</strong></div>
             </div>
           </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-3 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Carrier Stream</span>
+              <span id="logisticsLiveStreamStatus" class="text-[10px] text-emerald-400">Awaiting carrier alert...</span>
+            </div>
+            <div id="logisticsAlertsList" class="space-y-2"></div>
+          </div>
           <button class="w-full py-3 rounded-xl text-xs font-bold bg-emerald-400 hover:bg-emerald-500 text-slate-950 active:scale-[0.99] transition shadow-md shadow-emerald-400/5 flex items-center justify-center gap-1.5" onclick="startDeliveryGuide()">
             <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Launch GPS Route Monitor
           </button>
@@ -1414,17 +1421,16 @@
             </button>
           </div>
           <!-- Dynamic Success Flash Alert Window -->
-          <div id="contact-success" class="hidden p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
-            <div class="h-6 w-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-200">
-              <i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>
-            </div>
-            <div>
-              <p class="text-xs font-bold text-emerald-900">Message Dispatched Successfully</p>
-              <p class="text-[11px] text-emerald-600 mt-0.5">Data secure. Our customer support managers will touch base shortly.</p>
-            </div>
-          </div>
-
         </form>
+        <div id="contact-success" class="hidden m-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
+          <div class="h-6 w-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-200">
+            <i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-emerald-900">Message Dispatched Successfully</p>
+            <p class="text-[11px] text-emerald-600 mt-0.5">Data secure. Our customer support managers will touch base shortly.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

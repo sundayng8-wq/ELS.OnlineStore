@@ -514,6 +514,142 @@
         }
     }
 
+    function getStoredLogisticsAlerts() {
+        try {
+            const raw = localStorage.getItem('els_logistics_alerts');
+            const arr = raw ? JSON.parse(raw) : [];
+            return Array.isArray(arr) ? arr : [];
+        } catch (err) {
+            console.warn('Failed to load logistics alerts', err);
+            return [];
+        }
+    }
+
+    function saveLogisticsAlerts(alerts) {
+        try {
+            localStorage.setItem('els_logistics_alerts', JSON.stringify(Array.isArray(alerts) ? alerts : []));
+        } catch (err) {
+            console.warn('Failed to save logistics alerts', err);
+        }
+    }
+
+    function renderLogisticsAlerts() {
+        const list = document.getElementById('logisticsAlertsList');
+        const status = document.getElementById('logisticsLiveStreamStatus');
+        if (!list) return;
+
+        const alerts = getStoredLogisticsAlerts();
+        if (!alerts.length) {
+            list.innerHTML = '<div class="rounded-xl border border-dashed border-slate-700/70 p-3 text-[11px] text-slate-400">No carrier notifications yet. Contact submissions will appear here instantly.</div>';
+            if (status) status.textContent = 'Awaiting carrier alert...';
+            return;
+        }
+
+        const latest = alerts[0];
+        if (status) {
+            status.textContent = `Live carrier alert • ${latest.name || 'Customer request'}`;
+        }
+
+        list.innerHTML = alerts.slice(0, 5).map(alert => {
+            const createdAt = alert.createdAt ? new Date(alert.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now';
+            return `
+                <div class="rounded-xl border border-slate-800/70 bg-slate-950/60 p-3">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <p class="text-[11px] font-bold text-white">${(alert.name || 'Customer').slice(0, 24)}</p>
+                            <p class="text-[10px] text-slate-400">${(alert.message || 'Logistics request').slice(0, 80)}</p>
+                        </div>
+                        <span class="text-[10px] text-emerald-400">${createdAt}</span>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function startLogisticsLiveStream(alert) {
+        const status = document.getElementById('logisticsLiveStreamStatus');
+        const routeStop = document.getElementById('gpsNextStop');
+        const distance = document.getElementById('gpsDistance');
+        const eta = document.getElementById('gpsEta');
+        const speed = document.getElementById('tel-speed');
+        const telEta = document.getElementById('tel-eta');
+        const mapNode = document.getElementById('map');
+
+        if (status) {
+            status.textContent = `Live carrier alert • ${alert?.name || 'Customer request'}`;
+        }
+        if (routeStop) {
+            routeStop.textContent = `${alert?.name || 'Customer'} • ${alert?.message?.slice(0, 28) || 'Dispatch request'}`;
+        }
+        if (distance) distance.textContent = '12 km';
+        if (eta) eta.textContent = '8 mins';
+        if (speed) speed.textContent = '42 km/h';
+        if (telEta) telEta.textContent = '6 mins';
+
+        if (!mapNode) return;
+
+        try {
+            const route = [
+                [6.5244, 3.3792],
+                [6.5285, 3.3921],
+                [6.5363, 3.4082],
+                [6.5452, 3.4217]
+            ];
+
+            if (!window._logisticsMap) {
+                window._logisticsMap = L.map('map', { attributionControl: false }).setView(route[0], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(window._logisticsMap);
+            } else {
+                window._logisticsMap.setView(route[0], 13);
+            }
+
+            if (window._logisticsRouteLayer) {
+                window._logisticsMap.removeLayer(window._logisticsRouteLayer);
+            }
+            if (window._logisticsMarker) {
+                window._logisticsMap.removeLayer(window._logisticsMarker);
+            }
+
+            window._logisticsRouteLayer = L.polyline(route, { color: '#4f46e5', weight: 5, opacity: 0.85 }).addTo(window._logisticsMap);
+            window._logisticsMarker = L.marker(route[0], { title: 'Carrier live stream' }).addTo(window._logisticsMap).bindPopup('Carrier is en route');
+            window._logisticsMap.fitBounds(window._logisticsRouteLayer.getBounds(), { padding: [24, 24] });
+
+            let index = 0;
+            if (window._logisticsStreamInterval) clearInterval(window._logisticsStreamInterval);
+            window._logisticsStreamInterval = setInterval(() => {
+                index = (index + 1) % route.length;
+                const point = route[index];
+                if (window._logisticsMarker) {
+                    window._logisticsMarker.setLatLng(point);
+                }
+                window._logisticsMap.panTo(point, { animate: true });
+                if (distance) distance.textContent = `${Math.max(2, 12 - index)} km`;
+                if (eta) eta.textContent = `${Math.max(2, 8 - index)} mins`;
+                if (speed) speed.textContent = `${38 + index * 3} km/h`;
+                if (telEta) telEta.textContent = `${Math.max(2, 6 - index)} mins`;
+            }, 1400);
+        } catch (err) {
+            console.warn('Live logistics stream setup failed', err);
+        }
+    }
+
+    function dispatchContactToLogistics(alert) {
+        const alerts = getStoredLogisticsAlerts();
+        const normalized = {
+            id: alert?.id || `contact-${Date.now()}`,
+            name: alert?.name || 'Customer',
+            email: alert?.email || '',
+            subject: alert?.subject || 'Carrier logistics notification',
+            message: alert?.message || '',
+            createdAt: alert?.createdAt || new Date().toISOString(),
+            source: 'contact'
+        };
+        alerts.unshift(normalized);
+        saveLogisticsAlerts(alerts.slice(0, 20));
+        localStorage.setItem('els_latest_logistics_alert', JSON.stringify(normalized));
+        renderLogisticsAlerts();
+        startLogisticsLiveStream(normalized);
+    }
+
     function renderLogisticsPartners() {
         const list = document.getElementById('logisticsPartnersList');
         if (!list) return;
@@ -700,7 +836,17 @@
             loginForm.addEventListener('submit', handleLoginEnhanced);
         }
 
-        updateLogisticsUserInfo();        renderLogisticsPartners();
+        updateLogisticsUserInfo();
+        renderLogisticsPartners();
+        renderLogisticsAlerts();
+        const latestAlert = localStorage.getItem('els_latest_logistics_alert');
+        if (latestAlert) {
+            try {
+                startLogisticsLiveStream(JSON.parse(latestAlert));
+            } catch (err) {
+                console.warn('Failed to restore latest logistics alert', err);
+            }
+        }
         // Dynamic Injection of Region/Operational Role Configuration Node Options
         if (!document.getElementById('login-region')) {
             const selectElement = document.createElement('select');
@@ -741,6 +887,9 @@
     window.renderLogisticsPartners = renderLogisticsPartners;
     window.getStoredLogisticsPartners = getStoredLogisticsPartners;
     window.saveLogisticsPartners = saveLogisticsPartners;
+    window.renderLogisticsAlerts = renderLogisticsAlerts;
+    window.dispatchContactToLogistics = dispatchContactToLogistics;
+    window.startLogisticsLiveStream = startLogisticsLiveStream;
     window.callBuyer = callBuyer;
     window.trackOrderInLogistics = trackOrderInLogistics;
 
