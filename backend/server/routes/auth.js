@@ -145,20 +145,40 @@ router.post('/verify-otp', async (req, res) => {
   }
 });
 
+// Validate Password Reset Token
+router.get('/validate-reset', (req, res) => {
+  try {
+    const token = req.query.token;
+    if (!token) return res.status(400).json({ success: false, message: 'Reset token is required' });
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.purpose !== 'password-reset') {
+      return res.status(400).json({ success: false, message: 'Invalid reset token' });
+    }
+
+    res.json({ success: true, ok: true, message: 'Reset token is valid', user: { userId: decoded.userId } });
+  } catch (err) {
+    res.status(400).json({ success: false, ok: false, message: 'Invalid or expired reset token' });
+  }
+});
+
 // Send Password Reset
 router.post('/send-reset', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, resetBase } = req.body;
     if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
 
     const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) return res.json({ success: true, message: 'If an account exists, a reset link has been sent' });
+    if (!user) {
+      return res.json({ success: true, ok: true, message: 'If an account exists, a reset link has been sent' });
+    }
 
     const resetToken = jwt.sign({ userId: user._id, purpose: 'password-reset' }, JWT_SECRET, { expiresIn: '1h' });
+    const resetUrl = `${resetBase || 'http://localhost:8081'}#reset=${resetToken}`;
 
-    console.log('🔗 Reset link for ' + email + ': http://localhost:8081/reset-password?token=' + resetToken);
+    console.log('🔗 Reset link for ' + email + ': ' + resetUrl);
 
-    res.json({ success: true, message: 'If an account exists, a reset link has been sent' });
+    res.json({ success: true, ok: true, message: 'If an account exists, a reset link has been sent', token: resetToken, resetUrl });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to send reset email' });
   }
@@ -186,7 +206,7 @@ router.post('/reset-complete', async (req, res) => {
     user.password = newPassword;
     await user.save();
 
-    res.json({ success: true, message: 'Password reset successful. You can now login.' });
+    res.json({ success: true, ok: true, message: 'Password reset successful. You can now login.' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to reset password' });
   }

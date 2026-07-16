@@ -18,20 +18,25 @@ function closeResetSetModal() {
 function openResetOtpModal() { document.getElementById('reset-otp-modal').classList.remove('hidden'); }
 function closeResetOtpModal() { document.getElementById('reset-otp-modal').classList.add('hidden'); document.getElementById('reset-otp-result').innerHTML = ''; document.getElementById('reset-otp-code').value=''; }
 
+function getResetTokenFromLocation() {
+  const hash = location.hash || '';
+  const hashMatch = hash.match(/#reset=([A-Za-z0-9_-]+)/);
+  if (hashMatch) return hashMatch[1];
+  const params = new URLSearchParams(location.search || '');
+  return params.get('token') || params.get('reset') || '';
+}
+
 async function verifyOtp(e) {
   e.preventDefault();
-  const hash = location.hash || '';
-  const m = hash.match(/#reset=([A-Za-z0-9_-]+)/);
-  if (!m) return showToast('Reset token not found');
-  const token = m[1];
+  const token = getResetTokenFromLocation();
+  if (!token) return showToast('Reset token not found');
   const code = (document.getElementById('reset-otp-code')?.value || '').trim();
   if (!code) return showToast('Enter the verification code');
   const API = window.USER_API_URL || 'http://localhost:8001/api/auth';
   try {
     const res = await fetch(API + '/verify-otp', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ token, otp: code }) });
     const json = await res.json();
-    if (res.ok && json && json.ok) {
-      // verified — show set password modal
+    if (res.ok && json && (json.ok || json.success)) {
       closeResetOtpModal();
       openResetSetModal();
     } else {
@@ -156,28 +161,23 @@ function sendPasswordResetRequest(e) {
 
   // Prefer server-side email sending if configured
   const serverUrl = window.RESET_API_URL || 'http://localhost:8001/api/auth/send-reset';
-  // send reset request to server which will generate token and email the user
   fetch(serverUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, resetBase: (location.href.split('#')[0].split('?')[0]), siteName: document.title })
   }).then(res => res.json()).then(json => {
-    if (json && json.ok) {
+    const effectiveResetUrl = (json && json.resetUrl) ? json.resetUrl : resetUrl;
+    if (json && (json.ok || json.success)) {
       document.getElementById('reset-request-result').textContent = 'Reset email sent — check your inbox.';
       return;
     }
-    // fallback behavior: construct a clear subject/body with the reset link so Gmail/mail clients show it
-    const token = (json && json.token) ? json.token : '';
-    const resetUrl = (location.href.split('#')[0].split('?')[0]) + '#reset=' + token;
     const subject = 'Password reset';
-    const body = 'Please click the link below to change your password for ' + (document.title || 'the site') + ':\n\n' + resetUrl + '\n\nIf you did not request this, please ignore.';
+    const body = 'Please click the link below to change your password for ' + (document.title || 'the site') + ':\n\n' + effectiveResetUrl + '\n\nIf you did not request this, please ignore.';
     const mailto = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     const gmail = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     const header = (json && json.error && json.error === 'SMTP not configured on server') ? 'Server cannot send email. Use one of these to send the reset link:' : 'Reset link created. Use your email to send it, or open Gmail compose:';
-    document.getElementById('reset-request-result').innerHTML = '<div>' + header + '</div><div class="mt-2"><a target="_blank" href="' + gmail + '" class="underline text-indigo-600 mr-2">Open Gmail</a><a href="' + mailto + '" class="underline mr-2">Open mail client</a><button onclick="navigator.clipboard && navigator.clipboard.writeText(\'' + resetUrl + '\')?showToast(\'Link copied\'):null" class="ml-2 px-2 py-1 bg-gray-100 rounded">Copy link</button></div>';
+    document.getElementById('reset-request-result').innerHTML = '<div>' + header + '</div><div class="mt-2"><a target="_blank" href="' + gmail + '" class="underline text-indigo-600 mr-2">Open Gmail</a><a href="' + mailto + '" class="underline mr-2">Open mail client</a><button onclick="navigator.clipboard && navigator.clipboard.writeText(\'' + effectiveResetUrl + '\')?showToast(\'Link copied\'):null" class="ml-2 px-2 py-1 bg-gray-100 rounded">Copy link</button></div>';
   }).catch(err => {
-    // server not reachable — fallback to Gmail/mailto links with empty token
-    const resetUrl = (location.href.split('#')[0].split('?')[0]) + '#reset=';
     const subject = 'Password reset';
     const body = 'Please click the link below to change your password for ' + (document.title || 'the site') + ':\n\n' + resetUrl + '\n\nIf you did not request this, please ignore.';
     const mailto = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
@@ -207,7 +207,7 @@ function completePasswordReset(e) {
   try {
     return fetch(USER_API + '/reset-complete', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ token, newPassword: pass }) })
       .then(r => r.json()).then(json => {
-        if (json && json.ok) {
+        if (json && (json.ok || json.success)) {
           document.getElementById('reset-set-result').textContent = 'Password reset — you can now sign in.';
           setTimeout(() => { closeResetSetModal(); location.hash = ''; }, 1200);
         } else {
@@ -255,18 +255,14 @@ function completePasswordReset(e) {
 
 // On load, detect reset token and show set-password modal
 function checkForResetTokenOnLoad() {
-  const hash = location.hash || '';
-  const m = hash.match(/#reset=([A-Za-z0-9_-]+)/);
-  if (!m) return;
-  const token = m[1];
-  // validate token with server if available; then show OTP verify modal
+  const token = getResetTokenFromLocation();
+  if (!token) return;
   const validateUrl = (window.RESET_API_URL || 'http://localhost:8001/api/auth/validate-reset') + '?token=' + encodeURIComponent(token);
   fetch(validateUrl).then(r => r.json()).then(json => {
-    if (json && json.ok) {
-      openResetOtpModal();
+    if (json && (json.ok || json.success)) {
+      openResetSetModal();
     }
   }).catch(() => {
-    // fallback: check localStorage token generated earlier (best-effort) and open set modal directly
     let resets = {};
     try { resets = JSON.parse(localStorage.getItem('els_password_resets') || '{}'); } catch(e){ resets = {}; }
     const info = resets[token];
