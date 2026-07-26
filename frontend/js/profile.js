@@ -260,6 +260,21 @@ function collectStoreFormPayload(prefix = '') {
     document.getElementById(prefix + 'bank-account-number') || 
     document.getElementById(prefix + 'open-store-bank-account-number') || {}
   ).value || '';
+
+  const paymentMethod = (
+    document.getElementById(prefix + 'payment-method') || 
+    document.getElementById(prefix + 'open-store-payment-method') || {}
+  ).value || 'bank_transfer';
+
+  const paymentVerified = Boolean(
+    document.getElementById(prefix + 'payment-verified') || 
+    document.getElementById(prefix + 'open-store-payment-verified') || {}
+  ).checked;
+
+  const paymentVerificationNote = (
+    document.getElementById(prefix + 'payment-verification-note') || 
+    document.getElementById(prefix + 'open-store-payment-verification-note') || {}
+  ).value || '';
   
   const logoFile = (
     document.getElementById(prefix + 'store-logo') || 
@@ -271,7 +286,7 @@ function collectStoreFormPayload(prefix = '') {
     document.getElementById(prefix + 'open-store-banner') || {}
   ).files?.[0] || null;
 
-  return { name, desc, bankName, bankAccountName, bankAccountNumber, logoFile, bannerFile };
+  return { name, desc, bankName, bankAccountName, bankAccountNumber, paymentMethod, paymentVerified, paymentVerificationNote, logoFile, bannerFile };
 }
 
 /**
@@ -299,6 +314,9 @@ async function createStoreRecord(payload, btn) {
     bank_account_name: payload.bankAccountName, 
     bank_account_number: payload.bankAccountNumber, 
     bank_name: payload.bankName, 
+    preferred_payment_method: payload.paymentMethod || 'bank_transfer', 
+    bank_verification_status: payload.paymentVerified ? 'verified' : 'pending_verification',
+    payment_verification_note: payload.paymentVerificationNote || '',
     logo_url: logoUrl, 
     banner_url: bannerUrl 
   };
@@ -334,6 +352,7 @@ async function createStoreRecord(payload, btn) {
           store_id: store._id, 
           store_name: store.store_name 
         }))); 
+        localStorage.setItem('els_payout_ready', payload.paymentVerified ? 'true' : 'false');
       } catch (e) {}
 
       renderOpenStoreStatus();
@@ -374,6 +393,7 @@ async function createStoreRecord(payload, btn) {
       btn.innerHTML = btn._origHtml; 
     }
 
+    localStorage.setItem('els_payout_ready', payload.paymentVerified ? 'true' : 'false');
     showToast('Store created successfully');
     renderOpenStoreStatus();
 
@@ -427,6 +447,7 @@ function renderOpenStoreStatus() {
         <p class="font-semibold text-slate-900">${store.store_name}</p>
         <p class="text-sm mt-1">${store.description || 'Your newly created store is ready.'}</p>
         <p class="text-xs text-slate-500 mt-3">Bank: ${store.bank_name} • ${store.bank_account_name}</p>
+        <p class="text-xs text-slate-500 mt-1">Payout status: ${store.bank_verification_status === 'verified' ? 'Verified' : 'Pending verification'}</p>
       </div>
       <div class="rounded-2xl bg-slate-50 p-4 text-slate-700">
         <p class="text-sm font-semibold">Next steps</p>

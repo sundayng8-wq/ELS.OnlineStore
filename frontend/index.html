@@ -630,6 +630,26 @@
               <option class="bg-slate-900">UBA</option>
             </select>
           </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Payout Verification Channel</label>
+              <select id="open-store-payment-method" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <option value="bank_transfer" class="bg-slate-900">Bank transfer</option>
+                <option value="google_pay" class="bg-slate-900">Google Pay</option>
+                <option value="international_card" class="bg-slate-900">International card</option>
+                <option value="cash_on_delivery" class="bg-slate-900">Cash on delivery</option>
+              </select>
+            </div>
+            <label class="flex items-start gap-3 rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 text-sm text-slate-300">
+              <input id="open-store-payment-verified" type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-900 text-indigo-500 focus:ring-indigo-500" checked />
+              <span>These payout details are verified and ready for seller settlement.</span>
+            </label>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Verification Note</label>
+            <textarea id="open-store-payment-verification-note" rows="2" placeholder="Add any note for payout verification or settlement reference" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"></textarea>
+          </div>
+          <p class="text-xs text-slate-400">Seller payouts will use these details once a product is purchased on the marketplace.</p>
           <div class="text-right pt-2">
             <button id="open-store-submit-btn" type="submit" class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 font-semibold shadow-lg transition-all duration-150">
               Create Store
@@ -743,6 +763,9 @@
             <span id="add-prod-loading" class="hidden">Listing...</span>
           </button>
         </div>
+        <p id="product-publish-status" class="text-xs text-slate-500 mt-3">
+          Save as draft to keep work private, or publish instantly once your payout details are ready.
+        </p>
         <p id="store-limit-msg" class="hidden text-center text-rose-500 text-xs mt-4 font-semibold bg-rose-50 p-2.5 rounded-xl">
           Maximum product limit reached (999). Please remove existing listings first.
         </p>
@@ -1446,7 +1469,7 @@
           </div>
           <div class="min-w-0 flex-1">
             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Electronic Mail Support</h4>
-            <p class="text-sm font-semibold text-slate-800 truncate mt-1">elsonlinestoreng@gmail.com</p>
+            <p class="text-sm font-semibold text-slate-800 truncate mt-1">jovalistore@gmail.com</p>
             <p class="text-[11px] text-slate-400 mt-0.5">Expect response delivery within 24 operational hours.</p>
           </div>
         </div>

@@ -17,7 +17,7 @@ router.post('/', auth, async (req, res) => {
       });
     }
 
-    const { store_name, description, bank_account_name, bank_account_number, bank_name, preferred_payment_method } = req.body;
+    const { store_name, description, bank_account_name, bank_account_number, bank_name, preferred_payment_method, bank_verification_status, payment_verification_note } = req.body;
 
     if (!store_name || !bank_account_name || !bank_account_number || !bank_name) {
       return res.status(400).json({
@@ -41,6 +41,8 @@ router.post('/', auth, async (req, res) => {
       bank_account_number,
       bank_name,
       preferred_payment_method: preferred_payment_method || 'bank_transfer',
+      bank_verification_status: bank_verification_status || 'pending_verification',
+      payment_verification_note: payment_verification_note || '',
       logo_url: req.body.logo_url || '',
       banner_url: req.body.banner_url || ''
     });
@@ -137,7 +139,7 @@ router.put('/:id', auth, async (req, res) => {
     const allowedUpdates = [
       'store_name', 'description', 'logo_url', 'banner_url',
       'bank_account_name', 'bank_account_number', 'bank_name',
-      'preferred_payment_method'
+      'preferred_payment_method', 'bank_verification_status', 'payment_verification_note'
     ];
 
     allowedUpdates.forEach(field => {

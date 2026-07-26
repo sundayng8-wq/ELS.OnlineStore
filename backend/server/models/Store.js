@@ -46,6 +46,15 @@ const storeSchema = new mongoose.Schema({
     required: [true, 'Bank name is required'],
     trim: true
   },
+  bank_verification_status: {
+    type: String,
+    enum: ['pending_verification', 'verified', 'rejected'],
+    default: 'pending_verification'
+  },
+  payment_verification_note: {
+    type: String,
+    default: ''
+  },
   paystack_subaccount_code: {
     type: String,
     default: ''

@@ -12,7 +12,7 @@ let logisticsFees = { 'Standard': 5, 'Express': 12, 'Overnight': 25, 'Pickup': 0
 window.activeUploads = [];
 
 const defaultConfig = {
-  site_name: 'ELS.OnlineStores',
+  site_name: 'JovA Marketplace',
   tagline: 'Shop. Sell. Thrive.',
   hero_heading: 'Discover What You Love',
   bg_color: '#f8f6f3',
@@ -266,10 +266,23 @@ function acceptSuggestedCategory() {
 
 function updateAddProductButtonState() {
   const btn = document.getElementById('add-product-btn');
+  const draftBtn = document.getElementById('save-draft-btn');
+  const statusEl = document.getElementById('product-publish-status');
   if (!btn) return;
   const valid = validateOpenStoreForm();
   btn.disabled = !valid;
   btn.style.opacity = valid ? '1' : '0.6';
+  if (draftBtn) {
+    draftBtn.disabled = !valid;
+    draftBtn.style.opacity = valid ? '1' : '0.6';
+  }
+  if (statusEl) {
+    const payoutReady = localStorage.getItem('els_payout_ready') === 'true';
+    statusEl.textContent = payoutReady
+      ? 'Seller payout details are ready. You can save as draft or publish instantly.'
+      : 'Add payout details in store setup to enable direct publishing.';
+    statusEl.className = payoutReady ? 'text-xs text-emerald-600 mt-3' : 'text-xs text-slate-500 mt-3';
+  }
 }
 
 // Toggle button loading state: adds small spinner and disables button
