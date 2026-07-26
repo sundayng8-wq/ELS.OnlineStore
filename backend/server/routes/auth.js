@@ -20,7 +20,7 @@ router.get('/', (req, res) => {
 // Register User
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, confirmPassword } = req.body;
+    const { name, email, password, confirmPassword, role, region, provider } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide name, email, and password' });
@@ -39,7 +39,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email already registered. Please login instead.' });
     }
 
-    const user = new User({ name, email: email.toLowerCase(), password });
+    const user = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role: role || 'buyer',
+      region: region || 'global',
+      provider: provider || (/@gmail\.com$/i.test(email) ? 'gmail' : 'email')
+    });
     await user.save();
 
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
@@ -57,7 +64,7 @@ router.post('/register', async (req, res) => {
 // Login User
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role, region, provider } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
@@ -73,11 +80,20 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
+    const normalizedRole = role || user.role || 'buyer';
+    const normalizedRegion = region || user.region || 'global';
+    const normalizedProvider = provider || (/@gmail\.com$/i.test(user.email) ? 'gmail' : 'email');
+
+    user.role = normalizedRole;
+    user.region = normalizedRegion;
+    user.provider = normalizedProvider;
+    await user.save();
+
     const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
 
     res.json({
       success: true, message: 'Login successful', token,
-      user: { _id: user._id, name: user.name, email: user.email }
+      user: { _id: user._id, name: user.name, email: user.email, role: user.role, region: user.region, provider: user.provider }
     });
   } catch (err) {
     console.error('Login error:', err);

@@ -352,8 +352,11 @@ function switchAuthTab(tab) {
 
 async function handleLogin(e) {
   e.preventDefault();
-  const email = document.getElementById('login-email').value;
+  const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-pass').value;
+  const role = document.getElementById('login-role')?.value || 'buyer';
+  const region = document.getElementById('login-region')?.value || 'global';
+  const rememberMe = Boolean(document.getElementById('remember-login')?.checked);
 
   if (!email || !password) {
     showToast('Please enter email and password');
@@ -365,7 +368,13 @@ async function handleLogin(e) {
     const response = await fetch(window.API_BASE + '/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({
+        email,
+        password,
+        role,
+        region,
+        provider: /@gmail\.com$/i.test(email) ? 'gmail' : 'email'
+      })
     });
 
     const text = await response.text();
@@ -382,11 +391,14 @@ async function handleLogin(e) {
       return;
     }
 
-    // Store token and user data
-    localStorage.setItem('els_token', data.token);
-    localStorage.setItem('els_user', JSON.stringify(data.user));
-    
-    currentUser = data.user;
+    const userPayload = {
+      ...(data.user || {}),
+      role: (data.user && data.user.role) || role,
+      region: (data.user && data.user.region) || region,
+      provider: (data.user && data.user.provider) || (/@gmail\.com$/i.test(email) ? 'gmail' : 'email')
+    };
+
+    persistAuthSession(userPayload, data.token, rememberMe);
     enterApp();
   } catch (err) {
     console.error('Login error:', err);
@@ -396,10 +408,14 @@ async function handleLogin(e) {
 
 async function handleRegister(e) {
   e.preventDefault();
-  const name = document.getElementById('reg-name').value;
-  const email = document.getElementById('reg-email').value;
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-pass').value;
   const confirmPassword = document.getElementById('reg-confirm-pass').value;
+  const rememberMe = Boolean(document.getElementById('remember-register')?.checked);
+  const role = 'buyer';
+  const region = 'global';
+  const provider = /@gmail\.com$/i.test(email) ? 'gmail' : 'email';
 
   if (!name || !email || !password || !confirmPassword) {
     showToast('Please fill all fields');
@@ -421,7 +437,7 @@ async function handleRegister(e) {
     const response = await fetch(window.API_BASE + '/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, confirmPassword })
+      body: JSON.stringify({ name, email, password, confirmPassword, role, region, provider })
     });
 
     const text = await response.text();
@@ -438,11 +454,14 @@ async function handleRegister(e) {
       return;
     }
 
-    // Store token and user data
-    localStorage.setItem('els_token', data.token);
-    localStorage.setItem('els_user', JSON.stringify(data.user));
-    
-    currentUser = data.user;
+    const userPayload = {
+      ...(data.user || {}),
+      role: (data.user && data.user.role) || role,
+      region: (data.user && data.user.region) || region,
+      provider: (data.user && data.user.provider) || provider
+    };
+
+    persistAuthSession(userPayload, data.token, rememberMe);
     showToast('Account created successfully!');
     enterApp();
   } catch (err) {
@@ -451,20 +470,32 @@ async function handleRegister(e) {
   }
 }
 
-function enterApp() {
-  document.getElementById('auth-screen').classList.add('hidden');
-  document.getElementById('main-app').classList.remove('hidden');
-  document.getElementById('user-avatar').textContent = (currentUser.name || currentUser.email || 'U').charAt(0).toUpperCase();
+function enterApp(targetPage = 'home') {
+  const authScreen = document.getElementById('auth-screen');
+  const mainApp = document.getElementById('main-app');
+  if (authScreen) authScreen.classList.add('hidden');
+  if (mainApp) mainApp.classList.remove('hidden');
+  const avatar = document.getElementById('user-avatar');
+  if (avatar) avatar.textContent = (currentUser.name || currentUser.email || 'U').charAt(0).toUpperCase();
   lucide.createIcons();
   loadProductsFromBackend();
   updateCartBadge();
+  const role = (currentUser.role || 'buyer').toLowerCase();
+  if (role === 'seller') {
+    goTo('open-store');
+  } else {
+    goTo(targetPage);
+  }
   showToast('Welcome, ' + (currentUser.name || currentUser.email) + '!');
 }
 
 function handleLogout() {
   localStorage.removeItem('els_token');
   localStorage.removeItem('els_user');
-  currentUser = {};
+  sessionStorage.removeItem('els_token');
+  sessionStorage.removeItem('els_user');
+  currentUser = { name: 'User', email: '' };
+  window.currentUser = currentUser;
   
   document.getElementById('main-app').classList.add('hidden');
   document.getElementById('auth-screen').classList.remove('hidden');
@@ -511,6 +542,21 @@ function showToast(msg) {
   setTimeout(() => t.classList.add('hidden'), 2500);
 }
 
+function persistAuthSession(user, token, rememberMe = true) {
+  const safeUser = { ...(user || {}), role: user?.role || 'buyer', region: user?.region || 'global', provider: user?.provider || 'email' };
+  if (rememberMe) {
+    localStorage.setItem('els_token', token);
+    localStorage.setItem('els_user', JSON.stringify(safeUser));
+  } else {
+    sessionStorage.setItem('els_token', token);
+    sessionStorage.setItem('els_user', JSON.stringify(safeUser));
+    localStorage.removeItem('els_token');
+    localStorage.removeItem('els_user');
+  }
+  currentUser = safeUser;
+  window.currentUser = safeUser;
+}
+
 function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
 function initHomeCarousel(images = [], speedPerImage = 6) {
@@ -542,10 +588,10 @@ function initHomeCarousel(images = [], speedPerImage = 6) {
 // Restore session from localStorage on page load
 async function restoreSession() {
 
-  const token = localStorage.getItem('els_token');
-  const userData = localStorage.getItem('els_user');
+  const token = localStorage.getItem('els_token') || sessionStorage.getItem('els_token');
+  const savedUser = localStorage.getItem('els_user') || sessionStorage.getItem('els_user');
 
-  if (!token || !userData) return false;
+  if (!token || !savedUser) return false;
 
   try {
 
@@ -562,10 +608,14 @@ async function restoreSession() {
     if (!data.success) {
       localStorage.removeItem('els_token');
       localStorage.removeItem('els_user');
+      sessionStorage.removeItem('els_token');
+      sessionStorage.removeItem('els_user');
       return false;
     }
 
-    currentUser = JSON.parse(userData);
+    const parsedUser = JSON.parse(savedUser);
+    currentUser = parsedUser;
+    window.currentUser = parsedUser;
 
     enterApp();
 
@@ -577,6 +627,8 @@ async function restoreSession() {
 
     localStorage.removeItem('els_token');
     localStorage.removeItem('els_user');
+    sessionStorage.removeItem('els_token');
+    sessionStorage.removeItem('els_user');
 
     return false;
 

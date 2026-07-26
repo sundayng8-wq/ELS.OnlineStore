@@ -19,6 +19,19 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  role: {
+    type: String,
+    enum: ['buyer', 'seller', 'delivery'],
+    default: 'buyer'
+  },
+  region: {
+    type: String,
+    default: 'global'
+  },
+  provider: {
+    type: String,
+    default: 'email'
+  },
   created_at: {
     type: Date,
     default: Date.now
