@@ -21,7 +21,6 @@ function processProductImageFile(file) {
     showToast('You can upload up to ' + maxImages + ' images per product.');
     return;
   }
-sss
   const reader = new FileReader();
   reader.onload = async (e) => {ss
     try {

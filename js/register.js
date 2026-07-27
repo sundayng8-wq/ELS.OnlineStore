@@ -9,7 +9,7 @@ function switchAuthTab(tab) {
   if (tab === 'login') {
     loginForm.classList.remove('hidden'); loginForm.setAttribute('aria-hidden', 'false');
     registerForm.classList.add('hidden'); registerForm.setAttribute('aria-hidden', 'true');
-    regLogo.classList.add('hidden');
+    if (regLogo) regLogo.classList.add('hidden');
     loginTab.classList.add('text-white'); loginTab.classList.remove('text-gray-400'); loginTab.setAttribute('aria-pressed','true');
     registerTab.classList.remove('text-white'); registerTab.classList.add('text-gray-400'); registerTab.setAttribute('aria-pressed','false');
     // focus first input
@@ -17,7 +17,7 @@ function switchAuthTab(tab) {
   } else {
     loginForm.classList.add('hidden'); loginForm.setAttribute('aria-hidden', 'true');
     registerForm.classList.remove('hidden'); registerForm.setAttribute('aria-hidden', 'false');
-    regLogo.classList.remove('hidden');
+    if (regLogo) regLogo.classList.remove('hidden');
     registerTab.classList.add('text-white'); registerTab.classList.remove('text-gray-400'); registerTab.setAttribute('aria-pressed','true');
     loginTab.classList.remove('text-white'); loginTab.classList.add('text-gray-400'); loginTab.setAttribute('aria-pressed','false');
     setTimeout(()=>document.getElementById('reg-name')?.focus(), 80);
@@ -29,7 +29,7 @@ function handleLogin(e) {
   const pass = (document.getElementById('login-pass')?.value || '');
   if (!email) return showToast('Please enter your email');
   if (!pass) return showToast('Please enter your password');
-  const USER_API = window.USER_API_URL || 'http://localhost:8001';
+  const USER_API = window.USER_API_URL || 'http://localhost:8001/api/auth';
   const remember = !!document.getElementById('remember-login')?.checked;
   // try server login first
   try {
@@ -42,6 +42,9 @@ function handleLogin(e) {
         currentUser.email = json.user.email;
         currentUser.__serverId = json.user.id;
         try { localStorage.setItem('els_user', JSON.stringify({ name: currentUser.name, email: currentUser.email, __serverId: currentUser.__serverId, password: remember ? btoa(pass) : '', remember })); } catch(e){}
+        if (json.token) {
+          try { localStorage.setItem('els_token', json.token); } catch(e){}
+        }
         enterApp();
       } else {
         // server responded but not OK -> fallback to local check
@@ -82,16 +85,19 @@ function handleRegister(e) {
   const email = (document.getElementById('reg-email')?.value || '').trim();
   const pass = (document.getElementById('reg-pass')?.value || '');
   if (!email || !name || !pass) return showToast('Please enter name, email and password to register');
-  const USER_API = window.USER_API_URL || 'http://localhost:8001';
+  const USER_API = window.USER_API_URL || 'http://localhost:8001/api/auth';
   // try server register
   try {
     return fetch(USER_API + '/register', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ name, email, password: pass })
+      body: JSON.stringify({ name, email, password: pass, confirmPassword: pass })
     }).then(r => r.json()).then(json => {
       if (json && json.ok && json.user) {
         currentUser.name = json.user.name; currentUser.email = json.user.email; currentUser.__serverId = json.user.id;
         try { const remember = !!document.getElementById('remember-register')?.checked; localStorage.setItem('els_user', JSON.stringify({ name: currentUser.name, email: currentUser.email, __serverId: currentUser.__serverId, password: remember ? btoa(pass) : '', remember })); } catch(e){}
+        if (json.token) {
+          try { localStorage.setItem('els_token', json.token); } catch(e) {}
+        }
         enterApp();
       } else if (json && json.error && json.error === 'User exists') {
         showToast('Account already exists — please login');
@@ -189,7 +195,7 @@ async function resendResetCode() {
   try {
     const res = await fetch(API + '/send-reset', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, resetBase: (location.href.split('#')[0].split('?')[0]), siteName: document.title }) });
     const json = await res.json();
-    if (res.ok && json && json.ok) {sss
+    if (res.ok && json && json.ok) {
       document.getElementById('reset-otp-result').textContent = 'Verification code resent — check your email.';
       startResendCountdown(30);
       // store returned token locally if provided

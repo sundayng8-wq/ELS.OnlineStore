@@ -266,11 +266,11 @@ function acceptSuggestedCategory() {
 }
 
 function updateAddProductButtonState() {
-  const btn = document.getElementById('add-product-btn');
-  if (!btn) return;
+  const saveDraftBtn = document.getElementById('save-draft-btn');
+  const publishBtn = document.getElementById('publish-product-btn');
   const valid = validateOpenStoreForm();
-  btn.disabled = !valid;
-  btn.style.opacity = valid ? '1' : '0.6';
+  if (saveDraftBtn) { saveDraftBtn.disabled = !valid; saveDraftBtn.style.opacity = valid ? '1' : '0.6'; }
+  if (publishBtn) { publishBtn.disabled = !valid; publishBtn.style.opacity = valid ? '1' : '0.6'; }
 }
 
 // Toggle button loading state: adds small spinner and disables button
@@ -471,24 +471,59 @@ function handleLogout() {
 }
 
 function goTo(page) {
+  if (page === 'open-store') page = 'merchant';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + page);
   if (target) target.classList.add('active');
 
-  document.querySelectorAll('.nav-link').forEach(l => { l.style.background = l.dataset.nav === page ? 'rgba(255,255,255,0.1)' : ''; l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db'; });
-  document.querySelectorAll('.side-link').forEach(l => { l.style.background = l.dataset.nav === page ? 'rgba(255,255,255,0.1)' : ''; l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db'; });
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.nav === page);
+    l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db';
+  });
+  document.querySelectorAll('.side-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.nav === page);
+    l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db';
+  });
+
+  const mobileSidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  if (mobileSidebar) mobileSidebar.classList.remove('open');
+  if (sidebarOverlay) sidebarOverlay.classList.remove('open');
 
   if (page === 'cart') renderCart();
   if (page === 'payment') renderPayment();
   if (page === 'shop') renderShop();
   if (page === 'messages') renderConversations();
-  window.scrollTo(0, 0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('open');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (!sidebar || !overlay) return;
+  const isOpen = sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  if (sidebarToggle) sidebarToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleSidebar();
+  });
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+  document.addEventListener('click', (event) => {
+    const sidebar = document.getElementById('sidebar');
+    const isOpen = sidebar && sidebar.classList.contains('open');
+    if (!isOpen) return;
+    const insideSidebar = sidebar.contains(event.target);
+    const toggleButton = document.getElementById('sidebar-toggle');
+    if (toggleButton && toggleButton.contains(event.target)) return;
+    if (!insideSidebar) toggleSidebar();
+  });
+});
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -530,12 +565,13 @@ async function restoreSession() {
 
   const token = localStorage.getItem('els_token');
   const userData = localStorage.getItem('els_user');
+  const apiBase = window.API_BASE || 'http://localhost:8001/api';
 
   if (!token || !userData) return false;
 
   try {
 
-    const response = await fetch(`${window.API_BASE}/auth/verify`, {
+    const response = await fetch(`${apiBase}/auth/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

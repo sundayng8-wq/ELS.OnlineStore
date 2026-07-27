@@ -44,11 +44,7 @@ app.use('/api/auth/verify-otp', authLimiter);
 app.use('/api/', generalLimiter);
 
 app.use(cors());
-<<<<<<< HEAD
 app.use(express.json({ limit: '20mb' }));
-=======
-app.use(express.json());
->>>>>>> c7df98d9edeff8574c2dd1eab27c04fa9fbeab33
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
