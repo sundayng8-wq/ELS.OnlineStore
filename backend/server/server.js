@@ -22,6 +22,8 @@ const UPLOAD_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const app = express();
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 // Rate limiters
 const authLimiter = rateLimit({
@@ -45,9 +47,14 @@ app.use('/api/auth/send-otp', authLimiter);
 app.use('/api/auth/verify-otp', authLimiter);
 app.use('/api/', generalLimiter);
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '20mb' }));
-app.use('/uploads', express.static(UPLOAD_DIR));
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '1d' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/stores', storeRoutes);
@@ -74,13 +81,26 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.json({ url });
 });
 
+app.get('/health', (req, res) => res.json({ ok: true, service: 'els-online-store', timestamp: new Date().toISOString() }));
 app.get('/', (req, res) => res.send('ELS upload server is running'));
+app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(err.status || 500).json({ success: false, message: err.message || 'Internal server error' });
+});
 
 const port = process.env.PORT || 8001;
 
-connectDB().then(() => {
-  app.listen(port, () => {
-  console.log(`ELS server running on http://localhost:${port}`);
-  startReconciliationCron();
-});
-});
+connectDB()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`ELS server running on http://localhost:${port}`);
+      startReconciliationCron();
+    });
+  })
+  .catch((err) => {
+    console.error('Database connection failed:', err.message);
+    app.listen(port, () => {
+      console.log(`ELS server running on http://localhost:${port} without database connectivity`);
+    });
+  });

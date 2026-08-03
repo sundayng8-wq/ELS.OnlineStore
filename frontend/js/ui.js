@@ -124,7 +124,68 @@ function setupHomeCarousel(keywords) {
 window.addEventListener('load', () => {
   setupHomeCarousel();
   try { bindButtonTouchResponses(); } catch (e) { }
+  try { initAccessibility(); } catch (e) { }
 });
+
+function initAccessibility() {
+  const toast = document.getElementById('toast');
+  if (toast) {
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.setAttribute('aria-atomic', 'true');
+  }
+
+  const loader = document.getElementById('loading-overlay');
+  if (loader) {
+    loader.setAttribute('role', 'status');
+    loader.setAttribute('aria-live', 'polite');
+  }
+
+  document.querySelectorAll('form').forEach((form) => {
+    if (!form.hasAttribute('novalidate')) form.setAttribute('novalidate', 'true');
+  });
+
+  const passEl = document.getElementById('reg-pass');
+  const confirmEl = document.getElementById('reg-confirm-pass');
+  if (passEl && confirmEl) {
+    passEl.addEventListener('input', updatePasswordStrengthUI);
+    confirmEl.addEventListener('input', updatePasswordStrengthUI);
+  }
+
+  updatePasswordStrengthUI();
+}
+
+function updatePasswordStrengthUI() {
+  const passEl = document.getElementById('reg-pass');
+  const labelEl = document.getElementById('password-strength-label');
+  const meterEl = document.getElementById('password-strength')?.querySelector('div');
+  if (!passEl || !labelEl || !meterEl) return;
+
+  const password = passEl.value || '';
+  let score = 0;
+  if (password.length >= 8) score += 1;
+  if (/[A-Z]/.test(password)) score += 1;
+  if (/[a-z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+  const width = Math.min(100, score * 20);
+  const [label, color] = score >= 4 ? ['Strong', '#10b981'] : score >= 3 ? ['Good', '#f59e0b'] : score >= 2 ? ['Fair', '#f97316'] : ['Weak', '#ef4444'];
+
+  meterEl.style.width = `${width}%`;
+  meterEl.style.backgroundColor = color;
+  labelEl.textContent = label;
+  labelEl.style.color = color;
+}
+
+function setAppLoading(loading, label = 'Loading...') {
+  const overlay = document.getElementById('loading-overlay');
+  if (!overlay) return;
+  const textEl = overlay.querySelector('[data-loading-text]');
+  if (textEl) textEl.textContent = label;
+  overlay.classList.toggle('hidden', !loading);
+  overlay.classList.toggle('flex', loading);
+}
 
 function showUploadModal(count) {
   const modal = document.getElementById('upload-modal');
@@ -364,6 +425,8 @@ async function handleLogin(e) {
   }
 
   try {
+    setAppLoading(true, 'Signing you in...');
+    setButtonLoading(document.querySelector('#login-form button[type="submit"]'), true, 'Signing in');
     showToast('Logging in...', 'loading');
     const response = await fetch(window.API_BASE + '/auth/login', {
       method: 'POST',
@@ -382,12 +445,12 @@ async function handleLogin(e) {
     try {
       data = JSON.parse(text);
     } catch (err) {
-      showToast(`Login failed: ${response.status} ${text}`);
+      showToast(`Login failed: ${response.status} ${text}`, 'error');
       return;
     }
 
     if (!data.success) {
-      showToast(data.message || 'Login failed');
+      showToast(data.message || 'Login failed', 'error');
       return;
     }
 
@@ -402,7 +465,10 @@ async function handleLogin(e) {
     enterApp();
   } catch (err) {
     console.error('Login error:', err);
-    showToast('Connection error. Make sure server is running on port 8001');
+    showToast('Connection error. Make sure server is running on port 8001', 'error');
+  } finally {
+    setAppLoading(false);
+    setButtonLoading(document.querySelector('#login-form button[type="submit"]'), false);
   }
 }
 
@@ -433,6 +499,8 @@ async function handleRegister(e) {
   }
 
   try {
+    setAppLoading(true, 'Creating your account...');
+    setButtonLoading(document.querySelector('#register-form button[type="submit"]'), true, 'Creating account');
     showToast('Creating account...', 'loading');
     const response = await fetch(window.API_BASE + '/auth/register', {
       method: 'POST',
@@ -445,12 +513,12 @@ async function handleRegister(e) {
     try {
       data = JSON.parse(text);
     } catch (err) {
-      showToast(`Registration failed: ${response.status} ${text}`);
+      showToast(`Registration failed: ${response.status} ${text}`, 'error');
       return;
     }
 
     if (!data.success) {
-      showToast(data.message || 'Registration failed');
+      showToast(data.message || 'Registration failed', 'error');
       return;
     }
 
@@ -462,11 +530,14 @@ async function handleRegister(e) {
     };
 
     persistAuthSession(userPayload, data.token, rememberMe);
-    showToast('Account created successfully!');
+    showToast('Account created successfully!', 'success');
     enterApp();
   } catch (err) {
     console.error('Register error:', err);
-    showToast('Connection error. Make sure server is running on port 8001');
+    showToast('Connection error. Make sure server is running on port 8001', 'error');
+  } finally {
+    setAppLoading(false);
+    setButtonLoading(document.querySelector('#register-form button[type="submit"]'), false);
   }
 }
 
@@ -535,11 +606,15 @@ function toggleSidebar() {
   document.getElementById('sidebar-overlay').classList.toggle('open');
 }
 
-function showToast(msg) {
+function showToast(msg, type = 'info', duration = 2600) {
   const t = document.getElementById('toast');
+  if (!t) return;
+  const normalizedType = ['success', 'error', 'loading', 'info'].includes(type) ? type : 'info';
+  t.className = `toast-msg ${normalizedType}`;
   t.textContent = msg;
   t.classList.remove('hidden');
-  setTimeout(() => t.classList.add('hidden'), 2500);
+  clearTimeout(t._hideTimer);
+  t._hideTimer = setTimeout(() => t.classList.add('hidden'), duration);
 }
 
 function persistAuthSession(user, token, rememberMe = true) {
