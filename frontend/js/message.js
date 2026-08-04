@@ -1,4 +1,85 @@
 // ===== MESSAGING =====
+window.contactDirectory = window.contactDirectory || [];
+
+function toggleContactActionMenu(event) {
+  event?.stopPropagation();
+  const menu = document.getElementById('contact-action-menu');
+  if (menu) menu.classList.toggle('hidden');
+}
+
+function closeContactActionMenu() {
+  const menu = document.getElementById('contact-action-menu');
+  if (menu) menu.classList.add('hidden');
+}
+
+function openContactModal() {
+  closeContactActionMenu();
+  const modal = document.getElementById('contact-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    const input = document.getElementById('contact-name');
+    if (input) input.focus();
+  }
+}
+
+function closeContactModal() {
+  const modal = document.getElementById('contact-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function submitContactForm(event) {
+  event?.preventDefault();
+  const name = document.getElementById('contact-name')?.value?.trim();
+  const phone = document.getElementById('contact-phone')?.value?.trim();
+  const region = document.getElementById('contact-region')?.value?.trim() || 'global';
+  if (!name) {
+    showToast('Please enter a contact name');
+    return;
+  }
+  const contact = { id: `contact-${Date.now()}`, name, phone, region, role: 'Delivery contact' };
+  window.contactDirectory.push(contact);
+  const convId = `contact-${contact.id}`;
+  let conv = conversations.find(c => c.id === convId);
+  if (!conv) {
+    conv = {
+      id: convId,
+      title: `Direct contact • ${name}`,
+      participants: [name, currentUser?.name || 'You'],
+      region,
+      channel: 'direct contact',
+      isOnline: true,
+      phone,
+      messages: []
+    };
+    conversations.unshift(conv);
+  }
+  currentConversation = conv;
+  closeContactModal();
+  goTo('messages');
+  renderConversations();
+  showToast(`Contact added and chat opened for ${name}`);
+}
+
+function startQuickCall() {
+  closeContactActionMenu();
+  const phone = currentConversation?.phone || window.contactDirectory[0]?.phone;
+  if (!phone) {
+    showToast('Add a contact phone number first');
+    return;
+  }
+  window.location.href = `tel:${phone}`;
+}
+
+function startQuickChat() {
+  closeContactActionMenu();
+  openContactModal();
+  showToast('Add a contact to start a direct chat');
+}
+
 function getConversationParticipantName(conversation) {
   const participants = (conversation?.participants || []).filter(Boolean);
   const currentName = currentUser?.name || 'User';
@@ -74,7 +155,7 @@ function renderConversations() {
 
   if (!conversations.length) {
     list.innerHTML = '<div class="rounded-3xl border border-dashed border-slate-700/50 bg-white/10 p-4 text-center text-sm text-slate-400">No live channels yet. Open an order or delivery request to start a logistics chat.</div>';
-    header.innerHTML = '<div class="flex items-center gap-2 text-sm text-slate-500"><i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i> Select a regional delivery thread</div>';
+    header.innerHTML = '<div class="flex flex-col gap-1"><div class="flex items-center gap-2 text-sm font-semibold text-slate-700"><i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i> JovAli Delivery Hub</div><p class="text-xs text-slate-500">Use the plus button to add a contact, call directly, or start a new chat.</p></div>';
     inputArea.classList.add('hidden');
     container.innerHTML = '';
     return;
@@ -128,7 +209,7 @@ function renderConversations() {
     inputArea.classList.remove('hidden');
     renderMessages();
   } else {
-    header.innerHTML = '<div class="flex items-center gap-2 text-sm text-slate-500"><i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i> Select a regional delivery thread</div>';
+    header.innerHTML = '<div class="flex flex-col gap-1"><div class="flex items-center gap-2 text-sm font-semibold text-slate-700"><i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i> JovAli Delivery Hub</div><p class="text-xs text-slate-500">Choose a contact or use the plus button to add one.</p></div>';
     inputArea.classList.add('hidden');
   }
 

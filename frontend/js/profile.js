@@ -75,6 +75,32 @@ function loadUserIfExists(email) {
   return false;
 }
 
+let profileAutoSaveTimer = null;
+
+function bindProfileAutoSave() {
+  const form = document.getElementById('profile-form');
+  if (!form) return;
+
+  const fields = ['profile-name', 'profile-email', 'profile-bio']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+
+  if (fields.length && !form.dataset.autoSaveBound) {
+    fields.forEach(el => {
+      el.addEventListener('input', scheduleProfileAutoSave);
+      el.addEventListener('change', scheduleProfileAutoSave);
+    });
+    form.dataset.autoSaveBound = 'true';
+  }
+}
+
+function scheduleProfileAutoSave() {
+  clearTimeout(profileAutoSaveTimer);
+  profileAutoSaveTimer = setTimeout(() => {
+    saveProfile(null, { silent: true });
+  }, 500);
+}
+
 /**
  * Renders user meta context configuration values into inputs.
  */
@@ -104,19 +130,22 @@ function renderProfile() {
       placeholder.textContent = (currentUser.name || '').charAt(0).toUpperCase() || 'U'; 
     }
   }
+
+  bindProfileAutoSave();
 }
 
 /**
  * Serializes mutations to localStorage metadata nodes securely.
  */
-async function saveProfile(e) {
-  e.preventDefault();
+async function saveProfile(e, options = {}) {
+  if (e?.preventDefault) e.preventDefault();
+  const silent = options?.silent === true;
   const name = (document.getElementById('profile-name')?.value || '').trim();
   const email = (document.getElementById('profile-email')?.value || '').trim();
   const bio = (document.getElementById('profile-bio')?.value || '').trim();
 
-  if (!name) return showToast('Please enter a display name');
-  currentUser.name = name; 
+  if (!name && !options?.allowEmptyName) return showToast('Please enter a display name');
+  currentUser.name = name || currentUser.name || 'User'; 
   currentUser.email = email; 
   currentUser.bio = bio;
 
@@ -155,8 +184,7 @@ async function saveProfile(e) {
   try { updateHeaderAvatar(); } catch (e) {}
   try { renderProfile(); } catch (e) {}
 
-  showToast('Profile saved');
-  goTo('home');
+  if (!silent) showToast('Profile saved');
 }
 
 /**
@@ -191,6 +219,7 @@ function handleProfileAvatarInput(ev) {
 
       const form = document.getElementById('profile-form'); 
       if (form) form.dataset.avatarTemp = dataUrl;
+      await saveProfile(null, { silent: true, allowEmptyName: true });
     } catch (err) {
       console.error('Avatar processing failed', err);
       showToast('Failed to process avatar');
@@ -211,6 +240,7 @@ function clearProfileAvatarPreviewPage() {
 
   const form = document.getElementById('profile-form'); 
   if (form) delete form.dataset.avatarTemp;
+  scheduleProfileAutoSave();
 }
 
 

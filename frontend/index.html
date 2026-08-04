@@ -288,7 +288,6 @@
       <nav class="hidden md:flex items-center gap-1">
        <button onclick="goTo('home')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="home">Home</button>
        <button onclick="goTo('shop')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="shop">Shop</button>
-        <button onclick="goTo('open-store')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="open-store">Open Store</button>
         <button onclick="goTo('my-store')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="my-store">My Store</button>
        <button onclick="goTo('about')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="about">About</button>
        <button onclick="goTo('contact')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="contact">Contact</button>
@@ -315,8 +314,10 @@
           <h2 class="text-2xl font-bold mb-4" style="color:#1a1a2e;">Edit Profile</h2>
           <form id="profile-form" onsubmit="saveProfile(event)">
             <div class="text-center mb-4">
-              <img id="profile-avatar-preview-page" src="" alt="avatar preview" class="mx-auto rounded-full w-24 h-24 object-cover hidden" />
-              <div id="profile-avatar-placeholder-page" class="mx-auto w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600"></div>
+              <button type="button" onclick="document.getElementById('profile-avatar-input-page').click()" class="mx-auto inline-flex items-center justify-center rounded-full border border-slate-200 p-1 transition hover:scale-105">
+                <img id="profile-avatar-preview-page" src="" alt="avatar preview" class="rounded-full w-24 h-24 object-cover hidden" />
+                <div id="profile-avatar-placeholder-page" class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600"></div>
+              </button>
               <input id="profile-avatar-input-page" type="file" accept="image/*" class="hidden" onchange="handleProfileAvatarInput(event)" />
               <div class="flex gap-2 justify-center mt-3">
                 <button type="button" onclick="document.getElementById('profile-avatar-input-page').click()" class="px-4 py-2 rounded-xl bg-gray-100">Choose Avatar</button>
@@ -358,7 +359,7 @@
      </div>
      <div class="flex-1 py-4 px-3 flex flex-col gap-1 overflow-auto">
       <button onclick="goTo('home');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="home"><i data-lucide="home" class="w-4 h-4"></i>Home</button> <button onclick="goTo('shop');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="shop"><i data-lucide="shopping-bag" class="w-4 h-4"></i>Shop</button>
-               <button onclick="goTo('open-store');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="open-store"><i data-lucide="store" class="w-4 h-4"></i>Open Store</button> <button onclick="goTo('my-store');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="my-store"><i data-lucide="layout-dashboard" class="w-4 h-4"></i>My Store</button> <button onclick="goTo('cart');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="cart"><i data-lucide="shopping-cart" class="w-4 h-4"></i>Cart</button> <button onclick="goTo('orders');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="orders"><i data-lucide="package" class="w-4 h-4"></i>Orders</button> <button onclick="goTo('logistics');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="logistics"><i data-lucide="truck" class="w-4 h-4"></i>Logistics</button> <button onclick="goTo('payment');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="payment"><i data-lucide="credit-card" class="w-4 h-4"></i>Payment</button> <button onclick="goTo('about');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="about"><i data-lucide="info" class="w-4 h-4"></i>About</button> <button onclick="goTo('contact');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="contact"><i data-lucide="mail" class="w-4 h-4"></i>Contact</button>
+               <button onclick="goTo('my-store');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="my-store"><i data-lucide="layout-dashboard" class="w-4 h-4"></i>My Store</button> <button onclick="goTo('cart');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="cart"><i data-lucide="shopping-cart" class="w-4 h-4"></i>Cart</button> <button onclick="goTo('orders');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="orders"><i data-lucide="package" class="w-4 h-4"></i>Orders</button> <button onclick="goTo('logistics');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="logistics"><i data-lucide="truck" class="w-4 h-4"></i>Logistics</button> <button onclick="goTo('payment');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="payment"><i data-lucide="credit-card" class="w-4 h-4"></i>Payment</button> <button onclick="goTo('about');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="about"><i data-lucide="info" class="w-4 h-4"></i>About</button> <button onclick="goTo('contact');toggleSidebar()" class="side-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition text-sm font-medium" data-nav="contact"><i data-lucide="mail" class="w-4 h-4"></i>Contact</button>
      </div>
      <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.08);">
       <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition text-sm font-medium"><i data-lucide="log-out" class="w-4 h-4"></i>Sign Out</button>
@@ -1161,10 +1162,26 @@
               <p class="text-xs text-emerald-600 font-medium">Online & Active</p>
             </div>
           </div>
-          <div class="flex items-center gap-1 text-slate-500">
-            <button class="p-2 rounded-full hover:bg-slate-200/60 transition" title="New Chat">
-              <i data-lucide="message-square-plus" class="w-5 h-5"></i>
-            </button>
+          <div class="relative flex items-center gap-1 text-slate-500">
+            <div class="relative">
+              <button id="contact-action-trigger" type="button" onclick="toggleContactActionMenu(event)" class="p-2 rounded-full hover:bg-slate-200/60 transition" title="New Chat">
+                <i data-lucide="message-square-plus" class="w-5 h-5"></i>
+              </button>
+              <div id="contact-action-menu" class="absolute right-0 top-12 z-20 hidden w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                <button type="button" onclick="openContactModal()" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                  <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i>
+                  <span>Add contact</span>
+                </button>
+                <button type="button" onclick="startQuickCall()" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                  <i data-lucide="phone" class="w-4 h-4 text-indigo-600"></i>
+                  <span>Direct call</span>
+                </button>
+                <button type="button" onclick="startQuickChat()" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                  <i data-lucide="message-circle" class="w-4 h-4 text-emerald-600"></i>
+                  <span>New chat</span>
+                </button>
+              </div>
+            </div>
             <button class="p-2 rounded-full hover:bg-slate-200/60 transition" title="Menu">
               <i data-lucide="more-vertical" class="w-5 h-5"></i>
             </button>
@@ -1195,8 +1212,8 @@
         <div class="flex items-center gap-3">
           <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-sm">?</div>
           <div>
-            <h3 class="text-sm font-bold text-slate-900">Select a conversation</h3>
-            <p class="text-xs text-slate-500">Choose a thread from the sidebar to start messaging</p>
+            <h3 class="text-sm font-bold text-slate-900">JovAli Delivery Hub</h3>
+            <p class="text-xs text-slate-500">Use the plus menu to add a contact, call directly, or start a secure chat</p>
           </div>
         </div>
       </div>
@@ -1233,6 +1250,33 @@
     </div>
   </div>
 </section>
+<div id="contact-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4">
+  <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h3 class="text-lg font-bold text-slate-900">Add delivery contact</h3>
+        <p class="mt-1 text-sm text-slate-500">Save a contact and launch a direct call or chat from the logistics hub.</p>
+      </div>
+      <button type="button" onclick="closeContactModal()" class="rounded-full p-2 text-slate-500 hover:bg-slate-100" aria-label="Close contact form">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <form onsubmit="submitContactForm(event)" class="mt-5 space-y-3">
+      <input id="contact-name" type="text" required placeholder="Contact name" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-emerald-500" />
+      <input id="contact-phone" type="tel" placeholder="Phone number" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-emerald-500" />
+      <select id="contact-region" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-emerald-500">
+        <option value="lagos">Lagos Hub</option>
+        <option value="abuja">Abuja Hub</option>
+        <option value="enugu">Enugu Hub</option>
+        <option value="port-harcourt">Port Harcourt Hub</option>
+      </select>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeContactModal()" class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700">Cancel</button>
+        <button type="submit" class="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Save contact</button>
+      </div>
+    </form>
+  </div>
+</div>
 <div id="deliveryPartnerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
   <div class="w-full max-w-2xl rounded-3xl overflow-hidden bg-white shadow-2xl">
     <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
