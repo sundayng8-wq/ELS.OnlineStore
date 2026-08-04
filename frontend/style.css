@@ -390,4 +390,16 @@ button:hover {
         grid-template-columns: 1fr;
     }
 }
-body { box-sizing: border-box; }
+body { box-sizing: border-box; background: #f8fafc; }
+
+.logistics-page .rounded-\[28px\] {
+  backdrop-filter: blur(20px);
+}
+
+.logistics-page .shadow-\[0_20px_60px_rgba\(15,23,42,0.05\)\] {
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.05);
+}
+
+.logistics-page .shadow-\[0_25px_70px_rgba\(15,23,42,0.18\)\] {
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.18);
+}
