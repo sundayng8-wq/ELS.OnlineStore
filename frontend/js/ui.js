@@ -11,6 +11,22 @@ let isLogisticsProvider = false;
 let logisticsFees = { 'Standard': 5, 'Express': 12, 'Overnight': 25, 'Pickup': 0 };
 window.activeUploads = [];
 
+// Ensure `window.API_BASE` is available early so session restore works
+if (!window.API_BASE) {
+  try {
+    if (location && location.protocol === 'file:') {
+      window.API_BASE = 'http://localhost:8001/api';
+    } else if (location && location.protocol && location.hostname) {
+      const port = location.port ? `:${location.port}` : '';
+      window.API_BASE = `${location.protocol}//${location.hostname}${port}/api`;
+    } else {
+      window.API_BASE = 'http://localhost:8001/api';
+    }
+  } catch (e) {
+    window.API_BASE = 'http://localhost:8001/api';
+  }
+}
+
 const defaultConfig = {
   site_name: 'JovA Marketplace',
   tagline: 'Shop. Sell. Thrive.',
@@ -465,7 +481,8 @@ async function handleLogin(e) {
     enterApp();
   } catch (err) {
     console.error('Login error:', err);
-    showToast('Connection error. Make sure server is running on port 8001', 'error');
+    const attempted = window.API_BASE || 'http://localhost:8001/api';
+    showToast(`Connection error to ${attempted}. Is the backend running?`, 'error');
   } finally {
     setAppLoading(false);
     setButtonLoading(document.querySelector('#login-form button[type="submit"]'), false);
@@ -534,7 +551,8 @@ async function handleRegister(e) {
     enterApp();
   } catch (err) {
     console.error('Register error:', err);
-    showToast('Connection error. Make sure server is running on port 8001', 'error');
+    const attempted = window.API_BASE || 'http://localhost:8001/api';
+    showToast(`Connection error to ${attempted}. Is the backend running?`, 'error');
   } finally {
     setAppLoading(false);
     setButtonLoading(document.querySelector('#register-form button[type="submit"]'), false);

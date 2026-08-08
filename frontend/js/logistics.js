@@ -1,5 +1,5 @@
 /**
- * ELS Platform — Advanced Escrow Logistics System (Core UI & State Controller Layer)
+ * JovAli market Platform — Advanced Escrow Logistics System (Core UI & State Controller Layer)
  * Implementation: Defensive Data Mutation, UI Scoping & Dynamic State Tracking
  */
 
@@ -126,7 +126,7 @@
                                 <p class="font-bold text-xs text-slate-800">${order.order_id}</p>
                                 <p class="text-[10px] text-slate-400 font-medium">To: ${order.buyer_name || 'Verified Buyer'}</p>
                             </div>
-                            <button onclick="ELS_Engine.requestLogisticsPickup('${order.order_id}')" class="px-2.5 py-1 rounded bg-indigo-600 text-white text-[10px] font-bold hover:bg-indigo-700 shadow-sm transition">
+                            <button onclick="JAS_Engine.requestLogisticsPickup('${order.order_id}')" class="px-2.5 py-1 rounded bg-indigo-600 text-white text-[10px] font-bold hover:bg-indigo-700 shadow-sm transition">
                                 Book Pickup
                             </button>
                         </div>
@@ -158,7 +158,7 @@
                                 <p class="font-bold text-xs text-slate-800">${order.order_id}</p>
                                 <p class="text-[10px] text-slate-500">${order.buyer_name || 'Client'} → ${order.delivery_method || 'Hub Delivery'}</p>
                             </div>
-                            <button onclick="ELS_Engine.acceptShipment('${order.order_id}')" class="px-2.5 py-1 rounded bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-700 shadow-sm transition">
+                            <button onclick="JAS_Engine.acceptShipment('${order.order_id}')" class="px-2.5 py-1 rounded bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-700 shadow-sm transition">
                                 Accept Route
                             </button>
                         </div>
@@ -184,7 +184,7 @@
                                 <p class="font-bold text-xs text-slate-800">${order.order_id}</p>
                                 <p class="text-[10px] font-mono text-indigo-500 font-semibold">${order.tracking_number || 'TRK-GEN'}</p>
                             </div>
-                            <button onclick="ELS_Engine.completeDelivery('${order.order_id}')" class="px-2.5 py-1 rounded bg-indigo-600 text-white text-[10px] font-bold hover:bg-indigo-700 shadow-sm transition">
+                            <button onclick="JAS_Engine.completeDelivery('${order.order_id}')" class="px-2.5 py-1 rounded bg-indigo-600 text-white text-[10px] font-bold hover:bg-indigo-700 shadow-sm transition">
                                 Deliver Package
                             </button>
                         </div>
@@ -230,7 +230,7 @@
      */
     function acceptShipment(orderId) {
         const targetOrder = (window.allOrders || []).find(o => o.order_id === orderId);
-        const activeUser = window.currentUser || { name: 'ELS Courier Node' };
+        const activeUser = window.currentUser || { name: 'JAS Courier Node' };
 
         if (targetOrder) {
             targetOrder.order_status = 'In Transit';
@@ -762,7 +762,7 @@
         window.currentUser.region = user.region || window.currentUser.region || '';
         window.currentUser.logistics_id = user.logistics_id;
         window.currentUser.role = 'delivery';
-        try { localStorage.setItem('els_user', JSON.stringify(window.currentUser)); } catch (e) {}
+        try { localStorage.setItem('jas_user', JSON.stringify(window.currentUser)); } catch (e) {}
         updateLogisticsUserInfo();
         if (typeof renderProfile === 'function') renderProfile();
     }
@@ -796,7 +796,7 @@
         if (!name || !email || !password) {
             return showToast('Please complete all required registration fields');
         }
-        const logisticsId = `ELS-LG-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        const logisticsId = `JAS-LG-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
         const newPartner = {
             name,
             email,
@@ -863,7 +863,7 @@
         updateLogisticsUserInfo();
         renderLogisticsPartners();
         renderLogisticsAlerts();
-        const latestAlert = localStorage.getItem('els_latest_logistics_alert');
+        const latestAlert = localStorage.getItem('jas_latest_logistics_alert');
         if (latestAlert) {
             try {
                 startLogisticsLiveStream(JSON.parse(latestAlert));
@@ -887,7 +887,7 @@
     });
 
     // Explicit Context Namespace Binding Export
-    window.ELS_Engine = {
+    window.JAS_Engine = {
         renderOrders,
         renderLogisticsView,
         toggleLogisticsRole,
