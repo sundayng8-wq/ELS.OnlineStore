@@ -220,7 +220,7 @@
         const targetOrder = (window.allOrders || []).find(o => o.order_id === orderId);
         if (targetOrder) {
             targetOrder.order_status = 'Awaiting Pickup';
-            if (typeof window.showToast === 'function') window.showToast('✓ Shipment routing initialized via ELS Escrow Engine.');
+            if (typeof window.showToast === 'function') window.showToast('✓ Shipment routing initialized via JAS Escrow Engine.');
             renderLogisticsView();
         }
     }
@@ -235,7 +235,13 @@
         if (targetOrder) {
             targetOrder.order_status = 'In Transit';
             targetOrder.logistics_provider = activeUser.name;
-            targetOrder.tracking_number = `ELS-TRK-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+            // Generate a delivery verification code in the format JAS-<6digits>-NG
+            function generateDeliveryCode() {
+                const digits = Math.floor(100000 + Math.random() * 900000);
+                return `JAS-${digits}-NG`;
+            }
+
+            targetOrder.tracking_number = generateDeliveryCode();
             targetOrder.estimated_delivery = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString();
 
             if (typeof window.showToast === 'function') {

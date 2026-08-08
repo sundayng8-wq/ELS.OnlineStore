@@ -110,7 +110,7 @@ body {
        }
 .toast-msg.success { background: rgba(5, 150, 105, 0.95); }
 .toast-msg.error { background: rgba(220, 38, 38, 0.95); }
-.toast-msg.loading { background: rgba(59, 130, 246, 0.95); }
+.toast-msg.loading { background: rgba(59, 131, 246, 0.705); }
 #loading-overlay {
   backdrop-filter: blur(8px);
 }
@@ -189,7 +189,7 @@ input:focus, textarea:focus, select:focus { outline: none; }
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 .message-bubble--mine .message-bubble__card {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #4e46aac5 100%);
   color: white;
 }
 .message-bubble--other .message-bubble__card {

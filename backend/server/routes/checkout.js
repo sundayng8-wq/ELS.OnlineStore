@@ -6,6 +6,7 @@ const Transaction = require('../models/Transaction');
 const Product = require('../models/Product');
 const Store = require('../models/Store');
 const auth = require('../middleware/auth');
+const { initializeTransaction } = require('../services/paystack');
 
 // Generate unique reference
 function generateRef(prefix) {
@@ -119,8 +120,37 @@ router.post('/', auth, async (req, res) => {
     // Clear cart
     await Cart.findOneAndDelete({ buyer_id: req.user.userId });
 
-    // TODO: Integrate with Paystack/Flutterwave here
-    // For now, return transaction details for manual payment testing
+    let paymentUrl = null;
+    try {
+      const currency = 'NGN';
+      const customerEmail = req.user.email || 'customer@els.store';
+      const oneSellerGroup = Object.values(sellerGroups).length === 1 ? Object.values(sellerGroups)[0] : null;
+      const subaccountCode = oneSellerGroup ? (await Store.findById(oneSellerGroup.store_id)).paystack_subaccount_code : null;
+      const initializeData = {
+        email: customerEmail,
+        amount: Math.round(totalAmount * 100),
+        reference: parentTxnId,
+        currency,
+        metadata: {
+          parent_transaction_id: parentTxnId,
+          order_ids: orderIds,
+          split_details: splitDetails
+        }
+      };
+
+      if (subaccountCode) {
+        initializeData.subaccount = subaccountCode;
+        initializeData.transaction_charge = Math.round(oneSellerGroup.subtotal * oneSellerGroup.commission_rate / 100 * 100) || 0;
+        initializeData.bearer = 'account';
+      }
+
+      const paystackRes = await initializeTransaction(initializeData);
+      if (paystackRes && paystackRes.status && paystackRes.data && paystackRes.data.authorization_url) {
+        paymentUrl = paystackRes.data.authorization_url;
+      }
+    } catch (err) {
+      console.error('Paystack init error:', err);
+    }
 
     res.status(201).json({
       success: true,
@@ -128,7 +158,7 @@ router.post('/', auth, async (req, res) => {
       transaction: {
         parent_transaction_id: parentTxnId,
         total_amount: totalAmount,
-        currency: 'KES',
+        currency: 'NGN',
         split_summary: splitDetails.map(s => ({
           seller: s.seller_id || 'Platform',
           amount: s.amount,
@@ -138,7 +168,7 @@ router.post('/', auth, async (req, res) => {
         order_count: orderIds.length,
         orders: orderIds
       },
-      payment_url: null // Will be set when gateway is integrated
+      payment_url: paymentUrl
     });
   } catch (err) {
     console.error('Checkout error:', err);

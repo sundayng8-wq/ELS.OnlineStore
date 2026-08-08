@@ -145,15 +145,17 @@ async function saveProfile(e, options = {}) {
   const bio = (document.getElementById('profile-bio')?.value || '').trim();
 
   if (!name && !options?.allowEmptyName) return showToast('Please enter a display name');
-  currentUser.name = name || currentUser.name || 'User'; 
-  currentUser.email = email; 
+  currentUser.name = name || currentUser.name || 'User';
+  currentUser.email = email;
   currentUser.bio = bio;
 
   // Check for avatar uploaded on profile page
   try {
     const avatarTemp = document.getElementById('profile-form')?.dataset?.avatarTemp;
     if (avatarTemp) {
-      // If cloud upload is configured, attempt to upload and store a remote URL
+      currentUser.avatarDataUrl = avatarTemp;
+      try { updateHeaderAvatar(); } catch (e) {}
+
       const isCloudConfigured = window.cloudImageUploadUrl || 
                                 window.CLOUD_IMAGE_UPLOAD_URL || 
                                 typeof window.cloudImageUploadHandler === 'function' || 
@@ -167,20 +169,47 @@ async function saveProfile(e, options = {}) {
         } catch (err) {
           console.warn('avatar upload failed', err);
           currentUser.avatarDataUrl = avatarTemp;
-          showToast('Avatar upload failed — saved locally');
+          if (!silent) showToast('Avatar upload failed — saved locally');
         }
-      } else {
-        // No cloud configured — save data URL locally
-        currentUser.avatarDataUrl = avatarTemp;
       }
-      // Remove temp dataset after consuming
       try { delete document.getElementById('profile-form').dataset.avatarTemp; } catch (e) {}
     }
-  } catch (e) { 
-    console.warn('avatar check failed', e); 
+  } catch (e) {
+    console.warn('avatar check failed', e);
   }
 
-  try { localStorage.setItem('els_user', JSON.stringify(currentUser)); } catch (e) {}
+  const token = localStorage.getItem('els_token') || sessionStorage.getItem('els_token');
+  if (token) {
+    try {
+      const response = await fetch(`${window.API_BASE || 'http://localhost:8001/api'}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: currentUser.name,
+          bio: currentUser.bio,
+          avatar: currentUser.avatarDataUrl
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success && data.user) {
+        currentUser = Object.assign({}, currentUser, data.user);
+      } else {
+        console.warn('Profile save failed on server', data);
+      }
+    } catch (err) {
+      console.warn('Profile sync failed', err);
+    }
+  }
+
+  try {
+    const storage = localStorage.getItem('els_token') ? localStorage : (sessionStorage.getItem('els_token') ? sessionStorage : localStorage);
+    storage.setItem('els_user', JSON.stringify(currentUser));
+  } catch (e) {}
+
   try { updateHeaderAvatar(); } catch (e) {}
   try { renderProfile(); } catch (e) {}
 
@@ -216,6 +245,9 @@ function handleProfileAvatarInput(ev) {
         preview.classList.remove('hidden'); 
         placeholder.classList.add('hidden'); 
       }
+
+      currentUser.avatarDataUrl = dataUrl;
+      try { updateHeaderAvatar(); } catch (e) {}
 
       const form = document.getElementById('profile-form'); 
       if (form) form.dataset.avatarTemp = dataUrl;
@@ -305,6 +337,13 @@ function collectStoreFormPayload(prefix = '') {
     document.getElementById(prefix + 'payment-verification-note') || 
     document.getElementById(prefix + 'open-store-payment-verification-note') || {}
   ).value || '';
+
+  const paystackBusinessName = (document.getElementById(prefix + 'paystack-business-name') || document.getElementById(prefix + 'open-store-paystack-business-name') || {}).value || '';
+  const paystackContactEmail = (document.getElementById(prefix + 'paystack-contact-email') || document.getElementById(prefix + 'open-store-paystack-contact-email') || {}).value || '';
+  const paystackSettlementBank = (document.getElementById(prefix + 'paystack-settlement-bank') || document.getElementById(prefix + 'open-store-paystack-settlement-bank') || {}).value || '';
+  const paystackAccountNumber = (document.getElementById(prefix + 'paystack-account-number') || document.getElementById(prefix + 'open-store-paystack-account-number') || {}).value || '';
+  const paystackAccountName = (document.getElementById(prefix + 'paystack-account-name') || document.getElementById(prefix + 'open-store-paystack-account-name') || {}).value || '';
+  const paystackPercentageCharge = Number((document.getElementById(prefix + 'paystack-percentage-charge') || document.getElementById(prefix + 'open-store-paystack-percentage-charge') || {}).value || 0);
   
   const logoFile = (
     document.getElementById(prefix + 'store-logo') || 
@@ -316,15 +355,34 @@ function collectStoreFormPayload(prefix = '') {
     document.getElementById(prefix + 'open-store-banner') || {}
   ).files?.[0] || null;
 
-  return { name, desc, bankName, bankAccountName, bankAccountNumber, paymentMethod, paymentVerified, paymentVerificationNote, logoFile, bannerFile };
+  return {
+    name,
+    desc,
+    bankName,
+    bankAccountName,
+    bankAccountNumber,
+    paymentMethod,
+    paymentVerified,
+    paymentVerificationNote,
+    paystackBusinessName,
+    paystackContactEmail,
+    paystackSettlementBank,
+    paystackAccountNumber,
+    paystackAccountName,
+    paystackPercentageCharge,
+    logoFile,
+    bannerFile
+  };
 }
 
 /**
  * Generates or posts new multi-tenant merchant store registration schema payloads.
  */
 async function createStoreRecord(payload, btn) {
-  if (!payload.name || !payload.bankName || !payload.bankAccountName || !payload.bankAccountNumber) { 
-    showToast('Please fill required fields'); 
+  const bankAccountName = payload.bankAccountName || payload.paystackAccountName || '';
+  const bankAccountNumber = payload.bankAccountNumber || payload.paystackAccountNumber || '';
+  if (!payload.bankName || !bankAccountName || !bankAccountNumber) {
+    showToast('Please fill required bank or Paystack account details'); 
     return false; 
   }
 
@@ -338,15 +396,24 @@ async function createStoreRecord(payload, btn) {
     console.warn('image upload failed', e); 
   }
 
+  const activeUser = window.currentUser || JSON.parse(localStorage.getItem('els_user') || 'null') || {};
+  const defaultStoreName = activeUser.name ? `${activeUser.name}'s Store` : (activeUser.email ? `${activeUser.email.split('@')[0]}'s Store` : 'My Store');
+
   const storePayload = { 
-    store_name: payload.name, 
+    store_name: payload.name || defaultStoreName, 
     description: payload.desc, 
-    bank_account_name: payload.bankAccountName, 
-    bank_account_number: payload.bankAccountNumber, 
+    bank_account_name: bankAccountName, 
+    bank_account_number: bankAccountNumber, 
     bank_name: payload.bankName, 
     preferred_payment_method: payload.paymentMethod || 'bank_transfer', 
     bank_verification_status: payload.paymentVerified ? 'verified' : 'pending_verification',
     payment_verification_note: payload.paymentVerificationNote || '',
+    paystack_business_name: payload.paystackBusinessName || '',
+    paystack_contact_email: payload.paystackContactEmail || '',
+    paystack_settlement_bank: payload.paystackSettlementBank || '',
+    paystack_account_number: payload.paystackAccountNumber || '',
+    paystack_account_name: payload.paystackAccountName || '',
+    paystack_percentage_charge: Number(payload.paystackPercentageCharge || 0),
     logo_url: logoUrl, 
     banner_url: bannerUrl 
   };
@@ -358,7 +425,22 @@ async function createStoreRecord(payload, btn) {
       btn.innerHTML = 'Saving...'; 
     }
 
-    // Local Sandboxed Storage Strategy Fallback
+    const token = localStorage.getItem('els_token');
+    const API = window.API_BASE || 'http://localhost:8001/api';
+    let existingStore = null;
+    if (token) {
+      try {
+        const existingRes = await fetch(API + '/stores/mine', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        existingStore = existingRes.ok ? await existingRes.json() : null;
+      } catch (e) {
+        console.warn('Could not fetch existing store', e);
+      }
+    }
+    const url = API + '/stores' + (existingStore && existingStore.success && existingStore.store ? '/' + existingStore.store._id : '');
+    const method = existingStore && existingStore.success && existingStore.store ? 'PUT' : 'POST';
+
     if (window.localSdk && window.localSdk.stores) {
       const activeUser = window.currentUser || JSON.parse(localStorage.getItem('els_user') || 'null') || {};
       const store = Object.assign({}, storePayload, { 
@@ -396,9 +478,8 @@ async function createStoreRecord(payload, btn) {
     }
 
     // Live Server Endpoint Connection Strategy
-    const token = localStorage.getItem('els_token') || '';
-    const res = await fetch(`${window.API_BASE || 'http://localhost:8001/api'}/stores`, {
-      method: 'POST', 
+    const res = await fetch(url, {
+      method,
       headers: { 
         'Content-Type': 'application/json', 
         'Authorization': token ? `Bearer ${token}` : '' 
@@ -497,15 +578,54 @@ function renderOpenStoreStatus() {
 }
 
 // Global Core UI Event Listener Injections
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('create-store-form'); 
-  if (form) form.addEventListener('submit', submitCreateStore);
+async function loadOpenStoreDetails() {
+    const token = localStorage.getItem('els_token');
+    if (!token) return;
+    try {
+      const res = await fetch(`${window.API_BASE || 'http://localhost:8001/api'}/stores/mine`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !data.store) return;
+      const store = data.store;
+      const set = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value || '';
+      };
 
-  const openForm = document.getElementById('open-store-create-form'); 
-  if (openForm) openForm.addEventListener('submit', submitOpenStoreCreate);
+      set('open-store-name', store.store_name);
+      set('open-store-description', store.description);
+      set('open-store-bank-account-name', store.bank_account_name);
+      set('open-store-bank-account-number', store.bank_account_number);
+      set('open-store-bank-name', store.bank_name);
+      set('open-store-payment-method', store.preferred_payment_method || 'bank_transfer');
+      set('open-store-payment-verification-note', store.payment_verification_note || '');
+      set('open-store-paystack-business-name', store.paystack_business_name || '');
+      set('open-store-paystack-contact-email', store.paystack_contact_email || '');
+      set('open-store-paystack-settlement-bank', store.paystack_settlement_bank || '');
+      set('open-store-paystack-account-number', store.paystack_account_number || '');
+      set('open-store-paystack-account-name', store.paystack_account_name || '');
+      set('open-store-paystack-percentage-charge', store.paystack_percentage_charge || 0);
+      const verifiedEl = document.getElementById('open-store-payment-verified');
+      if (verifiedEl) verifiedEl.checked = store.paystack_verification_status === 'verified' || store.bank_verification_status === 'verified';
+    } catch (e) {
+      console.warn('Could not load open store details', e);
+    }
+  }
 
-  renderOpenStoreStatus();
-});
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('create-store-form'); 
+    if (form) form.addEventListener('submit', submitCreateStore);
+
+    const openForm = document.getElementById('open-store-create-form'); 
+    if (openForm) {
+      openForm.addEventListener('submit', submitOpenStoreCreate);
+      loadOpenStoreDetails();
+    }
+
+    renderOpenStoreStatus();
+  });
 
 
 // ============================================================================

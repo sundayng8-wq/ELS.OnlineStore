@@ -251,12 +251,13 @@ router.put('/profile', async (req, res) => {
     if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const { name, phone, avatar } = req.body;
+    const { name, phone, avatar, bio } = req.body;
 
     const updateFields = {};
     if (name) updateFields.name = name;
     if (phone) updateFields.phone = phone;
     if (avatar) updateFields.avatar = avatar;
+    if (bio) updateFields.bio = bio;
 
     const user = await User.findByIdAndUpdate(decoded.userId, { $set: updateFields }, { new: true }).select('-password');
 

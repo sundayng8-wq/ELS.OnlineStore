@@ -21,7 +21,7 @@ async function payWithPaystack() {
 
   try {
     // Step 1: Call our backend checkout endpoint
-    const checkoutRes = await fetch(window.API_BASE + '/checkout', {
+    const checkoutRes = await fetch((window.API_BASE || 'http://localhost:8001/api') + '/checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -52,8 +52,13 @@ async function payWithPaystack() {
     const email = userData.email || 'customer@els.store';
 
     // Step 3: Open Paystack with real transaction data
+    if (checkoutData.payment_url) {
+      window.location.href = checkoutData.payment_url;
+      return;
+    }
+
     const handler = PaystackPop.setup({
-      key: 'pk_test_e03176ae4b6a4910ea2bf5cb740923ccd27e877d',
+      key: window.PAYSTACK_PUBLIC_KEY || 'pk_test_e03176ae4b6a4910ea2bf5cb740923ccd27e877d',
       email: email,
       amount: Math.round(checkoutData.transaction.total_amount * 100), // Convert to kobo
       currency: checkoutData.transaction.currency || 'NGN',
@@ -84,7 +89,7 @@ async function payWithPaystack() {
 async function verifyPayment(reference) {
   try {
     const token = localStorage.getItem('els_token');
-    const res = await fetch(window.API_BASE + '/payment/callback', {
+    const res = await fetch((window.API_BASE || 'http://localhost:8001/api') + '/payment/callback', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -28,6 +28,22 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'global'
   },
+  avatar: {
+    type: String,
+    default: ''
+  },
+  phone: {
+    type: String,
+    default: ''
+  },
+  bio: {
+    type: String,
+    default: ''
+  },
+  logistics_id: {
+    type: String,
+    default: ''
+  },
   provider: {
     type: String,
     default: 'email'
