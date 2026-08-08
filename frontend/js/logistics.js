@@ -499,6 +499,24 @@
         if (typeof showToast === 'function') {
             showToast(`GPS route launched for ${order.order_id || 'current delivery'}`);
         }
+
+        // Also open Google Maps directions/search for quick external navigation access
+        try {
+            let googleUrl = null;
+            if (order && order.loc && order.loc.lat && order.loc.lng) {
+                // Use Google Maps directions to destination (origin optional for user)
+                googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${order.loc.lat},${order.loc.lng}&travelmode=driving`;
+            } else if (destination && typeof destination === 'string') {
+                googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
+            }
+
+            if (googleUrl) {
+                // Open in a new tab so the user can choose turn-by-turn directions
+                window.open(googleUrl, '_blank');
+            }
+        } catch (err) {
+            console.warn('Failed to open Google Maps', err);
+        }
     }
 
     function getStoredLogisticsPartners() {
