@@ -1,6 +1,29 @@
 // ===== MESSAGING =====
 window.contactDirectory = window.contactDirectory || [];
 
+// Load contacts from localStorage on page load
+function loadContactsFromStorage() {
+  try {
+    const savedContacts = localStorage.getItem('contactDirectory');
+    if (savedContacts) {
+      window.contactDirectory = JSON.parse(savedContacts);
+    }
+    const savedConversations = localStorage.getItem('conversations');
+    if (savedConversations) {
+      conversations = JSON.parse(savedConversations);
+    }
+  } catch (e) {
+    console.log('Could not load contacts from localStorage:', e);
+  }
+}
+
+// Initialize contacts on app start
+if (typeof document !== 'undefined' && document.readyState !== 'loading') {
+  loadContactsFromStorage();
+} else if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', loadContactsFromStorage);
+}
+
 function toggleContactActionMenu(event) {
   event?.stopPropagation();
   const menu = document.getElementById('contact-action-menu');
@@ -62,6 +85,14 @@ function submitContactForm(event) {
   goTo('messages');
   renderConversations();
   showToast(`Contact added and chat opened for ${name}`);
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem('contactDirectory', JSON.stringify(window.contactDirectory));
+    localStorage.setItem('conversations', JSON.stringify(conversations));
+  } catch (e) {
+    console.log('Could not save contacts to localStorage:', e);
+  }
 }
 
 function startQuickCall() {
@@ -167,8 +198,23 @@ function renderConversations() {
     const channelLabel = getConversationChannelLabel(c);
     const lastMessage = (c.messages && c.messages.length) ? c.messages[c.messages.length - 1].text : 'No delivery updates yet';
     const active = currentConversation?.id === c.id ? 'active' : '';
+    const isDirectContact = c.id.startsWith('contact-');
+    const menuBtn = isDirectContact ? `
+      <div class="relative">
+        <button type="button" onclick="toggleConversationMenu('${c.id}', event)" class="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-2 rounded-full hover:bg-slate-600/40 text-slate-300 hover:text-white" title="Options">
+          <i data-lucide="more-vertical" class="w-4 h-4"></i>
+        </button>
+        <div id="menu-${c.id}" class="hidden absolute right-0 top-8 z-30 w-48 rounded-xl border border-slate-600 bg-slate-800 shadow-lg">
+          <button type="button" onclick="deleteContact('${c.id}', event)" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/20">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Delete contact</span>
+          </button>
+        </div>
+      </div>
+    ` : '';
+    
     return `
-      <button onclick="selectConversation('${c.id}')" class="conversation-card ${active} w-full rounded-3xl p-3 text-left text-white">
+      <button onclick="selectConversation('${c.id}')" class="conversation-card group ${active} w-full rounded-3xl p-3 text-left text-white">
         <div class="flex items-start gap-2.5">
           <div class="relative mt-0.5">
             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-slate-700 text-sm font-bold text-white">${escHtml(participant.charAt(0).toUpperCase())}</div>
@@ -177,7 +223,10 @@ function renderConversations() {
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between gap-2">
               <p class="truncate text-sm font-semibold">${escHtml(participant)}</p>
-              <span class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">${presence.label}</span>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <span class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">${presence.label}</span>
+                ${menuBtn}
+              </div>
             </div>
             <p class="truncate text-[11px] text-slate-400">${escHtml(channelLabel)}</p>
             <p class="mt-1 truncate text-[11px] text-slate-500">${escHtml(lastMessage)}</p>
@@ -242,4 +291,58 @@ function renderMessages() {
 function selectConversation(id) {
   currentConversation = conversations.find(c => c.id === id);
   renderConversations();
+}
+
+// Delete a contact from the conversation list
+function deleteContact(contactId, event) {
+  event?.stopPropagation();
+  
+  // Find the contact to confirm deletion
+  const contact = window.contactDirectory.find(c => `contact-${c.id}` === contactId);
+  if (!contact) return;
+  
+  // Confirm deletion
+  if (!confirm(`Are you sure you want to delete contact "${contact.name}"? This action cannot be undone.`)) {
+    return;
+  }
+  
+  // Remove contact from directory
+  window.contactDirectory = window.contactDirectory.filter(c => `contact-${c.id}` !== contactId);
+  
+  // Remove conversation
+  conversations = conversations.filter(c => c.id !== contactId);
+  
+  // If deleted contact was selected, clear selection
+  if (currentConversation?.id === contactId) {
+    currentConversation = null;
+  }
+  
+  // Re-render
+  renderConversations();
+  showToast(`Contact deleted successfully`);
+  
+  // Save to localStorage if you have persistence
+  try {
+    localStorage.setItem('contactDirectory', JSON.stringify(window.contactDirectory));
+    localStorage.setItem('conversations', JSON.stringify(conversations));
+  } catch (e) {
+    console.log('Could not save to localStorage:', e);
+  }
+}
+
+// Toggle conversation action menu (three-dot menu)
+function toggleConversationMenu(conversationId, event) {
+  event?.stopPropagation();
+  const menu = document.getElementById(`menu-${conversationId}`);
+  if (!menu) return;
+  
+  // Close all other menus
+  document.querySelectorAll('[id^="menu-"]').forEach(m => {
+    if (m.id !== `menu-${conversationId}`) {
+      m.classList.add('hidden');
+    }
+  });
+  
+  // Toggle current menu
+  menu.classList.toggle('hidden');
 }

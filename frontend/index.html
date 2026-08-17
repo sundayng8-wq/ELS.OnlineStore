@@ -1420,23 +1420,88 @@
           <div class="bg-white rounded-3xl p-6 shadow-sm">
             <h3 class="font-semibold text-lg mb-5">Choose Payment Method</h3>
             <div class="grid grid-cols-2 gap-4 mb-8">
-              <button onclick="selectPaymentMethod(this)" data-method="card" class="payment-method-btn flex flex-col items-center gap-3 p-6 border-2 rounded-2xl">
+              <button onclick="selectPaymentMethod(this, 'card')" class="payment-method-btn flex flex-col items-center gap-3 p-6 border-2 border-emerald-600 rounded-2xl bg-emerald-50">
                 <i data-lucide="credit-card" class="w-8 h-8 text-emerald-600"></i>
-                <span class="font-medium">Card Payment</span>
+                <span class="font-medium text-sm">Card Payment</span>
               </button>
-              <button onclick="selectPaymentMethod(this)" data-method="bank" class="payment-method-btn flex flex-col items-center gap-3 p-6 border-2 rounded-2xl">
+              <button onclick="selectPaymentMethod(this, 'bank')" class="payment-method-btn flex flex-col items-center gap-3 p-6 border-2 border-slate-200 rounded-2xl bg-white hover:border-emerald-300">
                 <i data-lucide="building-2" class="w-8 h-8 text-emerald-600"></i>
-                <span class="font-medium">Bank Transfer</span>
+                <span class="font-medium text-sm">Bank Transfer</span>
               </button>
             </div>
-            <div id="card-payment-form" class="hidden">
-              <button onclick="payWithPaystack()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl text-lg">
+
+            <!-- Card Payment Form -->
+            <div id="card-payment-form">
+              <button onclick="payWithPaystack()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl text-lg transition">
                 Pay with Paystack
               </button>
+              
+              <!-- Alternative Payment Methods (shown after Paystack button click) -->
+              <div id="alternative-payment-methods" class="hidden mt-6 pt-6 border-t border-slate-200">
+                <p class="text-sm font-semibold text-slate-600 mb-4 text-center">Or try alternative payment methods</p>
+                <div class="grid grid-cols-2 gap-3">
+                  <button onclick="selectPaymentMethod(this, 'google_pay')" class="payment-method-btn flex flex-col items-center gap-2 p-4 border-2 border-slate-200 rounded-xl bg-white hover:border-emerald-300 hover:bg-emerald-50 transition">
+                    <i data-lucide="smartphone" class="w-6 h-6 text-emerald-600"></i>
+                    <span class="font-medium text-xs">Google Pay</span>
+                  </button>
+                  <button onclick="selectPaymentMethod(this, 'cod')" class="payment-method-btn flex flex-col items-center gap-2 p-4 border-2 border-slate-200 rounded-xl bg-white hover:border-emerald-300 hover:bg-emerald-50 transition">
+                    <i data-lucide="truck" class="w-6 h-6 text-emerald-600"></i>
+                    <span class="font-medium text-xs">Pay on Delivery</span>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div id="bank-transfer-info" class="hidden text-center py-8">
-              <p class="text-2xl font-bold mb-2">$<span id="bank-amount">0</span></p>
-              <p>Bank: GTBank | Account: Jovali Market | 1234567890</p>
+
+            <!-- Bank Transfer Info -->
+            <div id="bank-transfer-info" class="hidden text-center py-8 bg-blue-50 rounded-2xl border border-blue-200">
+              <p class="text-sm text-slate-600 mb-3">Total Amount</p>
+              <p class="text-3xl font-bold text-blue-900 mb-4">₦<span id="bank-amount">0</span></p>
+              <div class="bg-white rounded-xl p-4 text-left mb-4">
+                <p class="text-xs text-slate-500 font-semibold mb-2">BANK DETAILS</p>
+                <p class="text-sm font-medium">Bank: GTBank</p>
+                <p class="text-sm font-medium">Account: Jovali Market</p>
+                <p class="text-sm font-medium">Number: 1234567890</p>
+              </div>
+              <p class="text-xs text-slate-500 mb-4">Please transfer the exact amount and your order will be confirmed once verified</p>
+              <button onclick="goTo('orders')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition">
+                Go to Orders
+              </button>
+            </div>
+
+            <!-- Google Pay Form -->
+            <div id="google-pay-form" class="hidden">
+              <button onclick="initializeGooglePay()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl text-lg transition flex items-center justify-center gap-2">
+                <i data-lucide="smartphone" class="w-5 h-5"></i>
+                Pay with Google Pay
+              </button>
+              <p class="text-xs text-slate-500 text-center mt-4">Fast, secure payment using your Google Pay account</p>
+              <div class="mt-4 pt-4 border-t border-slate-200">
+                <button onclick="backToPaystack()" type="button" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium text-center w-full">
+                  ← Back to Paystack
+                </button>
+              </div>
+            </div>
+
+            <!-- Cash on Delivery Confirmation -->
+            <div id="cod-confirmation" class="hidden">
+              <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-6">
+                <div class="flex gap-3 mb-4">
+                  <i data-lucide="info" class="w-6 h-6 text-amber-600 flex-shrink-0"></i>
+                  <div>
+                    <p class="font-semibold text-amber-900 mb-2">Pay on Delivery</p>
+                    <p class="text-sm text-amber-800">You will pay ₦<span id="cod-amount">0</span> to the delivery partner when they arrive with your order.</p>
+                  </div>
+                </div>
+              </div>
+              <button onclick="confirmCashOnDelivery()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl text-lg transition flex items-center justify-center gap-2">
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                Confirm Order
+              </button>
+              <div class="mt-4 pt-4 border-t border-slate-200">
+                <button onclick="backToPaystack()" type="button" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium text-center w-full">
+                  ← Back to Paystack
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1696,17 +1761,6 @@
  <script src="js/messages.js"></script>
 <script src="js/cart.js"></script> 
 <script src="js/payment.js"></script>
- <script>
-   function selectPaymentMethod(btn) {
-     document.querySelectorAll('.payment-method-btn').forEach(b => {
-       b.classList.remove('border-emerald-500', 'bg-emerald-50');
-     });
-     btn.classList.add('border-emerald-500', 'bg-emerald-50');
-     const method = btn.getAttribute('data-method');
-     document.getElementById('card-payment-form').classList.toggle('hidden', method !== 'card');
-     document.getElementById('bank-transfer-info').classList.toggle('hidden', method !== 'bank');
-   }
- </script>
  <script src="js/chat.js"></script>
  <script src="js/profile.js"></script>
  <script src="js/dataSdk.js"></script>
