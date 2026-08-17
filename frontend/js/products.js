@@ -330,7 +330,16 @@ function replaceProductImageFromUrl(prodId) {
   showToast('Product image updated from URL');
 }
 
+// ========== LEGACY RENDERESHOP (FALLBACK) ==========
+// Updated to use ProductCatalog if available, otherwise fallback to client-side filtering
 function renderShop() {
+  // If ProductCatalog is loaded, use it instead
+  if (window.productCatalog) {
+    window.productCatalog.loadProducts();
+    return;
+  }
+
+  // FALLBACK: Client-side filtering (when ProductCatalog not available)
   const search = (document.getElementById('shop-search')?.value || '').toLowerCase();
   let filtered = allProducts.filter(p => p.name && (p.public !== false || p.seller === currentUser.name));
   if (currentCategory !== 'All') filtered = filtered.filter(p => p.category === currentCategory);

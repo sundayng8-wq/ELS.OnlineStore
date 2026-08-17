@@ -36,7 +36,85 @@
   <link rel="stylesheet" href="css/els2.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
- 
+  
+  <!-- Form Completion Indicator Styles -->
+  <style>
+    /* Pulse animation for form-ready button */
+    @keyframes pulse-glow {
+      0% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+      }
+    }
+
+    @keyframes bounce-subtle {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes slide-in-up {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fade-out {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+    }
+
+    /* Form ready button state */
+    #contact-submit.form-ready {
+      animation: pulse-glow 2s infinite, bounce-subtle 2s infinite;
+      box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+    }
+
+    /* Form ready badge */
+    .form-ready-badge {
+      animation: slide-in-up 0.4s ease-out;
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      border: 2px solid #3b82f6;
+      color: #1e40af;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-ready-badge.fade-out {
+      animation: fade-out 0.3s ease-out forwards;
+    }
+
+    /* Toast animation classes */
+    .animation-slide-in {
+      animation: slide-in-up 0.4s ease-out;
+    }
+  </style>
  </head>
 
  <body class="h-full">
@@ -293,6 +371,29 @@
        <button onclick="goTo('contact')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition" data-nav="contact">Contact</button>
       </nav>
        <div class="flex items-center gap-2">
+         <!-- Notification Bell -->
+         <div class="relative">
+           <button id="notification-bell" class="relative text-white p-2 rounded-lg hover:bg-white/10 transition" title="Notifications">
+             <i data-lucide="bell" class="w-5 h-5"></i>
+             <span id="notification-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white" style="background:#e94560;">0</span>
+           </button>
+
+           <!-- Notification Dropdown -->
+           <div id="notification-dropdown" class="hidden absolute right-0 top-12 z-20 w-80 rounded-2xl border border-slate-200 bg-white shadow-xl max-h-96 flex flex-col">
+             <div class="border-b p-3 flex items-center justify-between">
+               <h3 class="font-bold text-slate-900 text-sm">Notifications</h3>
+               <button onclick="notificationsService.markAllAsRead()" class="text-xs text-blue-600 hover:text-blue-700 font-semibold">Mark all as read</button>
+             </div>
+             <div id="notification-list" class="flex-1 overflow-y-auto">
+               <!-- Notifications will render here -->
+               <div class="p-4 text-center text-slate-400 text-sm">Loading...</div>
+             </div>
+             <div class="border-t p-3">
+               <button onclick="goTo('notifications-full')" class="w-full text-sm text-blue-600 hover:text-blue-700 font-semibold">See all notifications</button>
+             </div>
+           </div>
+         </div>
+
          <button onclick="goTo('orders')" class="relative text-white p-2 rounded-lg hover:bg-white/10 transition" title="Track Orders">
            <i data-lucide="package" class="w-5 h-5"></i>
          </button>
@@ -369,193 +470,324 @@
     <main id="main-content" class="w-full">
      <!-- HOME PAGE -->
      <section id="page-home" class="page active bg-slate-50 min-h-screen font-sans antialiased selection:bg-indigo-600 selection:text-white">
-  
-  <!-- ========================================== -->
-  <!-- CLEAN, LUXURY SEMI-TRANSPARENT HERO        -->
-  <!-- ========================================== -->
-  <div class="relative hero-section py-24 md:py-32 px-6 text-center overflow-hidden border-b border-slate-100" style="background: radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 28%), linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(59,130,246,0.88) 45%, rgba(12,8,40,0.94) 100%); border-color: rgba(148,163,184,0.12);">
-    
-    <!-- Sophisticated Transparent Pastel Glow (Perfect for E-Commerce) -->
-    <div class="absolute inset-0 z-0 pointer-events-none opacity-70" aria-hidden="true">
-      <div class="absolute top-[-20%] left-[15%] w-[600px] h-[450px] bg-gradient-to-br from-amber-100/40 to-rose-100/30 rounded-full blur-[130px]"></div>
-      <div class="absolute bottom-[-10%] right-[15%] w-[600px] h-[500px] bg-gradient-to-tr from-indigo-100/40 via-purple-50/30 to-blue-50/20 rounded-full blur-[140px]"></div>
-    </div>
-    
-    <div id="home-bg-carousel" class="absolute inset-0 pointer-events-none"></div>
 
-    <div class="max-w-3xl mx-auto relative z-10 space-y-6">
-      <!-- Minimalist Soft Welcome Badge -->
-      <span class="inline-flex items-center px-4 py-1 rounded-full text-xs font-semibold tracking-wide text-slate-600 bg-slate-100/80 border border-slate-200/50 backdrop-blur-sm">
-        Welcome to Jovali Market.
-      </span>
-      
-      <!-- High-End Editorial Typography -->
-      <h2 id="hero-heading" class="text-4xl sm:text-5xl md:text-6xl font-normal text-white tracking-tight font-serif leading-tight">
-        Discover <span class="font-sans font-bold bg-gradient-to-r from-cyan-300 via-sky-200 to-white bg-clip-text text-transparent">What You Love</span>
-      </h2>
-      
-      <p class="text-slate-200 text-base sm:text-lg mb-6 max-w-xl mx-auto leading-relaxed font-normal">
-        Buy unique products from independent sellers or open your own store and start selling today.
-      </p>
-      <div class="flex flex-wrap justify-center gap-3 mb-8 text-sm text-slate-200/90">
-        <span class="rounded-full border border-white/20 bg-white/10 px-3 py-1 backdrop-blur-sm">Trusted checkout</span>
-        <span class="rounded-full border border-white/20 bg-white/10 px-3 py-1 backdrop-blur-sm">Fast logistics</span>
-        <span class="rounded-full border border-white/20 bg-white/10 px-3 py-1 backdrop-blur-sm">Seller-friendly tools</span>
+  <div class="relative overflow-hidden bg-slate-950 text-white">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.30),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.18),_transparent_22%)]"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:36px_36px] opacity-40"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-20 lg:py-28">
+      <div class="grid lg:grid-cols-[1.15fr_0.85fr] gap-12 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold tracking-[0.18em] uppercase text-slate-200 backdrop-blur-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            Trusted marketplace
+          </div>
+
+          <h1 class="mt-8 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.05] text-white">
+            Shop smarter.<br>
+            Sell with confidence.
+          </h1>
+
+          <p class="mt-6 max-w-xl text-lg text-slate-300 leading-relaxed">
+            Discover premium products from trusted sellers, or launch your own storefront with tools built to help you grow faster and sell smarter.
+          </p>
+
+          <div class="mt-8 flex flex-col sm:flex-row gap-4">
+            <button onclick="goTo('shop')" class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 transition hover:bg-indigo-500 active:scale-[0.98]">
+              Browse products
+            </button>
+            <button onclick="goTo('open-store')" class="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-[0.98]">
+              Open a store
+            </button>
+          </div>
+
+          <div class="mt-10 flex flex-wrap gap-6 text-sm text-slate-300">
+            <div>
+              <div class="text-2xl font-black text-white">50K+</div>
+              <div class="text-slate-400">happy buyers</div>
+            </div>
+            <div>
+              <div class="text-2xl font-black text-white">5K+</div>
+              <div class="text-slate-400">active sellers</div>
+            </div>
+            <div>
+              <div class="text-2xl font-black text-white">24/7</div>
+              <div class="text-slate-400">support</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="rounded-[2rem] border border-white/10 bg-white/5 p-4 shadow-2xl shadow-indigo-950/40 backdrop-blur-sm">
+            <div class="overflow-hidden rounded-[1.5rem] bg-slate-900">
+              <img src="images/jaslogo.png" alt="JovAli brand showcase" class="h-[520px] w-full object-cover opacity-95" />
+            </div>
+          </div>
+
+          <div class="absolute -bottom-5 left-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl text-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">This week</p>
+            <p class="mt-1 text-xl font-black">New arrivals</p>
+            <p class="mt-1 text-sm text-slate-600">Curated for modern living</p>
+          </div>
+        </div>
       </div>
-      
-      <!-- High-Conversion Action Buttons -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
-        <button onclick="goTo('shop')" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm text-white bg-slate-900 hover:bg-indigo-600 shadow-md shadow-slate-900/10 hover:shadow-indigo-600/10 transition-all duration-200 transform active:scale-95">
-          Browse Shop
-        </button>
-        <button onclick="goTo('open-store')" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all duration-200 transform active:scale-95">
-          Open a Store
-        </button>  
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 py-16 lg:py-20">
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+        <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Secure shopping</h3>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600">Protected payments, trusted sellers, and a checkout experience designed for peace of mind.</p>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+        <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+          <i data-lucide="truck" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Fast delivery</h3>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600">Efficient logistics and transparent order updates keep every purchase moving smoothly.</p>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+        <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+          <i data-lucide="store" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Sell with ease</h3>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600">Open your storefront in minutes, manage products, and grow your customer base without friction.</p>
       </div>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- SHOP BY CATEGORY GRID                      -->
-  <!-- ========================================== -->
-  <div class="max-w-6xl mx-auto px-4 py-20">
-    <div class="text-center mb-12 space-y-2">
-      <h3 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Shop by Category</h3>
-      <p class="text-slate-500 text-sm">Find exactly what you need across our tailored ecosystems</p>
+  <div class="max-w-7xl mx-auto px-6 pb-20">
+    <div class="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">Popular categories</p>
+        <h2 class="mt-2 text-3xl font-black text-slate-900">Shop what fits your life</h2>
+      </div>
+      <button onclick="goTo('shop')" class="text-sm font-semibold text-slate-700 hover:text-slate-900">View all categories →</button>
     </div>
-    
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-      
-      <!-- Category Item -->
-      <div onclick="filterShopCategory('Electronics')" class="group cursor-pointer rounded-2xl p-3 bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-200 text-center">
-        <div class="overflow-hidden rounded-xl bg-slate-50 mb-3 aspect-square">
-          <img src="images/gadgets.jpg" alt="Electronics" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div onclick="filterShopCategory('Electronics')" class="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="overflow-hidden">
+          <img src="images/gadgets.jpg" alt="Electronics" class="h-52 w-full object-cover transition duration-300 group-hover:scale-105" />
         </div>
-        <span class="font-semibold text-sm text-slate-800 group-hover:text-indigo-600 transition-colors">Electronics</span>
+        <div class="p-4">
+          <p class="text-lg font-bold text-slate-900">Electronics</p>
+          <p class="mt-1 text-sm text-slate-500">Smart tools & devices</p>
+        </div>
       </div>
 
-      <!-- Category Item -->
-      <div onclick="filterShopCategory('Fashion')" class="group cursor-pointer rounded-2xl p-3 bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-200 text-center">
-        <div class="overflow-hidden rounded-xl bg-slate-50 mb-3 aspect-square">
-          <img src="images/fashionimg.jpg" alt="Fashion" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
+      <div onclick="filterShopCategory('Fashion')" class="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="overflow-hidden">
+          <img src="images/fashionimg.jpg" alt="Fashion brand" class="h-52 w-full object-cover transition duration-300 group-hover:scale-105" />
         </div>
-        <span class="font-semibold text-sm text-slate-800 group-hover:text-indigo-600 transition-colors">Fashion</span>
+        <div class="p-4">
+          <p class="text-lg font-bold text-slate-900">Fashion</p>
+          <p class="mt-1 text-sm text-slate-500">Brand-led style</p>
+        </div>
       </div>
 
-      <!-- Category Item -->
-      <div onclick="filterShopCategory('Home')" class="group cursor-pointer rounded-2xl p-3 bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-200 text-center">
-        <div class="overflow-hidden rounded-xl bg-slate-50 mb-3 aspect-square">
-          <img src="images/home.jpg" alt="Home" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
+      <div onclick="filterShopCategory('Home')" class="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="overflow-hidden">
+          <img src="images/homeimg.jpg" alt="Home" class="h-52 w-full object-cover transition duration-300 group-hover:scale-105" />
         </div>
-        <span class="font-semibold text-sm text-slate-800 group-hover:text-indigo-600 transition-colors">Home</span>
+        <div class="p-4">
+          <p class="text-lg font-bold text-slate-900">Home</p>
+          <p class="mt-1 text-sm text-slate-500">Comfort and essentials</p>
+        </div>
       </div>
 
-      <!-- Category Item -->
-      <div onclick="filterShopCategory('Sports')" class="group cursor-pointer rounded-2xl p-3 bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-200 text-center">
-        <div class="overflow-hidden rounded-xl bg-slate-50 mb-3 aspect-square">
-          <img src="images/sport.jpg" alt="Sports" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300" />
+      <div onclick="filterShopCategory('Sports')" class="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div class="overflow-hidden">
+          <img src="images/sport.jpg" alt="Sports" class="h-52 w-full object-cover transition duration-300 group-hover:scale-105" />
         </div>
-        <span class="font-semibold text-sm text-slate-800 group-hover:text-indigo-600 transition-colors">Sports</span>
+        <div class="p-4">
+          <p class="text-lg font-bold text-slate-900">Sports</p>
+          <p class="mt-1 text-sm text-slate-500">Performance & fitness</p>
+        </div>
       </div>
-      
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- RECENTLY LISTED PRODUCTS SECTION           -->
-  <!-- ========================================== -->
-  <div class="max-w-6xl mx-auto px-4 pb-24">
-    <div class="text-center mb-12 space-y-1">
-      <h3 class="text-2xl font-bold tracking-tight text-slate-900">Recently Listed</h3>
-      <p class="text-slate-500 text-sm">Explore fresh arrivals uploaded straight onto our live platform</p>
-    </div>
-    
-    <div id="home-products" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Clean, Professional Empty State Layout -->
-      <div class="col-span-full text-center py-16 bg-white border border-slate-100 rounded-2xl shadow-sm max-w-lg mx-auto px-6">
-        <div class="inline-flex p-3.5 bg-slate-50 text-slate-400 rounded-xl mb-4 border border-slate-100">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.5a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-          </svg>
+  <div class="bg-white py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="mb-10 text-center">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">Featured products</p>
+        <h2 class="mt-3 text-3xl font-black text-slate-900">Fresh picks for your next order</h2>
+      </div>
+
+      <div id="home-products" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+          <img src="images/Ecommerceimg.jpg" alt="Product" class="h-64 w-full object-cover" />
+          <div class="p-5">
+            <p class="text-sm text-slate-500">Electronics</p>
+            <h3 class="mt-2 text-xl font-bold text-slate-900">Pro Audio Kit</h3>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-xl font-black text-slate-900">$149</span>
+              <button onclick="goTo('shop')" class="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Shop now</button>
+            </div>
+          </div>
         </div>
-        <p class="text-slate-800 font-semibold text-base mb-1">No products listed yet</p>
-        <p class="text-slate-500 text-xs max-w-xs mx-auto leading-relaxed">
-          Be the first to 
-          <button onclick="goTo('open-store')" class="text-indigo-600 hover:text-indigo-700 font-semibold underline focus:outline-none transition-colors">
-            open a store
-          </button> 
-          and put your catalog online!
-        </p>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+          <img src="images/jaslogo.png" alt="Product" class="h-64 w-full object-cover" />
+          <div class="p-5">
+            <p class="text-sm text-slate-500">Fashion</p>
+            <h3 class="mt-2 text-xl font-bold text-slate-900">Signature Brand</h3>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-xl font-black text-slate-900">$96</span>
+              <button onclick="goTo('shop')" class="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Shop now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+          <img src="images/homeimg.jpg" alt="Product" class="h-64 w-full object-cover" />
+          <div class="p-5">
+            <p class="text-sm text-slate-500">Home</p>
+            <h3 class="mt-2 text-xl font-bold text-slate-900">Minimal Lamp</h3>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-xl font-black text-slate-900">$64</span>
+              <button onclick="goTo('shop')" class="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Shop now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+          <img src="images/sport.jpg" alt="Product" class="h-64 w-full object-cover" />
+          <div class="p-5">
+            <p class="text-sm text-slate-500">Sports</p>
+            <h3 class="mt-2 text-xl font-bold text-slate-900">Trail Essential Kit</h3>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-xl font-black text-slate-900">$120</span>
+              <button onclick="goTo('shop')" class="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Shop now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 pb-20">
+    <div class="rounded-[2rem] bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 p-8 sm:p-12 text-center text-white shadow-2xl">
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-200">Why sellers choose us</p>
+      <h2 class="mt-4 text-3xl font-black sm:text-4xl">Launch faster. Grow smarter.</h2>
+      <p class="mx-auto mt-4 max-w-2xl text-slate-200">From product management and secure checkout to trusted customer interaction, JovAli Market gives sellers the tools they need to build a stronger business.</p>
+      <div class="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+        <button onclick="goTo('open-store')" class="rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">Start selling</button>
+        <button onclick="goTo('shop')" class="rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10">Explore store</button>
       </div>
     </div>
   </div>
 </section>
 <!-- SHOP PAGE -->
-    <!-- ========================================== -->
-<section id="page-shop" class="page relative min-h-screen bg-slate-50/60 overflow-hidden">
-  <!-- High-End Ambient Graphic Backgrounds -->
-  <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] opacity-70 pointer-events-none"></div>
-  <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-  <div class="absolute top-1/3 -right-40 w-96 h-96 bg-rose-500/5 rounded-full blur-[120px] pointer-events-none"></div>
-  <div class="relative z-10 max-w-6xl mx-auto px-4 py-12 animate-fadeIn">
-    <!-- Header Controls Grid: Title & Navigation Pill Matrix -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 pb-6 border-b border-slate-200/60">
-      <div>
-        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-serif">
-          <i data-lucide="shopping-cart" class="w-5 h-5 inline-block mr-3 text-indigo-600"></i>Active JovAli Market..
-        </h2>
-        <p class="text-slate-500 text-xs sm:text-sm mt-1 font-medium">
-          Discover handpicked collections from verified independent storefronts
-        </p>
-      </div>
-     <!-- Modern Categories Filter Scroller -->
-      <div class="flex gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none snap-x mask-gradient">
-        <!-- Active Pill State Example -->
-        <button onclick="filterShopCategory('All')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 shadow-sm bg-slate-900 text-white ring-2 ring-offset-2 ring-slate-900/10">
-          All Products
-        </button> 
-         <!-- Standard Unselected Pill States -->
-        <button onclick="filterShopCategory('Electronics')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Electronics
-        </button> 
-        <button onclick="filterShopCategory('Fashion')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Fashion
-        </button>
-        <button onclick="filterShopCategory('Home')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Home
-        </button> 
-        <button onclick="filterShopCategory('Sports')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Sports
-        </button>
-        <button onclick="filterShopCategory('Other')" class="cat-btn px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 shrink-0 bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 hover:text-slate-900 active:scale-95">
-          Other
-        </button>
-      </div>
-     </div>
-     <!-- Main Dynamic Showcase Grid Layout -->
-    <div id="shop-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Premium Empty State Component Card (Rendered if grid is blank) -->
-      <div class="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white/80 backdrop-blur-md p-12 text-center max-w-lg mx-auto shadow-xl shadow-slate-100/50 mt-4">
-        <div class="inline-flex p-4 rounded-2xl bg-rose-50 text-rose-500 border border-rose-100 shadow-inner mb-5 animate-pulse">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72M6.75 18h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75z" />
-          </svg>
+<section id="page-shop" class="page relative min-h-screen bg-slate-50 overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.10),_transparent_24%)] pointer-events-none"></div>
+  <div class="relative z-10 max-w-7xl mx-auto px-4 py-12 animate-fadeIn">
+
+    <div class="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-6 sm:p-8">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-indigo-600">Marketplace</p>
+          <h2 class="mt-3 text-3xl font-black text-slate-900 sm:text-4xl">Shop with clarity</h2>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 tracking-tight">The Marketplace is Empty</h3>
-        <p class="text-slate-500 text-sm mt-2 mb-8 leading-relaxed">
-          Be the absolute first pioneer to dominate this category segment! Build your custom brand presence and launch inventory assets live in minutes.
-        </p>
-        <button onclick="goTo('open-store')" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 transition-all shadow-md shadow-rose-500/20 text-xs tracking-wider uppercase transform active:scale-95">
-          Open Your Storefront
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
+
+        <div class="flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+          <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">Fast shipping</span>
+          <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">Verified sellers</span>
+          <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">Secure checkout</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div class="flex flex-col gap-4 xl:flex-row xl:items-end">
+        <div class="flex-1 min-w-0">
+          <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Search</label>
+          <input id="product-search" type="text" placeholder="Search by product name or keyword" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+        </div>
+
+        <div class="min-w-[170px]">
+          <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Category</label>
+          <select id="product-category-filter" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+            <option value="">All categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Home">Home</option>
+            <option value="Sports">Sports</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="min-w-[120px]">
+          <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Min</label>
+          <input id="product-min-price" type="number" value="0" min="0" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+        </div>
+
+        <div class="min-w-[120px]">
+          <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Max</label>
+          <input id="product-max-price" type="number" value="1000000" min="0" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+        </div>
+
+        <div class="min-w-[180px]">
+          <label class="mb-2 block text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Sort by</label>
+          <select id="product-sort-select" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+            <option value="rating">Top rated</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </div>
+
+        <button onclick="window.productCatalog.resetFilters()" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 active:scale-[0.98]">
+          Reset
         </button>
       </div>
-     </div>
     </div>
-    </section>
-   <!-- OPEN STORE PAGE -->
+
+    <div class="mt-6">
+      <div class="mb-4 flex flex-wrap gap-2">
+        <button onclick="filterShopCategory('All')" class="cat-btn rounded-full bg-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-sm">All</button>
+        <button onclick="filterShopCategory('Electronics')" class="cat-btn rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-700 transition hover:border-slate-300 hover:text-slate-900">Electronics</button>
+        <button onclick="filterShopCategory('Fashion')" class="cat-btn rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-700 transition hover:border-slate-300 hover:text-slate-900">Fashion</button>
+        <button onclick="filterShopCategory('Home')" class="cat-btn rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-700 transition hover:border-slate-300 hover:text-slate-900">Home</button>
+        <button onclick="filterShopCategory('Sports')" class="cat-btn rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-700 transition hover:border-slate-300 hover:text-slate-900">Sports</button>
+        <button onclick="filterShopCategory('Other')" class="cat-btn rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-700 transition hover:border-slate-300 hover:text-slate-900">Other</button>
+      </div>
+
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p id="product-page-info" class="text-sm text-slate-600">Loading products...</p>
+        <div class="flex items-center gap-2">
+          <button id="product-prev-page" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50" disabled>Previous</button>
+          <button id="product-next-page" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="shop-grid" class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="col-span-full mx-auto max-w-lg rounded-[2rem] border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm">
+        <div class="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+          <i data-lucide="shopping-bag" class="w-7 h-7"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Marketplace is empty</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-500">
+          No products are live yet. Open a store and start listing your first collection today.
+        </p>
+        <button onclick="goTo('open-store')" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 active:scale-[0.98]">
+          Open your store
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- OPEN STORE PAGE -->
     <section id="page-open-store" class="page bg-slate-50 min-h-screen">
   <div class="max-w-5xl mx-auto px-4 py-12">
     <!-- Header Section -->
@@ -606,74 +838,126 @@
         <p class="text-slate-400 text-sm mb-8 max-w-xl">
           Upload your store details from this page, then list products and route them to the right category automatically.
         </p>
-         <form id="open-store-create-form" class="space-y-5">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Payout Verification Channel</label>
-              <select id="open-store-payment-method" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
-                <option value="bank_transfer" class="bg-slate-900">Bank transfer</option>
-                <option value="google_pay" class="bg-slate-900">Google Pay</option>
-                <option value="international_card" class="bg-slate-900">International card</option>
-                <option value="cash_on_delivery" class="bg-slate-900">Cash on delivery</option>
-              </select>
+         <form id="open-store-create-form" class="space-y-8">
+          
+          <!-- Step 1: Payment Method Selection -->
+          <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50/50 to-transparent p-6">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-600 text-white font-bold text-sm">1</div>
+              <h3 class="text-lg font-bold text-slate-900">Select Payment Method</h3>
             </div>
-            <label class="flex items-start gap-3 rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-3 text-sm text-slate-300">
-              <input id="open-store-payment-verified" type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-900 text-indigo-500 focus:ring-indigo-500" checked />
-              <span>These payout details are verified and ready for seller settlement.</span>
-            </label>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Paystack Business Name</label>
-              <input id="open-store-paystack-business-name" type="text" placeholder="Your business name on Paystack" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Paystack Contact Email</label>
-              <input id="open-store-paystack-contact-email" type="email" placeholder="merchant@example.com" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Paystack Settlement Bank</label>
-              <input id="open-store-paystack-settlement-bank" type="text" placeholder="GTBank, Zenith Bank, etc." class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Paystack Account Number</label>
-              <input id="open-store-paystack-account-number" type="text" placeholder="1234567890" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-3">Payout Verification Channel</label>
+                <select id="open-store-payment-method" class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                  <option value="bank_transfer">Bank Transfer (Recommended)</option>
+                  <option value="google_pay">Google Pay</option>
+                  <option value="international_card">International Card</option>
+                  <option value="cash_on_delivery">Cash on Delivery</option>
+                </select>
+                <p class="text-xs text-slate-600 mt-2">Choose how you'll receive payouts from your sales</p>
+              </div>
+              <label class="flex items-start gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 cursor-pointer hover:bg-indigo-100 transition">
+                <input id="open-store-payment-verified" type="checkbox" class="mt-1.5 h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500" checked />
+                <span class="text-sm text-slate-700"><strong>Mark verified:</strong> These payout details are verified and ready for seller settlement.</span>
+              </label>
             </div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Paystack Account Name</label>
-              <input id="open-store-paystack-account-name" type="text" placeholder="Account name on Paystack" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+
+          <!-- Step 2: Business Information -->
+          <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50/50 to-transparent p-6">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-600 text-white font-bold text-sm">2</div>
+              <h3 class="text-lg font-bold text-slate-900">Business Information</h3>
             </div>
-            <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Commission % (Paystack fee)</label>
-              <input id="open-store-paystack-percentage-charge" type="number" min="0" max="100" placeholder="0" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Business Name</label>
+                <input id="open-store-paystack-business-name" type="text" placeholder="Your registered business name" class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" />
+                <p class="text-xs text-slate-600 mt-1">Must match your official business registration</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Contact Email</label>
+                <input id="open-store-paystack-contact-email" type="email" placeholder="business@example.com" class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all" />
+                <p class="text-xs text-slate-600 mt-1">Primary contact for payment notifications</p>
+              </div>
             </div>
           </div>
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Verification Note</label>
-            <textarea id="open-store-payment-verification-note" rows="2" placeholder="Add any note for payout verification or settlement reference" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-800/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"></textarea>
+
+          <!-- Step 3: Bank Settlement Details -->
+          <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-amber-50/50 to-transparent p-6">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-white font-bold text-sm">3</div>
+              <h3 class="text-lg font-bold text-slate-900">Bank Settlement Account</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Bank Name</label>
+                <select id="open-store-bank-name" class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
+                  <option value="">Select your bank</option>
+                  <option>Access Bank</option>
+                  <option>GTBank</option>
+                  <option>Zenith Bank</option>
+                  <option>First Bank</option>
+                  <option>UBA</option>
+                  <option>Fidelity Bank</option>
+                  <option>Stanbic IBTC</option>
+                  <option>Other</option>
+                </select>
+                <p class="text-xs text-slate-600 mt-1">The bank where your account is registered</p>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Account Number</label>
+                <input id="open-store-paystack-account-number" type="text" placeholder="0123456789" class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
+                <p class="text-xs text-slate-600 mt-1">10-digit account number</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Account Holder Name</label>
+                <input id="open-store-paystack-account-name" type="text" placeholder="Name on bank account" class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
+                <p class="text-xs text-slate-600 mt-1">Exact name as it appears on your bank account</p>
+              </div>
+              <div style="display:none;">
+                <input id="open-store-paystack-settlement-bank" type="hidden" />
+              </div>
+            </div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-[1.3fr_0.9fr] gap-4 items-end">
-            <div class="rounded-3xl border border-slate-700 bg-slate-800/70 p-5">
-              <label class="block text-xs font-semibold uppercase tracking-wider mb-2 text-slate-300">Bank Name</label>
-              <select id="open-store-bank-name" class="w-full rounded-xl px-4 py-3 border border-slate-700 bg-slate-900 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
-                <option value="" class="bg-slate-900">Select bank</option>
-                <option class="bg-slate-900">Access Bank</option>
-                <option class="bg-slate-900">GTBank</option>
-                <option class="bg-slate-900">Zenith Bank</option>
-                <option class="bg-slate-900">First Bank</option>
-                <option class="bg-slate-900">UBA</option>
-              </select>
+
+          <!-- Step 4: Commission & Verification -->
+          <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-rose-50/50 to-transparent p-6">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-rose-600 text-white font-bold text-sm">4</div>
+              <h3 class="text-lg font-bold text-slate-900">Commission & Verification</h3>
             </div>
-            <div class="rounded-3xl border border-slate-700 bg-slate-800/70 p-5 space-y-4">
-              <p class="text-sm leading-6 text-slate-400">Paystack details let you receive payments directly, support commission split workflows, and keep your seller account verifiable.</p>
-              <button id="open-store-submit-btn" type="submit" class="w-full inline-flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 font-semibold shadow-lg transition-all duration-150">
-                Create Store
-              </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Platform Commission %</label>
+                <div class="relative">
+                  <input id="open-store-paystack-percentage-charge" type="number" min="0" max="100" step="0.01" placeholder="2.5" class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all" />
+                  <span class="absolute right-4 top-3.5 text-slate-500 font-semibold">%</span>
+                </div>
+                <p class="text-xs text-slate-600 mt-1">Paystack or payment processing fee</p>
+              </div>
+              <div></div>
             </div>
+            <div class="mt-4">
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Verification Note (Optional)</label>
+              <textarea id="open-store-payment-verification-note" rows="3" placeholder="Add any special instructions, settlement reference, or verification notes..." class="w-full rounded-xl px-4 py-3 border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all resize-none"></textarea>
+              <p class="text-xs text-slate-600 mt-1">This helps us process your payouts faster and more accurately</p>
+            </div>
+          </div>
+
+          <!-- Submit Section -->
+          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="mb-4 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+              <p class="text-sm text-slate-700">
+                <strong>Ready to launch?</strong> Once you create your store, you can immediately start uploading products and accepting orders. Payment details can be updated anytime from your seller dashboard.
+              </p>
+            </div>
+            <button id="open-store-submit-btn" type="submit" class="w-full inline-flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white px-8 py-4 font-semibold shadow-lg shadow-indigo-600/20 transition-all duration-200">
+              ✓ Create Store & Continue
+            </button>
           </div>
         </form>
       </section>
@@ -876,80 +1160,120 @@
 </section>
      <!-- ORDERS PAGE -->
   <section id="page-orders" class="page bg-slate-50 min-h-screen">
-  <div class="max-w-6xl mx-auto px-4 py-12 animate-fadeIn">
-    <div class="flex items-center gap-3 mb-10">
-      <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l10.5 6M9 10.125l6 3.5m-6 2.125l6 3.5" />
-        </svg>
-      </div>
-      <div>
-        <h2 class="text-3xl font-black text-slate-900 tracking-tight font-serif">Order Tracking</h2>
-        <p class="text-xs text-slate-500 mt-0.5 font-medium">Monitor real-time status and deployment workflows of your shipments</p>
-      </div>
-    </div>
-     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-      <div class="rounded-2xl p-6 bg-white border border-slate-200/60 shadow-sm border-l-4 border-l-rose-500 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Orders</p>
-          <p class="text-4xl font-black text-slate-900 tracking-tight" id="total-orders">0</p>
-        </div>
-        <div class="p-3 bg-rose-50 text-rose-500 rounded-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0112 3m0 0c-1.135 0-2.098.845-2.192 1.976a48.414 48.414 0 00-.166 1.913m8.706-2.133a48.555 48.555 0 00-1.804-.227A8.915 8.915 0 0015 4.5a8.914 8.914 0 00-1.547-.144m-3.116-.328a48.567 48.567 0 01-1.804.227m4.92 12.462c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75V11.25a.75.75 0 00-.75-.75h-4.5a.75.75 0 00-.75.75v5.025z" />
-          </svg>
-        </div>
-      </div>
-      <div class="rounded-2xl p-6 bg-white border border-slate-200/60 shadow-sm border-l-4 border-l-indigo-600 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">In Transit</p>
-          <p class="text-4xl font-black text-slate-900 tracking-tight" id="in-transit-count">0</p>
-        </div>
-        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM19.5 18.75a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM4.744 14.25H21.16c.381 0 .675-.353.6-.729-1.21-6.046-1.748-8.021-1.748-8.021A1.5 1.5 0 0018.551 4.5H11.25m-6.506 9.75l-.466-2.333a1.5 1.5 0 011.47-1.792h14.537m-16.007 4.125l-.47-2.348m4.5 4.5h9" />
-          </svg>
-        </div>
-      </div>
-       <div class="rounded-2xl p-6 bg-white border border-slate-200/60 shadow-sm border-l-4 border-l-emerald-500 flex items-center justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Delivered</p>
-          <p class="text-4xl font-black text-slate-900 tracking-tight" id="delivered-count">0</p>
-        </div>
-        <div class="p-3 bg-emerald-50 text-emerald-500 rounded-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-     <div class="rounded-3xl bg-white border border-slate-200/80 shadow-xl shadow-slate-100/40 overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-        <h3 class="text-lg font-bold text-slate-900">Your Orders</h3>
-        <span class="text-xs font-semibold text-slate-500 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200/40">Live Logs</span>
-      </div>
-       <div id="orders-list" class="p-6">
-        <div class="text-center py-16 max-w-sm mx-auto">
-          <div class="inline-flex p-4 rounded-full bg-slate-50 border border-slate-100 text-slate-400 mb-4 shadow-inner">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1,0-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
+    <div class="max-w-7xl mx-auto px-4 py-12 animate-fadeIn">
+      <div class="rounded-[2rem] bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 p-8 text-white shadow-2xl shadow-indigo-950/20">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-200">
+              <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+              Order dashboard
+            </div>
+            <h2 class="mt-5 text-3xl font-black tracking-tight sm:text-4xl font-serif">Order tracking</h2>
+            <p class="mt-3 max-w-xl text-sm text-slate-300">
+              Monitor your purchases in real time and stay updated on delivery progress from checkout to arrival.
+            </p>
           </div>
-          <p class="text-slate-800 font-bold text-lg tracking-tight">No active orders found</p>
-          <p class="text-slate-400 text-sm mt-1 mb-6 leading-relaxed">You haven't requested any items yet. Discover premium independent products in the shop right now.</p>
-          <button onclick="goTo('shop')" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-md shadow-indigo-600/10 text-xs transform active:scale-[0.98]">
-            Start Shopping
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M15 12l-6.75 6.75" />
-            </svg>
+
+          <button onclick="goTo('shop')" class="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 active:scale-[0.98]">
+            Continue shopping
           </button>
         </div>
+      </div>
 
+      <div class="mt-8 grid gap-5 sm:grid-cols-3">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Total orders</p>
+              <p class="mt-3 text-4xl font-black text-slate-900" id="total-orders">0</p>
+            </div>
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+              <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">In transit</p>
+              <p class="mt-3 text-4xl font-black text-slate-900" id="in-transit-count">0</p>
+            </div>
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+              <i data-lucide="truck" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Delivered</p>
+              <p class="mt-3 text-4xl font-black text-slate-900" id="delivered-count">0</p>
+            </div>
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-6 xl:grid-cols-[1.6fr_0.8fr]">
+        <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+          <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-5">
+            <h3 class="text-xl font-bold text-slate-900">Your orders</h3>
+            <span class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Live activity</span>
+          </div>
+
+          <div id="orders-list" class="p-6">
+            <div class="mx-auto max-w-md py-16 text-center">
+              <div class="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-400">
+                <i data-lucide="shopping-bag" class="w-7 h-7"></i>
+              </div>
+              <p class="text-xl font-bold text-slate-900">No active orders found</p>
+              <p class="mt-3 text-sm leading-relaxed text-slate-500">
+                You have not placed any orders yet. Explore the marketplace and discover premium products from trusted sellers.
+              </p>
+              <button onclick="goTo('shop')" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500 active:scale-[0.98]">
+                Start shopping
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Quick actions</p>
+            <div class="mt-5 space-y-3">
+              <button onclick="goTo('shop')" class="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:border-indigo-200 hover:bg-indigo-50">
+                <span class="font-semibold text-slate-800">Browse products</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500"></i>
+              </button>
+
+              <button onclick="goTo('messages')" class="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:border-indigo-200 hover:bg-indigo-50">
+                <span class="font-semibold text-slate-800">Chat with sellers</span>
+                <i data-lucide="message-circle" class="w-4 h-4 text-slate-500"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-[2rem] border border-slate-200 bg-gradient-to-br from-slate-900 to-indigo-900 p-6 text-white shadow-lg shadow-indigo-900/20">
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-indigo-200">Support</p>
+            <h3 class="mt-3 text-2xl font-black">Need help?</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-200">
+              Our customer support team can help with shipping, returns, and tracking updates.
+            </p>
+            <button onclick="goTo('contact')" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition">
+              Contact support
+              <i data-lucide="mail" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-  </div>
-</section>
      <!-- LOGISTICS PAGE -->
     <section id="page-logistics" class="page logistics-page min-h-screen py-8 px-4 sm:px-6">
   <div class="max-w-7xl mx-auto space-y-6">
@@ -1506,139 +1830,468 @@
           </div>
         </div>
       </section>
-     <!-- ABOUT PAGE -->
-<section id="page-about" class="page bg-slate-50 min-h-screen relative overflow-hidden">
+     <!-- ABOUT PAGE - PROFESSIONAL REDESIGN -->
+<section id="page-about" class="page bg-white min-h-screen">
   
-  <!-- Subtle Background Grid Overlay for Premium Tech Feel -->
-  <div class="absolute inset-0 bg-[linear-gradient(to_right,#0f172a03_1px,transparent_1px),linear-gradient(to_bottom,#0f172a03_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" aria-hidden="true"></div>
-
-  <div class="max-w-5xl mx-auto px-6 py-24 relative z-10">
-    
-    <!-- BRANDING & HEADER SECTION -->
-    <div class="text-center mb-20 animate-fadeIn">
-      
-      <!-- Logo Container -->
-      <div class="inline-flex items-center justify-center p-3 rounded-2.5xl mb-6 bg-white border border-slate-200/80 shadow-[0_10px_30px_rgba(0,0,0,0.04)] relative group transition-all duration-300 hover:shadow-[0_10px_40px_rgba(79,70,229,0.1)]">
-        <!-- Ambient hover glow background -->
-        <div class="absolute inset-0 bg-indigo-500/5 rounded-2.5xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
-         <img src="images/jaslogo.png" alt="JovAli Market Logo" class="w-14 h-14 object-contain" style="filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));">
-      </div>
-
-      <h2 class="text-4xl sm:text-5xl font-black tracking-tight mb-5 text-slate-900 font-serif leading-tight">
-        JovAli Market: A New Era of <br class="hidden sm:inline" /> Community Commerce
-      </h2>
-      <p class="text-slate-500 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
-        A next-generation marketplace where buying and selling converge into a seamless, community-driven ecosystem built on trust and accessibility.
-      </p>
+  <!-- HERO SECTION WITH GRADIENT BACKGROUND -->
+  <div class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white overflow-hidden pt-32 pb-24">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
     </div>
 
-    <!-- THE PHILOSOPHY / VISION HERO CARD -->
-    <div class="rounded-[2.5rem] p-8 sm:p-12 mb-16 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 shadow-xl border border-white/5 relative overflow-hidden">
-      <!-- Glow Gradients -->
-      <div class="absolute -right-24 -top-24 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div class="absolute -left-24 -bottom-24 w-80 h-80 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none"></div>
-
-      <div class="relative z-10 max-w-3xl">
-        <span class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3 block">
-          The Philosophy
-        </span>
-        <h3 class="text-3xl sm:text-4xl font-extrabold mb-6 text-white tracking-tight font-serif">
-          Our Vision
-        </h3>
-        <div class="space-y-4 text-slate-300 text-base leading-relaxed font-light">
-          <p>
-            JovAli Market was born from a transformative belief: digital commerce should be inherently human. In an era dominated by automated marketplace networks, we envisioned a platform that restores personal connection—providing a home where independent brands launch sustainable storefronts and buyers discover unique, meaningful creations.
-          </p>
-          <p>
-            Our interface seamlessly merges the traditional merchant-consumer divide. With our integrated architecture, anyone can navigate fluidly between supporting small businesses and launching their own storefront, fostering shared economic empowerment.
-          </p>
+    <div class="max-w-6xl mx-auto px-6 relative z-10">
+      <!-- Logo -->
+      <div class="flex justify-center mb-8">
+        <div class="inline-flex items-center justify-center p-4 rounded-2xl bg-white/10 backdrop-blur border border-white/20 hover:border-white/40 transition-all duration-300">
+          <img src="images/jaslogo.png" alt="JovAli Market Logo" class="w-16 h-16 object-contain">
         </div>
       </div>
-    </div>
 
-    <!-- FEATURES GRID (2x2 Layout) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-      
-      <!-- Feature 1: Trust & Transparency -->
-      <div class="group rounded-3xl p-8 bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300">
-        <div class="flex items-center gap-5 mb-5">
-          <div class="w-16 h-16 shrink-0 overflow-hidden rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center">
-            <img src="images/trust.jpg" alt="Trust and Transparency" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-          </div>
-          <h4 class="font-extrabold text-xl text-slate-900 tracking-tight">Trust &amp; Transparency</h4>
-        </div>
-        <p class="text-slate-500 text-sm leading-relaxed">
-          Every layer of transaction architecture on JovAli Market is engineered for clarity. Merchants optimize reputations via authentic user reviews, while our linear, transparent pricing model mitigates hidden platform fees or unexpected processing costs.
-        </p>
-      </div>
-
-      <!-- Feature 2: Sustainable Commerce -->
-      <div class="group rounded-3xl p-8 bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300">
-        <div class="flex items-center gap-5 mb-5">
-          <div class="w-16 h-16 shrink-0 overflow-hidden rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center">
-            <img src="images/sustanbilty.jpg" alt="Sustainable Commerce" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-          </div>
-          <h4 class="font-extrabold text-xl text-slate-900 tracking-tight">Sustainable Commerce</h4>
-        </div>
-        <p class="text-slate-500 text-sm leading-relaxed">
-          We actively champion independent craftsmanship and short-run production scales. By introducing consumers directly to product innovators, we effectively decrease supply chain overhead, eliminate industrial waste, and foster clean retail cycles.
-        </p>
-      </div>
-
-      <!-- Feature 3: Dual-Mode Architecture -->
-      <div class="group rounded-3xl p-8 bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300">
-        <div class="flex items-center gap-5 mb-5">
-          <div class="w-16 h-16 shrink-0 overflow-hidden rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center">
-            <img src="images/dualimgtwo.jpg" alt="Dual-Mode Platform" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-          </div>
-          <h4 class="font-extrabold text-xl text-slate-900 tracking-tight">Dual-Mode Architecture</h4>
-        </div>
-        <p class="text-slate-500 text-sm leading-relaxed">
-          JovAli Market offers an innovative dual-state structural layout. Users can comfortably pivot between a buyer persona and a merchant interface instantaneously, maintaining all global metrics effortlessly under a single verified account profile.
-        </p>
-      </div>
-
-      <!-- Feature 4: Community First -->
-      <div class="group rounded-3xl p-8 bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300">
-        <div class="flex items-center gap-5 mb-5">
-          <div class="w-16 h-16 shrink-0 overflow-hidden rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center">
-            <img src="images/fashion.jpg" alt="Community First" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-          </div>
-          <h4 class="font-extrabold text-xl text-slate-900 tracking-tight">Community First</h4>
-        </div>
-        <p class="text-slate-500 text-sm leading-relaxed">
-          Far more than a standard checkout gateway, our platform serves as a modern digital collaborative hub. We catalyze direct, reliable merchant-to-buyer interactions via secure instant messaging components, authentic feedback models, and interest matching.
-        </p>
-      </div>
-
-    </div>
-
-    <!-- CALL TO ACTION (CTA) SECTION -->
-    <div class="rounded-[2.5rem] p-10 sm:p-16 text-center bg-slate-950 border border-slate-900 shadow-2xl relative overflow-hidden">
-      <!-- Deep Glowing Background Spot -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none"></div>
-      
-      <div class="relative z-10 max-w-xl mx-auto">
-        <h3 class="text-3xl sm:text-4xl font-bold text-white mb-4 font-serif tracking-tight">Join the Movement</h3>
-        <p class="text-slate-400 text-sm sm:text-base mb-10 leading-relaxed font-light">
-          Whether you are seeking to discover remarkable products or aiming to scale an independent business, JovAli Market is your comprehensive launching pad.
+      <!-- Main Heading -->
+      <div class="text-center max-w-3xl mx-auto">
+        <h1 class="text-5xl md:text-6xl font-black mb-6 tracking-tight leading-tight font-serif">
+          Redefining Digital Commerce
+        </h1>
+        <p class="text-xl text-slate-200 leading-relaxed mb-8">
+          A marketplace built on trust, transparency, and genuine human connection. Empowering buyers and sellers to create meaningful commerce together.
         </p>
         
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button onclick="goTo('shop')" 
-                  class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 active:scale-[0.98] transition-all duration-300 text-sm tracking-wide">
-            Start Shopping
-          </button> 
-          <button onclick="goTo('open-store')" 
-                  class="w-full sm:w-auto px-8 py-4 rounded-xl font-semibold text-slate-300 bg-slate-900 border border-slate-800 hover:border-slate-700 hover:text-white active:scale-[0.98] transition-all duration-300 text-sm tracking-wide">
-            Open a Store
+        <!-- Hero CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button onclick="goTo('shop')" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all duration-300 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 active:scale-95">
+            <i data-lucide="shopping-bag" class="w-5 h-5 inline mr-2"></i>Start Shopping
+          </button>
+          <button onclick="goTo('open-store')" class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg border border-white/30 transition-all duration-300 active:scale-95">
+            <i data-lucide="store" class="w-5 h-5 inline mr-2"></i>Become a Seller
           </button>
         </div>
       </div>
     </div>
-
   </div>
+
+  <!-- MISSION & VALUES SECTION -->
+  <div class="max-w-6xl mx-auto px-6 py-24">
+    <div class="grid md:grid-cols-2 gap-12 items-center mb-24">
+      <!-- Left: Text Content -->
+      <div>
+        <span class="text-indigo-600 font-bold uppercase text-sm tracking-widest block mb-4">Our Mission</span>
+        <h2 class="text-4xl font-black text-slate-900 mb-6 leading-tight font-serif">
+          Empowering the Future of Commerce
+        </h2>
+        <p class="text-slate-600 text-lg leading-relaxed mb-4">
+          JovAli Market was born from a simple but powerful belief: digital commerce should prioritize human connection over automation.
+        </p>
+        <p class="text-slate-600 text-lg leading-relaxed mb-6">
+          We're building a marketplace where independent creators thrive, where buyers discover authentic products, and where every transaction builds community wealth. No hidden fees. No corporate intermediaries. Just real people doing real commerce.
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3 text-slate-700">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5"></i>
+            <span>Transparent pricing with zero hidden fees</span>
+          </li>
+          <li class="flex items-start gap-3 text-slate-700">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5"></i>
+            <span>Verified reviews and seller ratings</span>
+          </li>
+          <li class="flex items-start gap-3 text-slate-700">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5"></i>
+            <span>Direct buyer-seller communication</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right: Image with Stats Overlay -->
+      <div class="relative">
+        <div class="rounded-2xl overflow-hidden shadow-xl">
+          <img src="images/dualimgtwo.jpg" alt="Our Mission" class="w-full h-full object-cover">
+          <!-- Stats Overlay -->
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent p-8 flex flex-col justify-end">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-white/10 backdrop-blur border border-white/20 rounded-lg p-4 text-center">
+                <div class="text-3xl font-black text-white">5K+</div>
+                <div class="text-xs text-slate-300 mt-1">Active Sellers</div>
+              </div>
+              <div class="bg-white/10 backdrop-blur border border-white/20 rounded-lg p-4 text-center">
+                <div class="text-3xl font-black text-white">50K+</div>
+                <div class="text-xs text-slate-300 mt-1">Happy Customers</div>
+              </div>
+              <div class="bg-white/10 backdrop-blur border border-white/20 rounded-lg p-4 text-center">
+                <div class="text-3xl font-black text-white">100%</div>
+                <div class="text-xs text-slate-300 mt-1">Secure Checkout</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CORE VALUES GRID -->
+    <div>
+      <div class="text-center mb-16">
+        <span class="text-indigo-600 font-bold uppercase text-sm tracking-widest">Our Values</span>
+        <h2 class="text-4xl font-black text-slate-900 mt-4 font-serif">What Drives Us</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Value 1: Trust -->
+        <div class="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-8 hover:shadow-lg hover:border-slate-300 transition-all duration-300 group">
+          <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="shield-check" class="w-7 h-7 text-indigo-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Trust First</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Every transaction is backed by verified reviews, secure payment, and transparent dispute resolution.
+          </p>
+        </div>
+
+        <!-- Value 2: Sustainability -->
+        <div class="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-8 hover:shadow-lg hover:border-slate-300 transition-all duration-300 group">
+          <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="leaf" class="w-7 h-7 text-emerald-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Sustainability</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Supporting local crafts and independent creators reduces supply chain waste and builds community wealth.
+          </p>
+        </div>
+
+        <!-- Value 3: Accessibility -->
+        <div class="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-8 hover:shadow-lg hover:border-slate-300 transition-all duration-300 group">
+          <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="unlock" class="w-7 h-7 text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Accessibility</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Anyone can sell, anyone can buy. No complicated processes, just simple, fair commerce for all.
+          </p>
+        </div>
+
+        <!-- Value 4: Community -->
+        <div class="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-2xl p-8 hover:shadow-lg hover:border-slate-300 transition-all duration-300 group">
+          <div class="w-14 h-14 bg-rose-100 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="users" class="w-7 h-7 text-rose-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 mb-3">Community</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            We're more than a marketplace. We're a platform where meaningful connections drive growth together.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES SECTION -->
+  <div class="bg-slate-50 py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-indigo-600 font-bold uppercase text-sm tracking-widest">Features</span>
+        <h2 class="text-4xl font-black text-slate-900 mt-4 font-serif">Powerful Tools for Modern Commerce</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Feature 1: Dual Mode -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300">
+          <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-5">
+            <i data-lucide="toggle-left" class="w-6 h-6 text-indigo-600"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3">Dual-Mode Experience</h3>
+          <p class="text-slate-600 mb-4">
+            Switch between buyer and seller instantly. Manage both personas under one verified account with complete control.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-600"></i>One account, two worlds
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-600"></i>Unified dashboard
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-600"></i>Shared profile reputation
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 2: Instant Messaging -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300">
+          <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-5">
+            <i data-lucide="message-square" class="w-6 h-6 text-emerald-600"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3">Secure Messaging</h3>
+          <p class="text-slate-600 mb-4">
+            Communicate directly with buyers or sellers without sharing personal information. All messages are encrypted.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-600"></i>Real-time notifications
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-600"></i>Order-linked chats
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-600"></i>No spam guarantee
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 3: Ratings & Reviews -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300">
+          <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-5">
+            <i data-lucide="star" class="w-6 h-6 text-amber-600"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3">Verified Reviews</h3>
+          <p class="text-slate-600 mb-4">
+            Build trust through authentic, verified buyer reviews. Our system prevents fake ratings and protects both parties.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600"></i>5-star rating system
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600"></i>Verified buyer badges
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600"></i>Transparent history
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 4: Smart Filters -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300">
+          <div class="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center mb-5">
+            <i data-lucide="filter" class="w-6 h-6 text-rose-600"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3">Smart Filtering</h3>
+          <p class="text-slate-600 mb-4">
+            Find exactly what you need with advanced search, category filtering, price ranges, and smart sorting options.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-600"></i>Multi-criteria search
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-600"></i>Price range filters
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-600"></i>Sort by rating/price
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 5: Seller Dashboard -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300">
+          <div class="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center mb-5">
+            <i data-lucide="bar-chart-2" class="w-6 h-6 text-violet-600"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3">Seller Analytics</h3>
+          <p class="text-slate-600 mb-4">
+            Track sales, manage inventory, monitor earnings, and optimize your store with detailed analytics and insights.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-violet-600"></i>Sales dashboard
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-violet-600"></i>Earnings tracking
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-violet-600"></i>Performance metrics
+            </li>
+          </ul>
+        </div>
+
+        <!-- Feature 6: Secure Checkout -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300">
+          <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-5">
+            <i data-lucide="lock" class="w-6 h-6 text-cyan-600"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900 mb-3">Secure Payments</h3>
+          <p class="text-slate-600 mb-4">
+            Encrypted payments, fraud protection, and multiple payment options. Your transactions are always secure.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-cyan-600"></i>PCI compliant
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-cyan-600"></i>Buyer protection
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 text-cyan-600"></i>Multiple payment methods
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS SECTION -->
+  <div class="max-w-6xl mx-auto px-6 py-24">
+    <div class="text-center mb-16">
+      <span class="text-indigo-600 font-bold uppercase text-sm tracking-widest">Process</span>
+      <h2 class="text-4xl font-black text-slate-900 mt-4 font-serif">How JovAli Market Works</h2>
+    </div>
+
+    <!-- For Buyers -->
+    <div class="mb-20">
+      <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+        <i data-lucide="shopping-bag" class="w-6 h-6 text-indigo-600"></i>For Buyers
+      </h3>
+      <div class="grid md:grid-cols-4 gap-4">
+        <div class="relative">
+          <div class="bg-indigo-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-indigo-600 mb-4">1</div>
+          <h4 class="font-bold text-slate-900 mb-2">Explore & Search</h4>
+          <p class="text-slate-600 text-sm">Browse our curated collection using smart filters and search tools.</p>
+          <div class="absolute right-0 top-6 w-8 h-0.5 bg-slate-300 hidden md:block" style="width: calc(100% - 50px);"></div>
+        </div>
+        <div class="relative">
+          <div class="bg-emerald-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-emerald-600 mb-4">2</div>
+          <h4 class="font-bold text-slate-900 mb-2">Connect & Ask</h4>
+          <p class="text-slate-600 text-sm">Message sellers directly with any questions before purchasing.</p>
+          <div class="absolute right-0 top-6 w-8 h-0.5 bg-slate-300 hidden md:block" style="width: calc(100% - 50px);"></div>
+        </div>
+        <div class="relative">
+          <div class="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-amber-600 mb-4">3</div>
+          <h4 class="font-bold text-slate-900 mb-2">Pay Securely</h4>
+          <p class="text-slate-600 text-sm">Complete checkout with encrypted, secure payment options.</p>
+          <div class="absolute right-0 top-6 w-8 h-0.5 bg-slate-300 hidden md:block" style="width: calc(100% - 50px);"></div>
+        </div>
+        <div>
+          <div class="bg-rose-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-rose-600 mb-4">4</div>
+          <h4 class="font-bold text-slate-900 mb-2">Review & Share</h4>
+          <p class="text-slate-600 text-sm">Leave verified reviews to help other buyers and support sellers.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- For Sellers -->
+    <div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+        <i data-lucide="store" class="w-6 h-6 text-emerald-600"></i>For Sellers
+      </h3>
+      <div class="grid md:grid-cols-4 gap-4">
+        <div class="relative">
+          <div class="bg-indigo-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-indigo-600 mb-4">1</div>
+          <h4 class="font-bold text-slate-900 mb-2">Create Store</h4>
+          <p class="text-slate-600 text-sm">Set up your store profile in minutes with our simple setup wizard.</p>
+          <div class="absolute right-0 top-6 w-8 h-0.5 bg-slate-300 hidden md:block" style="width: calc(100% - 50px);"></div>
+        </div>
+        <div class="relative">
+          <div class="bg-emerald-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-emerald-600 mb-4">2</div>
+          <h4 class="font-bold text-slate-900 mb-2">Add Products</h4>
+          <p class="text-slate-600 text-sm">Upload products with photos, descriptions, and pricing details.</p>
+          <div class="absolute right-0 top-6 w-8 h-0.5 bg-slate-300 hidden md:block" style="width: calc(100% - 50px);"></div>
+        </div>
+        <div class="relative">
+          <div class="bg-amber-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-amber-600 mb-4">3</div>
+          <h4 class="font-bold text-slate-900 mb-2">Manage Orders</h4>
+          <p class="text-slate-600 text-sm">Track orders, communicate with buyers, and process payments easily.</p>
+          <div class="absolute right-0 top-6 w-8 h-0.5 bg-slate-300 hidden md:block" style="width: calc(100% - 50px);"></div>
+        </div>
+        <div>
+          <div class="bg-rose-100 rounded-full w-12 h-12 flex items-center justify-center font-bold text-rose-600 mb-4">4</div>
+          <h4 class="font-bold text-slate-900 mb-2">Earn & Grow</h4>
+          <p class="text-slate-600 text-sm">Receive earnings directly and grow your business with our tools.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS SECTION -->
+  <div class="bg-slate-50 py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-indigo-600 font-bold uppercase text-sm tracking-widest">Success Stories</span>
+        <h2 class="text-4xl font-black text-slate-900 mt-4 font-serif">What Our Community Says</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Testimonial 1 -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+          <div class="flex items-center gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+          </div>
+          <p class="text-slate-700 mb-6 italic">
+            "JovAli Market transformed how I sell online. No hidden fees, direct customer communication, and real support. Best decision for my small business!"
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-full"></div>
+            <div>
+              <p class="font-bold text-slate-900">Amara C.</p>
+              <p class="text-xs text-slate-500">Fashion Seller</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+          <div class="flex items-center gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+          </div>
+          <p class="text-slate-700 mb-6 italic">
+            "As a buyer, I love finding unique handmade items from real artisans. The verified reviews give me confidence, and the messaging helps me ask questions."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full"></div>
+            <div>
+              <p class="font-bold text-slate-900">Chioma O.</p>
+              <p class="text-xs text-slate-500">Verified Buyer</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+          <div class="flex items-center gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+          </div>
+          <p class="text-slate-700 mb-6 italic">
+            "The dual-mode feature is incredible. I can sell my crafts and also buy supplies from other vendors all on the same platform. Makes business so much easier!"
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-rose-400 to-rose-600 rounded-full"></div>
+            <div>
+              <p class="font-bold text-slate-900">Tunde M.</p>
+              <p class="text-xs text-slate-500">Craftsperson</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL CTA SECTION -->
+  <div class="max-w-6xl mx-auto px-6 py-24">
+    <div class="rounded-3xl bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-12 text-center shadow-2xl">
+      <h2 class="text-4xl font-black mb-4 font-serif">Ready to Join JovAli Market?</h2>
+      <p class="text-lg text-indigo-100 mb-8 max-w-2xl mx-auto">
+        Whether you're looking to discover amazing products or launch your business, we're here to support your journey.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button onclick="goTo('shop')" class="px-8 py-4 bg-white text-indigo-600 font-bold rounded-lg hover:bg-indigo-50 transition-all duration-300 active:scale-95">
+          <i data-lucide="shopping-bag" class="w-5 h-5 inline mr-2"></i>Browse Products
+        </button>
+        <button onclick="goTo('open-store')" class="px-8 py-4 bg-indigo-500 hover:bg-indigo-400 text-white font-bold rounded-lg border border-indigo-400 transition-all duration-300 active:scale-95">
+          <i data-lucide="store" class="w-5 h-5 inline mr-2"></i>Become a Seller
+        </button>
+      </div>
+    </div>
+  </div>
+
 </section>
  <!-- CONTACT PAGE -->
    <section id="page-contact" class="page min-h-screen bg-slate-50/60 py-12 px-4">
@@ -1693,64 +2346,124 @@
       <!-- 2. Right Side Column Panel: Secure Messaging Engine Terminal (3 Columns Wide) -->
       <div class="lg:col-span-3 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
         <!-- Form Header Accent -->
-        <div class="px-6 py-4 bg-slate-50 border-b border-slate-200/60 flex items-center gap-2">
+        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-50/50 border-b border-indigo-200/50 flex items-center gap-2">
           <i data-lucide="send" class="w-4 h-4 text-indigo-600"></i>
-          <span class="text-xs font-bold uppercase tracking-wide text-slate-600">Secure Dispatch Form</span>
+          <span class="text-xs font-bold uppercase tracking-wide text-indigo-700">Send Us Your Message</span>
         </div>
-         <form id="contact-form" onsubmit="handleContact(event)" class="p-6 md:p-8 space-y-5">
+
+        <!-- Success Message Container (Initially Hidden) -->
+        <div id="contact-success" class="hidden m-6 p-6 bg-gradient-to-br from-emerald-50 to-emerald-50/60 border-2 border-emerald-200 rounded-2xl shadow-lg shadow-emerald-100/50">
+          <div class="flex items-start gap-4">
+            <div class="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/30">
+              <i data-lucide="check-circle" class="w-6 h-6 stroke-[2.5]"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-lg font-bold text-emerald-900 mb-1">Message Received! 🎉</p>
+              <p class="text-sm text-emerald-700 leading-relaxed mb-3">
+                Thank you for reaching out to us! Your message has been successfully sent to our support team.
+              </p>
+              <div class="space-y-2 mb-4 bg-white/60 rounded-lg p-3">
+                <p class="text-xs text-emerald-800"><span class="font-semibold">What happens next:</span> We'll review your inquiry and respond within 24 business hours.</p>
+                <p class="text-xs text-emerald-700">You'll receive a detailed response at your registered email address.</p>
+              </div>
+              <p class="text-xs font-semibold text-emerald-600">We appreciate your patience and look forward to assisting you! ✨</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <form id="contact-form" onsubmit="handleContact(event)" class="p-6 md:p-8 space-y-5">
+          <!-- Form Status Indicator -->
+          <div id="form-status-indicator" class="flex items-center gap-2 text-xs text-slate-500 mb-4 pb-4 border-b border-slate-200/50">
+            <span class="w-2 h-2 rounded-full bg-slate-400 animate-pulse"></span>
+            <span>Form monitoring active - Fill all fields to submit</span>
+          </div>
           <!-- Name Row -->
           <div>
-            <label for="contact-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">Full Name</label> 
+            <label for="contact-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Full Name *</label> 
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
                 <i data-lucide="user" class="w-4 h-4"></i>
               </span>
               <input id="contact-name" type="text" required placeholder="John Doe"
-                class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 placeholder-slate-400 transition">
+                class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 placeholder-slate-400 transition duration-200 shadow-sm">
             </div>
           </div>
-       <!-- Email Row -->
+
+          <!-- Email Row -->
           <div>
-            <label for="contact-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">Email Address</label> 
+            <label for="contact-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Email Address *</label> 
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                <i data-lucide="at-sign" class="w-4 h-4"></i>
+              <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                <i data-lucide="mail" class="w-4 h-4"></i>
               </span>
               <input id="contact-email" type="email" required placeholder="you@domain.com"
-                class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 placeholder-slate-400 transition">
+                class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 placeholder-slate-400 transition duration-200 shadow-sm">
             </div>
           </div>
+
+          <!-- Subject Row -->
+          <div>
+            <label for="contact-subject" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">Subject (Optional)</label> 
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                <i data-lucide="heading" class="w-4 h-4"></i>
+              </span>
+              <input id="contact-subject" type="text" placeholder="e.g., Order issue, Technical support, General inquiry"
+                class="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 placeholder-slate-400 transition duration-200 shadow-sm">
+            </div>
+          </div>
+
           <!-- Message Body Row -->
           <div>
-            <label for="contact-msg" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">Detailed Message</label> 
-            <textarea id="contact-msg" rows="4" required placeholder="Describe your query in detail so our agents can review background logs..."
-              class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 placeholder-slate-400 transition resize-none"></textarea>
+            <div class="flex justify-between items-center mb-2">
+              <label for="contact-msg" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">Detailed Message *</label>
+              <span id="char-count" class="text-[11px] text-slate-400 font-medium">0/1000</span>
+            </div>
+            <textarea id="contact-msg" rows="5" required placeholder="Please describe your inquiry in detail. Include any relevant order numbers, error messages, or context to help us assist you better..."
+              class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 placeholder-slate-400 transition duration-200 resize-none shadow-sm" maxlength="1000"></textarea>
           </div>
-           <!-- Form Submit Button Trigger -->
-          <div class="pt-2">
+
+          <!-- Form Submit Button Trigger -->
+          <div class="flex gap-3 pt-3">
             <button id="contact-submit" type="submit" 
-              class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 shadow-md shadow-indigo-100 transition flex items-center justify-center gap-2 group">
-              <span id="contact-submit-text">Transmit Message</span>
-              <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-0.5"></i>
-              <!-- Clean Loading Spinner State Overlay Component -->
-              <span id="contact-submit-loading" class="hidden animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full ml-2"></span>
+              class="flex-1 py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 shadow-md shadow-indigo-200 transition duration-200 flex items-center justify-center gap-2 group">
+              <span id="contact-submit-text">Send Message</span>
+              <i data-lucide="send" class="w-4 h-4 transition-transform group-hover:translate-x-0.5"></i>
+              <span id="contact-submit-loading" class="hidden animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+            </button>
+            <button type="reset" 
+              class="py-3 px-6 rounded-xl font-semibold text-sm text-slate-700 bg-slate-100 hover:bg-slate-200 focus:outline-none focus:ring-4 focus:ring-slate-500/20 transition duration-200">
+              Clear
             </button>
           </div>
-          <!-- Dynamic Success Flash Alert Window -->
+
+          <!-- Help Text -->
+          <p class="text-xs text-slate-500 leading-relaxed">
+            <i data-lucide="info" class="w-3 h-3 inline mr-1 text-slate-400"></i>
+            All messages are sent to <span class="font-semibold text-slate-700">jovalistore@gmail.com</span> and will be reviewed within 24 hours.
+          </p>
         </form>
-        <div id="contact-success" class="hidden m-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
-          <div class="h-6 w-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-200">
-            <i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>
-          </div>
-          <div>
-            <p class="text-xs font-bold text-emerald-900">Message Dispatched Successfully</p>
-            <p class="text-[11px] text-emerald-600 mt-0.5">Data secure. Our customer support managers will touch base shortly.</p>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </section>
+ <!-- API Client - Foundation for all Phase 3 & 4 features -->
+ <script src="js/api-client.js"></script>
+ <!-- Notifications Service -->
+ <script src="js/notifications.js"></script>
+ <!-- Messaging Service (REST API) -->
+ <script src="js/messages-rest.js"></script>
+ <!-- Reviews Service -->
+ <script src="js/reviews.js"></script>
+ <!-- Product Catalog (Search & Filtering) -->
+ <script src="js/products-catalog.js"></script>
+ <!-- Seller Dashboard (Enhanced) -->
+ <script src="js/seller-dashboard.js"></script>
+ <!-- Admin Panel Foundation -->
+ <script src="js/admin-panel.js"></script>
+ <!-- Contact Service -->
+ <script src="js/contact-service.js"></script>
  <script src="js/els2app.js"></script>
   <script src="js/cloudupload.js"></script>
  <script src="js/ui.js"></script>
