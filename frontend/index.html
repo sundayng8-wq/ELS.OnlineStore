@@ -114,6 +114,91 @@
     .animation-slide-in {
       animation: slide-in-up 0.4s ease-out;
     }
+
+    /* Conversation Menu Styles */
+    .conversation-menu {
+      animation: slide-in-up 0.2s ease-out;
+    }
+
+    .conversation-menu.hidden {
+      display: none;
+    }
+
+    .conversation-card {
+      position: relative;
+    }
+
+    .conversation-card .conversation-menu button {
+      border-radius: 0;
+    }
+
+    .conversation-card .conversation-menu button:first-child {
+      border-radius: 8px 8px 0 0;
+    }
+
+    .conversation-card .conversation-menu button:last-child {
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* Message bubble styles for better display */
+    .message-bubble {
+      display: flex;
+      margin-bottom: 8px;
+      animation: slide-in-up 0.3s ease-out;
+    }
+
+    .message-bubble--mine {
+      justify-content: flex-end;
+    }
+
+    .message-bubble--other {
+      justify-content: flex-start;
+    }
+
+    .message-bubble__card {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      word-wrap: break-word;
+    }
+
+    .message-bubble--mine .message-bubble__card {
+      background-color: #dcfce7;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-bubble--other .message-bubble__card {
+      background-color: #f0f2f5;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-bubble__meta {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .message-bubble__text {
+      font-size: 14px;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .message-bubble--mine .message-bubble__text {
+      color: #166534;
+    }
+
+    .message-bubble__time {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .message-bubble--mine .message-bubble__time {
+      color: #65a30d;
+    }
   </style>
  </head>
 
@@ -771,18 +856,68 @@
     </div>
 
     <div id="shop-grid" class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-      <div class="col-span-full mx-auto max-w-lg rounded-[2rem] border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm">
-        <div class="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-          <i data-lucide="shopping-bag" class="w-7 h-7"></i>
+      <!-- Electronics Product Card -->
+      <div class="group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div class="relative overflow-hidden bg-slate-100 h-48">
+          <img src="images/gadgets.jpg" alt="Pro Audio Kit" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+          <div class="absolute top-3 right-3 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Electronics</div>
         </div>
-        <h3 class="text-xl font-bold text-slate-900">Marketplace is empty</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-500">
-          No products are live yet. Open a store and start listing your first collection today.
-        </p>
-        <button onclick="goTo('open-store')" class="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 active:scale-[0.98]">
-          Open your store
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </button>
+        <div class="p-5">
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Pro Audio Kit</h3>
+          <p class="text-sm text-slate-600 mb-3 line-clamp-2">High-quality audio equipment designed for professionals and enthusiasts. Features crystal-clear sound, noise cancellation, and premium build quality.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xl font-black text-slate-900">$149</span>
+            <button onclick="goTo('shop')" class="rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 text-xs font-semibold transition">View</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fashion Product Card -->
+      <div class="group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div class="relative overflow-hidden bg-slate-100 h-48">
+          <img src="images/jaslogo.png" alt="Signature Brand" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+          <div class="absolute top-3 right-3 bg-rose-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Fashion</div>
+        </div>
+        <div class="p-5">
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Signature Brand</h3>
+          <p class="text-sm text-slate-600 mb-3 line-clamp-2">Premium fashion collection featuring trendy apparel and accessories. Crafted from high-quality materials with contemporary designs perfect for modern wardrobes.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xl font-black text-slate-900">$96</span>
+            <button onclick="goTo('shop')" class="rounded-lg bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 text-xs font-semibold transition">View</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Home Product Card -->
+      <div class="group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div class="relative overflow-hidden bg-slate-100 h-48">
+          <img src="images/homeimg.jpg" alt="Minimal Lamp" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+          <div class="absolute top-3 right-3 bg-amber-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Home</div>
+        </div>
+        <div class="p-5">
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Minimal Lamp</h3>
+          <p class="text-sm text-slate-600 mb-3 line-clamp-2">Elegant home décor lighting solution combining minimalist aesthetics with functional design. Perfect for creating ambient lighting in any room with style and sophistication.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xl font-black text-slate-900">$64</span>
+            <button onclick="goTo('shop')" class="rounded-lg bg-amber-600 hover:bg-amber-500 text-white px-3 py-2 text-xs font-semibold transition">View</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sports Product Card -->
+      <div class="group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div class="relative overflow-hidden bg-slate-100 h-48">
+          <img src="images/sport.jpg" alt="Trail Essential Kit" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+          <div class="absolute top-3 right-3 bg-emerald-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Sports</div>
+        </div>
+        <div class="p-5">
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Trail Essential Kit</h3>
+          <p class="text-sm text-slate-600 mb-3 line-clamp-2">Complete sports and fitness equipment package for outdoor adventures. Durable, lightweight, and designed for performance with professional-grade materials.</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xl font-black text-slate-900">$120</span>
+            <button onclick="goTo('shop')" class="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-semibold transition">View</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

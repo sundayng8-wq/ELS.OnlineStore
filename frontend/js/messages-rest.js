@@ -216,17 +216,37 @@ class MessagingService {
       const unreadBadge = conv.unreadCount > 0 ? `<span class="ml-auto bg-blue-600 text-white text-xs px-2 py-1 rounded-full">${conv.unreadCount}</span>` : '';
       
       return `
-        <button onclick="messagingService.selectConversation('${conv.id}')" 
-                class="conversation-card group ${activeClass} w-full rounded-3xl p-3 text-left text-white hover:bg-slate-700/30 transition">
-          <div class="flex items-start gap-2.5 justify-between">
-            <div class="flex-1 min-w-0">
-              <p class="truncate text-sm font-semibold">${escHtml(conv.title || 'Conversation')}</p>
-              <p class="text-[11px] text-slate-400 truncate mt-1">${escHtml(conv.lastMessage || 'No messages yet')}</p>
-              <p class="text-[10px] text-slate-500 mt-0.5">${conv.lastMessageTime ? this.getTimeAgo(conv.lastMessageTime) : ''}</p>
+        <div class="conversation-card group ${activeClass} w-full rounded-xl border border-slate-200/50 bg-white hover:border-slate-300 hover:shadow-md transition-all relative">
+          <button onclick="messagingService.selectConversation('${conv.id}')" 
+                  class="w-full rounded-xl p-4 text-left hover:bg-slate-50/50 transition">
+            <div class="flex items-start gap-2.5 justify-between">
+              <div class="flex-1 min-w-0">
+                <p class="truncate text-sm font-semibold text-slate-900">${escHtml(conv.title || 'Conversation')}</p>
+                <p class="text-xs text-slate-500 truncate mt-1">${escHtml(conv.lastMessage || 'No messages yet')}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">${conv.lastMessageTime ? this.getTimeAgo(conv.lastMessageTime) : ''}</p>
+              </div>
+              ${unreadBadge}
             </div>
-            ${unreadBadge}
+          </button>
+          
+          <!-- Three-Dot Menu for Delete -->
+          <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button type="button" 
+                    onclick="toggleConversationMenu(event, '${conv.id}')" 
+                    class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition"
+                    title="Conversation menu">
+              <i data-lucide="more-vertical" class="w-4 h-4"></i>
+            </button>
+            <div class="conversation-menu hidden absolute right-0 top-10 z-30 min-w-max rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+              <button type="button" 
+                      onclick="deleteConversationConfirm('${conv.id}')"
+                      class="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50/80 transition font-medium">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span>Delete Conversation</span>
+              </button>
+            </div>
           </div>
-        </button>
+        </div>
       `;
     }).join('');
   }
@@ -311,6 +331,49 @@ class MessagingService {
     }
   }
 }
+
+// Helper Functions for Conversation Menu
+
+/**
+ * Toggle conversation menu visibility
+ */
+function toggleConversationMenu(event, conversationId) {
+  event.stopPropagation();
+  
+  // Close all other menus
+  document.querySelectorAll('.conversation-menu').forEach(menu => {
+    menu.classList.add('hidden');
+  });
+  
+  // Find and toggle the current menu
+  const menu = event.currentTarget.nextElementSibling;
+  if (menu && menu.classList.contains('conversation-menu')) {
+    menu.classList.toggle('hidden');
+  }
+}
+
+/**
+ * Confirm and delete conversation
+ */
+function deleteConversationConfirm(conversationId) {
+  if (!conversationId) return;
+  
+  // Create confirmation dialog
+  const confirmed = confirm('Are you sure you want to delete this conversation? This action cannot be undone.');
+  
+  if (confirmed) {
+    messagingService.deleteConversation(conversationId);
+  }
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('.conversation-card')) {
+    document.querySelectorAll('.conversation-menu').forEach(menu => {
+      menu.classList.add('hidden');
+    });
+  }
+});
 
 // Initialize global instance
 window.messagingService = new MessagingService();
