@@ -1,6 +1,6 @@
 # Contact Form Feature - Setup & Configuration Guide
 
-## 🎉 Overview
+##  Overview
 
 The contact form has been upgraded with the following features:
 
