@@ -1,4 +1,136 @@
+<<<<<<< HEAD:frontend/js/register.js
 // Auth functions are now in ui.js - this file only contains password reset helpers
+=======
+// ===== AUTH =====
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  const regLogo = document.getElementById('register-logo');
+  const loginTab = document.getElementById('login-tab');
+  const registerTab = document.getElementById('register-tab');
+
+  if (tab === 'login') {
+    loginForm.classList.remove('hidden'); loginForm.setAttribute('aria-hidden', 'false');
+    registerForm.classList.add('hidden'); registerForm.setAttribute('aria-hidden', 'true');
+    if (regLogo) regLogo.classList.add('hidden');
+    loginTab.classList.add('text-white'); loginTab.classList.remove('text-gray-400'); loginTab.setAttribute('aria-pressed','true');
+    registerTab.classList.remove('text-white'); registerTab.classList.add('text-gray-400'); registerTab.setAttribute('aria-pressed','false');
+    // focus first input
+    setTimeout(()=>document.getElementById('login-email')?.focus(), 80);
+  } else {
+    loginForm.classList.add('hidden'); loginForm.setAttribute('aria-hidden', 'true');
+    registerForm.classList.remove('hidden'); registerForm.setAttribute('aria-hidden', 'false');
+    if (regLogo) regLogo.classList.remove('hidden');
+    registerTab.classList.add('text-white'); registerTab.classList.remove('text-gray-400'); registerTab.setAttribute('aria-pressed','true');
+    loginTab.classList.remove('text-white'); loginTab.classList.add('text-gray-400'); loginTab.setAttribute('aria-pressed','false');
+    setTimeout(()=>document.getElementById('reg-name')?.focus(), 80);
+  }
+}
+function handleLogin(e) {
+  e.preventDefault();
+  const email = (document.getElementById('login-email')?.value || '').trim();
+  const pass = (document.getElementById('login-pass')?.value || '');
+  if (!email) return showToast('Please enter your email');
+  if (!pass) return showToast('Please enter your password');
+  const USER_API = window.USER_API_URL || 'http://localhost:8001/api/auth';
+  const remember = !!document.getElementById('remember-login')?.checked;
+  // try server login first
+  try {
+    return fetch(USER_API + '/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
+    }).then(r => r.json()).then(json => {
+      if (json && json.ok && json.user) {
+        currentUser.name = json.user.name;
+        currentUser.email = json.user.email;
+        currentUser.__serverId = json.user.id;
+        try { localStorage.setItem('els_user', JSON.stringify({ name: currentUser.name, email: currentUser.email, __serverId: currentUser.__serverId, password: remember ? btoa(pass) : '', remember })); } catch(e){}
+        if (json.token) {
+          try { localStorage.setItem('els_token', json.token); } catch(e){}
+        }
+        enterApp();
+      } else {
+        // server responded but not OK -> fallback to local check
+        const loaded = loadUserIfExists(email);
+        if (!loaded) {
+          if (remember) try { localStorage.setItem('els_user', JSON.stringify({ name: email.split('@')[0], email: email, password: btoa(pass), remember: true })); } catch(e){}
+          currentUser.email = email; currentUser.name = email.split('@')[0]; enterApp(); return;
+        }
+        // verify stored local password if present
+        if (currentUser.password) {
+          try { if (currentUser.password === btoa(pass)) { enterApp(); return; } } catch(e){}
+        }
+        showToast((json && json.error) ? json.error : 'Invalid credentials');
+      }
+    }).catch(err => {
+      // server unreachable — fallback to local
+      const loaded = loadUserIfExists(email);
+      if (!loaded) {
+        if (remember) try { localStorage.setItem('els_user', JSON.stringify({ name: email.split('@')[0], email: email, password: btoa(pass), remember: true })); } catch(e){}
+        currentUser.email = email; currentUser.name = email.split('@')[0]; enterApp(); return;
+      }
+      if (currentUser.password) {
+        try { if (currentUser.password === btoa(pass)) { enterApp(); return; } } catch(e){}
+      }
+      showToast('Incorrect password. Click "Forgot password?" to reset.');
+    });
+  } catch (e) {
+    // fall back to local behavior
+    const loaded = loadUserIfExists(email);
+    if (!loaded) { if (remember) try { localStorage.setItem('els_user', JSON.stringify({ name: email.split('@')[0], email: email, password: btoa(pass), remember: true })); } catch(e){}; currentUser.email = email; currentUser.name = email.split('@')[0]; enterApp(); return; }
+    if (currentUser.password) { try { if (currentUser.password === btoa(pass)) { enterApp(); return; } } catch(e){} }
+    showToast('Incorrect password. Click "Forgot password?" to reset.');
+  }
+}
+function handleRegister(e) {
+  e.preventDefault();
+  const name = (document.getElementById('reg-name')?.value || '').trim();
+  const email = (document.getElementById('reg-email')?.value || '').trim();
+  const pass = (document.getElementById('reg-pass')?.value || '');
+  if (!email || !name || !pass) return showToast('Please enter name, email and password to register');
+  const USER_API = window.USER_API_URL || 'http://localhost:8001/api/auth';
+  // try server register
+  try {
+    return fetch(USER_API + '/register', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password: pass, confirmPassword: pass })
+    }).then(r => r.json()).then(json => {
+      if (json && json.ok && json.user) {
+        currentUser.name = json.user.name; currentUser.email = json.user.email; currentUser.__serverId = json.user.id;
+        try { const remember = !!document.getElementById('remember-register')?.checked; localStorage.setItem('els_user', JSON.stringify({ name: currentUser.name, email: currentUser.email, __serverId: currentUser.__serverId, password: remember ? btoa(pass) : '', remember })); } catch(e){}
+        if (json.token) {
+          try { localStorage.setItem('els_token', json.token); } catch(e) {}
+        }
+        enterApp();
+      } else if (json && json.error && json.error === 'User exists') {
+        showToast('Account already exists — please login');
+      } else {
+        // fallback to local registration
+        const loaded = loadUserIfExists(email);
+        if (!loaded) {
+          const remember = !!document.getElementById('remember-register')?.checked;
+          currentUser.name = name; currentUser.email = email; try { currentUser.password = remember ? btoa(pass) : ''; } catch(e){ currentUser.password = pass; }
+          try { localStorage.setItem('els_user', JSON.stringify(Object.assign({}, currentUser, { remember }))); } catch(e){}
+        }
+        enterApp();
+      }
+    }).catch(err => {
+      // server unreachable - fallback
+      const loaded = loadUserIfExists(email);
+      if (!loaded) {
+        const remember = !!document.getElementById('remember-register')?.checked;
+        currentUser.name = name; currentUser.email = email; try { currentUser.password = remember ? btoa(pass) : ''; } catch(e){ currentUser.password = pass; }
+        try { localStorage.setItem('els_user', JSON.stringify(Object.assign({}, currentUser, { remember }))); } catch(e){}
+      }
+      enterApp();
+    });
+  } catch (e) {
+    const loaded = loadUserIfExists(email);
+    if (!loaded) { const remember = !!document.getElementById('remember-register')?.checked; currentUser.name = name; currentUser.email = email; try { currentUser.password = remember ? btoa(pass) : ''; } catch(e){ currentUser.password = pass; } try { localStorage.setItem('els_user', JSON.stringify(Object.assign({}, currentUser, { remember }))); } catch(e){} }
+    enterApp();
+  }
+}
+>>>>>>> zohan-work:js/register.js
 
 // Password reset helpers
 function openResetRequestModal() {

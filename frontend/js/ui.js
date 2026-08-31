@@ -342,6 +342,7 @@ function acceptSuggestedCategory() {
 }
 
 function updateAddProductButtonState() {
+<<<<<<< HEAD:frontend/js/ui.js
   const btn = document.getElementById('add-product-btn');
   const draftBtn = document.getElementById('save-draft-btn');
   const statusEl = document.getElementById('product-publish-status');
@@ -360,6 +361,13 @@ function updateAddProductButtonState() {
       : 'Add payout details in store setup to enable direct publishing.';
     statusEl.className = payoutReady ? 'text-xs text-emerald-600 mt-3' : 'text-xs text-slate-500 mt-3';
   }
+=======
+  const saveDraftBtn = document.getElementById('save-draft-btn');
+  const publishBtn = document.getElementById('publish-product-btn');
+  const valid = validateOpenStoreForm();
+  if (saveDraftBtn) { saveDraftBtn.disabled = !valid; saveDraftBtn.style.opacity = valid ? '1' : '0.6'; }
+  if (publishBtn) { publishBtn.disabled = !valid; publishBtn.style.opacity = valid ? '1' : '0.6'; }
+>>>>>>> zohan-work:js/ui.js
 }
 
 // Toggle button loading state: adds small spinner and disables button
@@ -603,28 +611,71 @@ function handleLogout() {
 }
 
 function goTo(page) {
+  if (page === 'open-store') page = 'merchant';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + page);
   if (target) target.classList.add('active');
 
-  document.querySelectorAll('.nav-link').forEach(l => { l.style.background = l.dataset.nav === page ? 'rgba(255,255,255,0.1)' : ''; l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db'; });
-  document.querySelectorAll('.side-link').forEach(l => { l.style.background = l.dataset.nav === page ? 'rgba(255,255,255,0.1)' : ''; l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db'; });
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.nav === page);
+    l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db';
+  });
+  document.querySelectorAll('.side-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.nav === page);
+    l.style.color = l.dataset.nav === page ? 'white' : '#d1d5db';
+  });
+
+  const mobileSidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  if (mobileSidebar) mobileSidebar.classList.remove('open');
+  if (sidebarOverlay) sidebarOverlay.classList.remove('open');
 
   if (page === 'cart') renderCart();
   if (page === 'payment') renderPayment();
   if (page === 'shop') renderShop();
   if (page === 'messages') renderConversations();
+<<<<<<< HEAD:frontend/js/ui.js
   if (page === 'my-store') { if (window.MyStore) window.MyStore.init(); }
   if (page === 'orders') { if (typeof loadBuyerOrders === 'function') loadBuyerOrders(); }
   window.scrollTo(0, 0);
+=======
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+>>>>>>> zohan-work:js/ui.js
 }
 
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('open');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (!sidebar || !overlay) return;
+  const isOpen = sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
 }
 
+<<<<<<< HEAD:frontend/js/ui.js
 function showToast(msg, type = 'info', duration = 2600) {
+=======
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  if (sidebarToggle) sidebarToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleSidebar();
+  });
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+  document.addEventListener('click', (event) => {
+    const sidebar = document.getElementById('sidebar');
+    const isOpen = sidebar && sidebar.classList.contains('open');
+    if (!isOpen) return;
+    const insideSidebar = sidebar.contains(event.target);
+    const toggleButton = document.getElementById('sidebar-toggle');
+    if (toggleButton && toggleButton.contains(event.target)) return;
+    if (!insideSidebar) toggleSidebar();
+  });
+});
+
+function showToast(msg) {
+>>>>>>> zohan-work:js/ui.js
   const t = document.getElementById('toast');
   if (!t) return;
   const normalizedType = ['success', 'error', 'loading', 'info'].includes(type) ? type : 'info';
@@ -681,14 +732,20 @@ function initHomeCarousel(images = [], speedPerImage = 6) {
 // Restore session from localStorage on page load
 async function restoreSession() {
 
+<<<<<<< HEAD:frontend/js/ui.js
   const token = localStorage.getItem('els_token') || sessionStorage.getItem('els_token');
   const savedUser = localStorage.getItem('els_user') || sessionStorage.getItem('els_user');
+=======
+  const token = localStorage.getItem('els_token');
+  const userData = localStorage.getItem('els_user');
+  const apiBase = window.API_BASE || 'http://localhost:8001/api';
+>>>>>>> zohan-work:js/ui.js
 
   if (!token || !savedUser) return false;
 
   try {
 
-    const response = await fetch(`${window.API_BASE}/auth/verify`, {
+    const response = await fetch(`${apiBase}/auth/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
