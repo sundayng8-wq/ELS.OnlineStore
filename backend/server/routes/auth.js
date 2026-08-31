@@ -251,18 +251,27 @@ router.put('/profile', async (req, res) => {
     if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const { name, phone, avatar, bio } = req.body;
+    const { name, phone, avatar, bio, email, logistics_id } = req.body;
 
     const updateFields = {};
-    if (name) updateFields.name = name;
-    if (phone) updateFields.phone = phone;
-    if (avatar) updateFields.avatar = avatar;
-    if (bio) updateFields.bio = bio;
+    const allowedFields = { name, phone, avatar, bio, email, logistics_id };
+
+    for (const [key, value] of Object.entries(allowedFields)) {
+      if (value !== undefined) {
+        updateFields[key] = value;
+      }
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ success: false, message: 'No profile fields provided' });
+    }
 
     const user = await User.findByIdAndUpdate(decoded.userId, { $set: updateFields }, { new: true }).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     res.json({ success: true, message: 'Profile updated', user });
   } catch (err) {
+    console.error('Profile update failed:', err);
     res.status(401).json({ success: false, message: 'Invalid token' });
   }
 });

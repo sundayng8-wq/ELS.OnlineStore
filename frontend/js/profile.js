@@ -178,25 +178,36 @@ async function saveProfile(e, options = {}) {
     console.warn('avatar check failed', e);
   }
 
+  const logisticsId = (document.getElementById('profile-logistics-id')?.value || '').trim();
+  currentUser.logistics_id = logisticsId || currentUser.logistics_id || '';
+
   const token = localStorage.getItem('els_token') || sessionStorage.getItem('els_token');
   if (token) {
     try {
+      const payload = {
+        name: currentUser.name,
+        email,
+        bio: currentUser.bio,
+        avatar: currentUser.avatarDataUrl || currentUser.avatar || '',
+        logistics_id: currentUser.logistics_id || '',
+        phone: currentUser.phone || ''
+      };
+
       const response = await fetch(`${window.API_BASE || 'http://localhost:8001/api'}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          name: currentUser.name,
-          bio: currentUser.bio,
-          avatar: currentUser.avatarDataUrl
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
       if (response.ok && data.success && data.user) {
         currentUser = Object.assign({}, currentUser, data.user);
+        if (!currentUser.avatarDataUrl && data.user.avatar) {
+          currentUser.avatarDataUrl = data.user.avatar;
+        }
       } else {
         console.warn('Profile save failed on server', data);
       }
