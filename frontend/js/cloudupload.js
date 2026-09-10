@@ -1,13 +1,14 @@
-// ===== IMAGE UPLOAD (Open Store) =====
-window.selectedImages = window.selectedImages || [];
-window.primaryImageIndex = window.primaryImageIndex || 0;
+ let currentTotal = 0;
 
-function handleImageUpload(event) {
-  const files = Array.from(event?.target?.files || []);
-  if (!files.length) return;
-  files.forEach(f => processProductImageFile(f));
-}
+    function selectPaymentMethod(btn) {
+      document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('border-emerald-500', 'bg-emerald-50'));
+      btn.classList.add('border-emerald-500', 'bg-emerald-50');
 
+<<<<<<< HEAD:js/cloudupload.js
+      const method = btn.getAttribute('data-method');
+      document.getElementById('card-payment-form').classList.toggle('hidden', method !== 'card');
+      document.getElementById('bank-transfer-info').classList.toggle('hidden', method !== 'bank');
+=======
 function processProductImageFile(file) {
   const maxFileSize = 5 * 1024 * 1024; // absolute max allowed: 5MB
   if (!file.type.startsWith('image/')) {
@@ -48,105 +49,50 @@ function processProductImageFile(file) {
     } catch (err) {
       console.error('Image processing failed', err);
       showToast('Failed to process image');
+>>>>>>> zohan-work:frontend/js/cloudupload.js
     }
-  };
-  reader.readAsDataURL(file);
-}
 
-function renderImageGallery() {
-  const gallery = document.getElementById('image-gallery');
-  const section = document.getElementById('image-preview-section');
-  if (!gallery || !section) return;
-  gallery.innerHTML = '';
-  if (!selectedImages.length) { section.classList.add('hidden'); return; }
-  section.classList.remove('hidden');
-  selectedImages.forEach((src, i) => {
-    const wrap = document.createElement('div'); wrap.className = 'relative';
-    const img = document.createElement('img'); img.src = src; img.className = 'w-full h-28 object-cover rounded-lg';
-    wrap.appendChild(img);
+    function payWithPaystack() {
+      if (currentTotal <= 0) return alert("No amount to pay!");
 
-    const controls = document.createElement('div'); controls.className = 'absolute top-1 right-1 flex gap-1';
-    const btnPrimary = document.createElement('button'); btnPrimary.title = 'Set as primary'; btnPrimary.className = 'bg-white/70 p-1 rounded btn-anim'; btnPrimary.innerHTML = i===primaryImageIndex ? '★' : '☆';
-    btnPrimary.onclick = () => { primaryImageIndex = i; renderImageGallery(); };
-    const btnLeft = document.createElement('button'); btnLeft.title = 'Move left'; btnLeft.className = 'bg-white/70 p-1 rounded btn-anim'; btnLeft.innerHTML = '◀'; btnLeft.onclick = () => { moveImageLeft(i); };
-    const btnRight = document.createElement('button'); btnRight.title = 'Move right'; btnRight.className = 'bg-white/70 p-1 rounded btn-anim'; btnRight.innerHTML = '▶'; btnRight.onclick = () => { moveImageRight(i); };
-    const btnRemove = document.createElement('button'); btnRemove.title = 'Remove'; btnRemove.className = 'bg-white/70 p-1 rounded text-red-500 btn-anim'; btnRemove.innerHTML = '✕'; btnRemove.onclick = () => { removeImageAt(i); };
-    controls.appendChild(btnPrimary); controls.appendChild(btnLeft); controls.appendChild(btnRight); controls.appendChild(btnRemove);
-    wrap.appendChild(controls);
-
-    gallery.appendChild(wrap);
-  });
-}
-
-function moveImageLeft(i) {
-  if (i<=0) return; [selectedImages[i-1], selectedImages[i]] = [selectedImages[i], selectedImages[i-1]];
-  if (primaryImageIndex===i) primaryImageIndex = i-1; else if (primaryImageIndex===i-1) primaryImageIndex = i;
-  renderImageGallery();
-}
-function moveImageRight(i) {
-  if (i>=selectedImages.length-1) return; [selectedImages[i+1], selectedImages[i]] = [selectedImages[i], selectedImages[i+1]];
-  if (primaryImageIndex===i) primaryImageIndex = i+1; else if (primaryImageIndex===i+1) primaryImageIndex = i;
-  renderImageGallery();
-}
-function removeImageAt(i) {
-  selectedImages.splice(i,1);
-  if (primaryImageIndex >= selectedImages.length) primaryImageIndex = Math.max(0, selectedImages.length-1);
-  renderImageGallery();
-}
-function clearAllImages() { selectedImages = []; primaryImageIndex = 0; renderImageGallery(); }
-
-function getImageDimensions(dataUrl) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve({ w: img.width, h: img.height });
-    img.onerror = reject;
-    img.src = dataUrl;
-  });
-}
-
-function formatBytes(bytes) {
-  if (!bytes) return '0 B';
-  const units = ['B','KB','MB','GB'];
-  let i = 0; let v = bytes;
-  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
-  return v.toFixed(v < 10 && i > 0 ? 1 : 0) + ' ' + units[i];
-}
-
-function compressImageDataUrl(dataUrl, opts = {}) {
-  const maxDim = opts.maxDim || 1200;
-  const targetBytes = opts.targetBytes || 700 * 1024;
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      try {
-        let w = img.width, h = img.height;
-        if (w > maxDim || h > maxDim) {
-          const ratio = Math.max(w / maxDim, h / maxDim);
-          w = Math.round(w / ratio);
-          h = Math.round(h / ratio);
+      const handler = PaystackPop.setup({
+        key: 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxx', // ← Replace with your actual Paystack Public Key
+        email: "customer@example.com",
+        amount: Math.round(currentTotal * 100),
+        currency: "NGN",
+        ref: 'ELS-' + Math.floor(Math.random() * 1000000000),
+        callback: function(response) {
+          alert('✅ Payment Successful! Reference: ' + response.reference);
+          goTo('orders');
+        },
+        onClose: function() {
+          alert('Payment cancelled');
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
+      });
+      handler.openIframe();
+    }
 
-        // try progressive quality reduction
-        let quality = 0.92;
-        function attempt() {
-          const out = canvas.toDataURL('image/jpeg', quality);
-          const bytes = dataURLtoBlob(out).size;
-          if (bytes <= targetBytes || quality <= 0.5) return resolve(out);
-          quality -= 0.08;
-          attempt();
-        }
-        attempt();
-      } catch (err) { reject(err); }
+    function loadPaymentPage() {
+      const cartTotalEl = document.getElementById('cart-total');
+      currentTotal = cartTotalEl ? parseFloat(cartTotalEl.textContent.replace(/[^0-9.]/g, '')) || 15000 : 15000;
+      document.getElementById('summary-total').textContent = '₦' + currentTotal.toLocaleString();
+      document.getElementById('bank-amount').textContent = currentTotal.toLocaleString();
+    }
+
+    window.goTo = function(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+      const target = document.getElementById('page-' + page);
+      if (target) {
+        target.classList.remove('hidden');
+        if (page === 'payment') loadPaymentPage();
+      }
     };
-    img.onerror = (err) => reject(err);
-    img.src = dataUrl;
-  });
-}
 
+<<<<<<< HEAD:js/cloudupload.js
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+=======
 function removeImage() { clearAllImages(); }
 
 // Setup drag & drop and click-to-upload handlers
@@ -280,3 +226,4 @@ async function uploadToFirebaseStorage(dataUrl) {
   const url = await snap.ref.getDownloadURL();
   return url;
 }
+>>>>>>> zohan-work:frontend/js/cloudupload.js

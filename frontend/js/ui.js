@@ -731,7 +731,10 @@ function goTo(page) {
 
   if (page === 'cart') renderCart();
   if (page === 'payment') renderPayment();
+  if (page === 'payment-system' && window.PaymentSystem && typeof window.PaymentSystem.init === 'function') PaymentSystem.init();
   if (page === 'shop') renderShop();
+  if (page === 'orders' && typeof renderOrders === 'function') renderOrders();
+  if (page === 'logistics' && typeof renderLogisticsView === 'function') renderLogisticsView();
   if (page === 'messages') renderConversations();
   if (page === 'my-store') { if (window.MyStore) window.MyStore.init(); }
   if (page === 'orders') { if (typeof loadBuyerOrders === 'function') loadBuyerOrders(); }

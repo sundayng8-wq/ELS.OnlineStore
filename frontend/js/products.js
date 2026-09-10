@@ -504,7 +504,11 @@ async function handleAddProduct(e) {
     renderShop(); renderHomeProducts(); renderMyProducts(); try { saveProductsToLocal(); } catch (e) {} createdOk = true;
   }
   btn.disabled = false; document.getElementById('add-prod-text').classList.remove('hidden'); document.getElementById('add-prod-loading').classList.add('hidden');
+<<<<<<< HEAD:js/products.js
+  if (createdOk) { document.getElementById('add-product-form').reset(); removeImage(); document.getElementById('prod-image').value = ''; const publishedText = forcePublish ? '🎉 Product published to store!' : '✓ Product saved as draft'; showToast(publishedText); try { saveProductsToLocal(); } catch (e) {} if (forcePublish) { goTo('shop'); setTimeout(() => { try { const cat = (sdkResult && sdkResult.item && sdkResult.item.category) || productPayload.category; if (cat) filterShopCategory(cat); if (window.lastCreatedProductId) { setTimeout(() => { try { highlightAndScrollProduct(window.lastCreatedProductId); window.lastCreatedProductId = null; } catch(e){} }, 200); } } catch (e) {} }, 150); } }
+=======
   if (createdOk) { document.getElementById('add-product-form').reset(); removeImage(); document.getElementById('prod-image').value = ''; showToast(forcePublish ? '🎉 Product published successfully!' : '📝 Product saved as draft.'); try { saveProductsToLocal(); } catch (e) {} }
+>>>>>>> zohan-work:frontend/js/products.js
   else { showToast('Failed to list product. Try again.'); }
   if (createdOk) { try { const cat = (sdkResult && sdkResult.item && sdkResult.item.category) || productPayload.category; if (cat) filterShopCategory(cat); else goTo('shop'); } catch (e) { goTo('shop'); } }
 }
@@ -512,13 +516,36 @@ async function handleAddProduct(e) {
 async function deleteProduct(id, btnEl) {
   const prod = allProducts.find(p => p.__backendId === id);
   if (!prod) return;
-  if (prod.__backendId && String(prod.__backendId).startsWith('local-')) { allProducts = allProducts.filter(p => p.__backendId !== id); renderShop(); renderHomeProducts(); renderMyProducts(); try { saveProductsToLocal(); } catch (e) {} showToast('✓ Product removed'); return; }
+  
   if (btnEl) btnEl.disabled = true;
-  try {
-    const result = await window.dataSdk.delete(prod);
-    if (result.isOk) { showToast('✓ Product removed'); try { saveProductsToLocal(); } catch (e) {} }
-    else { showToast('Failed to remove product'); if (btnEl) btnEl.disabled = false; }
-  } catch (err) { console.error('deleteProduct error', err); showToast('Failed to remove product'); if (btnEl) btnEl.disabled = false; }
+  
+  // Always remove from local array
+  allProducts = allProducts.filter(p => p.__backendId !== id);
+  renderShop(); renderHomeProducts(); renderMyProducts();
+  try { saveProductsToLocal(); } catch (e) {}
+  showToast('✓ Product removed');
+  
+  // Try to delete from backend if not local
+  if (prod.__backendId && !String(prod.__backendId).startsWith('local-')) {
+    try {
+      if (window.dataSdk && typeof window.dataSdk.delete === 'function') {
+        await window.dataSdk.delete(prod);
+      }
+    } catch (err) {
+      console.warn('Backend delete failed, but product removed locally:', err);
+    }
+  }
+}
+
+async function setProductPublic(id, isPublic) {
+  const prod = allProducts.find(p => p.__backendId === id);
+  if (!prod) return;
+  
+  prod.public = isPublic;
+  try { saveProductsToLocal(); } catch (e) {}
+  renderShop(); renderHomeProducts(); renderMyProducts();
+  showToast(isPublic ? '✓ Product published to store!' : '✓ Product unpublished');
+}
 }
 
 async function loadProductsFromBackend() {
